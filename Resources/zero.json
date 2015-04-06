@@ -1,0 +1,38 @@
+{
+	"maxTerrainSize" : 0,
+	"width" : 0,
+	"height" : 0,
+	"greenHealth" : 0,
+
+	"mapSegmentSize" : 0,
+
+	"hunterAttack" : 0,
+	"hunterHealth" : 0,
+	"basehealth" : 0,
+	"hunterHealthIncome" : 0,
+	"hunterHungryDamage" : 0,
+	"greenHealthIncome" : 0,
+	"greenAttack" : 0,
+	"greenHugryDamage" : 0,
+	"greenSleepTime" : 0,
+
+	"percentOfCreatures" : 0.0,
+	"percentOfHunters" : 0.00,
+	"percentOfGreen" : 0.0,
+	"percentOfSalat" : 0.0,
+
+	"salatIncomeMin" : 0,
+	"salatIncomeMax" : 0,
+
+	"imporvedSalatIncomeMin" : 0,
+	"improvedSalatIncomeMax" : 0,
+
+	"improvedSalatArmor" : 0,
+	"salatSleepTime" : 0,
+
+	"percentOfMMutations" : 0.0,
+
+	"salatArmor" : 0,
+	"maxLifeTime" : 0,
+	"hunterLifeTime" : 0
+}
