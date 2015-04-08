@@ -27,6 +27,7 @@ namespace komorki
     , m_inProccess(false)
     , m_lastUpdateDuration(0)
     , m_nuberOfUpdates(0)
+    , m_updateId(0)
     {
       m_thread = std::thread(&AsyncPixelManager::WorkerThread, this);
     }
@@ -87,6 +88,7 @@ namespace komorki
           m_nuberOfUpdates = 0;
           m_inProccess = false;
           m_lastUpdateDuration = lastUpdateDuration;
+          ++m_updateId;
         }
       }
     }
@@ -121,6 +123,11 @@ namespace komorki
       m_semaphore.notify_one();
     }
     
+    unsigned char GetUpdateId()
+    {
+      return m_updateId;
+    }
+    
   private:
     PixelDescriptorProvider* m_provider;
     bool m_performUpdate;
@@ -128,6 +135,7 @@ namespace komorki
     bool m_inProccess;
     double m_lastUpdateDuration;
     unsigned int m_nuberOfUpdates;
+    unsigned char m_updateId;
     std::mutex m_lock;
     std::condition_variable m_semaphore;
     std::list<PixelDescriptorProvider::UpdateResult> m_updateResult;

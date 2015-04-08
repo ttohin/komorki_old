@@ -10,7 +10,7 @@
 class PixelMapManager
 {
 public:
-  PixelMapManager(komorki::PixelDescriptorProvider::Config* config, int mapSegmentSize = 100);
+  PixelMapManager(komorki::PixelDescriptorProvider::Config* config);
   ~PixelMapManager();
   void CreateMap(cocos2d::Node* superView);
   
@@ -60,6 +60,7 @@ protected:
   StatisticCounter<double> providerUpdateTime;
   StatisticCounter<double> mapsUpdateTime;
   StatisticCounter<unsigned long long> numberOfEntriesInUpdate;
+  unsigned char m_lastUpdateId;
 };
 
 #endif /* defined(__komorki__PixelMapManager__) */

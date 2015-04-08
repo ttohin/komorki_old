@@ -27,7 +27,9 @@ bool AppDelegate::applicationDidFinishLaunching()
   {
     glview = GLViewImpl::createWithRect("Komorki 0.0.2", Rect(0, 0, 800, 600), 1.0);
     director->setOpenGLView(glview);
-    glview->setFrameSize(800, 600);
+    
+    Size glViewSize = glview->getFrameSize();
+    glview->setFrameSize(glViewSize.width, glViewSize.height);
   }
   
   director->setAnimationInterval(1.0 / 60);

@@ -2,37 +2,36 @@
 	"maxTerrainSize" : 8,
 	"width" : 300,
 	"height" : 200,
-	"weakHealth" : 335,
-
-	"mapSegmentSize" : 100,
+	"greenHealth" : 335,
 
 	"hunterAttack" : 15,
-	"hunterHealth" : 129595,
-	"basehealth" : 200,
-	"hunterHealthIncome" : 80,
+	"hunterHealth" : 1400,
+	"baseHealth" : 200,
+	"hunterHealthIncome" : 66,
 	"hunterHungryDamage" : -1,
-	"weakHealthIncome" : 90,
-	"weakAttack" : 14,
-	"weakHugryDamage" : -1,
-	"weakSleepTime" : 2,
+	"greenHealthIncome" : 90,
+	"greenAttack" : 14,
+	"greenHugryDamage" : -1,
+	"greenSleepTime" : 2,
 
 	"percentOfCreatures" : 0.1,
 	"percentOfHunters" : 0.05,
-	"percentOfWeak" : 0.5,
-	"percentOfPlant" : 0.4,
+	"percentOfGreen" : 0.5,
+	"percentOfSalat" : 0.4,
 
-	"plantIncomeMin" : -10,
-	"plantIncomeMax" : 16,
+	"salatIncomeMin" : -10,
+	"salatIncomeMax" : 16,
 
-	"imporvedPlantIncomeMin" : -10,
-	"improvedPlantIncomeMax" : 14,
+	"imporvedSalatIncomeMin" : -10,
+	"improvedSalatIncomeMax" : 14,
 
-	"improvedPlantArmor" : 30,
-	"plantSleepTime" : 30,
+	"improvedSalatArmor" : 30,
+	"salatSleepTime" : 30,
 
-	"percentOfMMutations" : 0.0,
+	"percentOfMutations" : 0.01,
 
-	"plantArmor" : 21,
+	"salatArmor" : 21,
+	"baseArmor" : 10,
 	"maxLifeTime" : 530,
 	"hunterLifeTime" : 1530
 }

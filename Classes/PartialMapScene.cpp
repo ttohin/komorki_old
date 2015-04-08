@@ -3,25 +3,21 @@
 #include "cocostudio/DictionaryHelper.h"
 #include "UIButton.h"
 
-static const float kInitialMapScale = 0.2;
-
 static const float kUpdateTime = 0.2;
 
-static const float kMaxMapScale= 3.0;
-static const float kMinMapScale = 0.1;
+static float kMaxMapScale= 3.0;
+static float kMinMapScale = 0.1;
 static const float kMaxBgScale= 2.5;
 static const float kMinBgScale = 1.2;
 
 static const float kZoomStep = 0.05;
 static const float kMoveStep = 25.0;
-static const float kMoveTimer = 0.2;
 
-#if CC_TARGET_PLATFORM == CC_PLATFORM_IOS
-static const float kButtonScale = 2.f;
-static const float kButtonSize = 80.f;
-#else
-static const float kButtonScale = 1.f;
-static const float kButtonSize = 40.f;
+static float kButtonScale = 1.f;
+static float kButtonSize = 40.f;
+
+#if CC_TARGET_PLATFORM != CC_PLATFORM_IOS
+static const float kMoveTimer = 0.2;
 #endif
 
 static const char* s_configPath = nullptr;
@@ -57,7 +53,7 @@ void PartialMapScene::CreateMap()
   
   config.greenHealth = DICTOOL->getIntValue_json(doc, "greenHealth", config.greenHealth);
   config.hunterHealth = DICTOOL->getIntValue_json(doc, "hunterHealth", config.hunterHealth);
-  config.basehealth = DICTOOL->getIntValue_json(doc, "basehealth", config.basehealth);
+  config.baseHealth = DICTOOL->getIntValue_json(doc, "baseHealth", config.baseHealth);
   
   config.hunterHealthIncome = DICTOOL->getIntValue_json(doc, "hunterHealthIncome", config.hunterHealthIncome);
   config.hunterAttack = DICTOOL->getIntValue_json(doc, "hunterAttack", config.hunterAttack);
@@ -83,11 +79,11 @@ void PartialMapScene::CreateMap()
   config.salatSleepTime = DICTOOL->getIntValue_json(doc, "salatSleepTime", config.salatSleepTime);
   config.maxLifeTime = DICTOOL->getIntValue_json(doc, "maxLifeTime", config.maxLifeTime);
   config.hunterLifeTime = DICTOOL->getIntValue_json(doc, "hunterLifeTime", config.hunterLifeTime);
-  config.percentOfMMutations = DICTOOL->getFloatValue_json(doc, "percentOfMMutations", config.percentOfMMutations);
- 
-  int mapSegmentSize = DICTOOL->getIntValue_json(doc, "mapSegmentSize", 100);
+  config.percentOfMutations = DICTOOL->getFloatValue_json(doc, "percentOfMutations", config.percentOfMutations);
   
-  m_mapManager = new PixelMapManager(&config, mapSegmentSize);
+  config.baseArmor = DICTOOL->getIntValue_json(doc, "baseArmor", config.baseArmor);
+  
+  m_mapManager = new PixelMapManager(&config);
   m_mapManager->CreateMap(m_rootNode);
 }
 
@@ -96,6 +92,14 @@ bool PartialMapScene::init()
   if ( !Layer::init() )
   {
     return false;
+  }
+  
+  auto glview = Director::getInstance()->getOpenGLView();
+  bool isRetina = glview->isRetinaDisplay();
+  if (isRetina)
+  {
+    kButtonScale *= 2.f;
+    kButtonSize *= 2.f;
   }
   
   m_brushMode = eBrushModeGreen;
@@ -111,9 +115,6 @@ bool PartialMapScene::init()
   
   Size visibleSize = Director::getInstance()->getVisibleSize();
   
-  m_mapScale = kInitialMapScale;
-  m_mapPos = Vec2();
-
   Vec2 origin = Director::getInstance()->getVisibleOrigin();
   Size winSize = Director::getInstance()->getWinSize();
   
@@ -123,15 +124,21 @@ bool PartialMapScene::init()
   m_rootNode = Node::create();
   addChild(m_rootNode);
   
+  CreateMap();
+  
+  Size mapSize = m_mapManager->GetTotalMapSize();
+  m_mapScale = MAX(AspectToFit(mapSize, visibleSize), kMinMapScale);
+  mapSize = mapSize * m_mapScale;
+  m_mapPos = Vec2((visibleSize.width - mapSize.width)/2.0,
+                  (visibleSize.height - mapSize.height)/2.0);
   m_rootNode->setScale(m_mapScale);
   m_rootNode->setPosition(m_mapPos);
 
-  CreateMap();
-  
   SetBackgroundPosition();
 
   schedule(schedule_selector(PartialMapScene::timerForUpdate), m_updateTime, kRepeatForever, m_updateTime);
 
+#if CC_TARGET_PLATFORM != CC_PLATFORM_IOS
   auto touchListener = EventListenerTouchOneByOne::create();
   touchListener->setSwallowTouches(true);
   
@@ -173,9 +180,48 @@ bool PartialMapScene::init()
       }
     }
   };
+  
+#else // CC_TARGET_PLATFORM == CC_PLATFORM_IOS
+  
+  auto touchListener = EventListenerTouchAllAtOnce::create();
+  touchListener->onTouchesMoved = [this](const std::vector<Touch*>& touches, Event* event)
+  {
+    if (touches.size() == 1)
+    {
+      if (m_touchMode == eTouchModeMove)
+      {
+        this->Move(touches[0]->getDelta());
+      }
+      else if (m_touchMode == eTouchModeBrush)
+      {
+        if (m_eraseBrush)
+        {
+          m_mapManager->RemoveCreatureAtPostion(touches[0]->getLocation());
+        }
+        else
+        {
+          m_mapManager->AddCreatureAtPosition(touches[0]->getLocation(), this->GetCurretnCellType());
+        }
+      }
+    }
+    else if (touches.size() == 2)
+    {
+      Vec2 delta = (touches[0]->getDelta() + touches[1]->getDelta()) * 0.5;
+      this->Move(delta);
+      
+      float initialDistance = touches[0]->getPreviousLocation().distance(touches[1]->getPreviousLocation());
+      float currentDistance = touches[0]->getLocation().distance(touches[1]->getLocation());
+      
+      float scale = 0.5 * (currentDistance - initialDistance)/initialDistance;
+      this->Zoom(scale);
+    }
+  };
+  
+#endif // CC_TARGET_PLATFORM != CC_PLATFORM_IOS
 
   _eventDispatcher->addEventListenerWithSceneGraphPriority(touchListener, this);
 
+#if CC_TARGET_PLATFORM != CC_PLATFORM_IOS
   auto mouseListener = EventListenerMouse::create();
   mouseListener->onMouseScroll = [this](Event* event)
   {
@@ -187,9 +233,9 @@ bool PartialMapScene::init()
     else
       scrollY = -0.01;
     
-    if(m_mapScale - scrollY <= 0.1)
+    if(m_mapScale - scrollY <= kMinMapScale)
       return;
-    if (m_mapScale - scrollY >= 3.0)
+    if (m_mapScale - scrollY >= kMaxMapScale)
       return;
     
     m_mapScale -= scrollY;
@@ -236,7 +282,8 @@ bool PartialMapScene::init()
       this->SetEraseMode(false);
       this->SetDrawingMode(false);
     }
-    else if (keyCode == EventKeyboard::KeyCode::KEY_EQUAL)
+    else if (keyCode == EventKeyboard::KeyCode::KEY_EQUAL ||
+             keyCode == EventKeyboard::KeyCode::KEY_PLUS)
     {
       this->ZoomIn();
     }
@@ -296,6 +343,8 @@ bool PartialMapScene::init()
   };
   
   _eventDispatcher->addEventListenerWithSceneGraphPriority(keyboardListener, this);
+  
+#endif // CC_TARGET_PLATFORM == CC_PLATFORM_IOS
 
   CreateToolBar();
   CreateSpeedToolBar();
@@ -316,10 +365,7 @@ void PartialMapScene::SetBackgroundPosition(float animationDuration)
   
   float bgAspect = 1.0;
   {
-    Size contentSize = m_bg->getContentSize();
-    float wAspect = visibleSize.width/contentSize.width;
-    float hAspect = visibleSize.height/contentSize.height;
-    bgAspect = MAX(wAspect, hAspect);
+    bgAspect = AspectToFill(m_bg->getContentSize(), visibleSize);
   }
   
   Vec2 centralPos = Vec2(visibleSize.width/2.f, visibleSize.height/2.f);
@@ -412,15 +458,21 @@ void PartialMapScene::timerForUpdate(float dt)
       m_mapManager->Reset();
     }
     
-    float updateTimeEstimated = m_speed == eSpeedNormal ? m_updateTime : m_updateTime * 0.5;
+    float updateTime = m_speed == eSpeedNormal ? m_updateTime : m_updateTime * 0.5;
+    float updateTimeEstimated = updateTime;
     m_mapManager->UpdateAsync(updateTimeEstimated);
+    
+    if (updateTimeEstimated - updateTime > 2)
+    {
+      updateTimeEstimated = updateTime;
+    }
     schedule(schedule_selector(PartialMapScene::timerForUpdate), updateTimeEstimated, kRepeatForever, updateTimeEstimated);
   }
-  else if (m_speed == eSpeedWarp)
+  else if (m_speed == eSpeedMax)
   {
-    float updateTimeEstimated = 0.0;
-    m_mapManager->UpdateWarp(updateTimeEstimated, 10);
-    schedule(schedule_selector(PartialMapScene::timerForUpdate), updateTimeEstimated, kRepeatForever, updateTimeEstimated);
+    float updateTimeEstimated = m_updateTime;
+    m_mapManager->UpdateAsync(updateTimeEstimated);
+    schedule(schedule_selector(PartialMapScene::timerForUpdate), 0, kRepeatForever, 0);
   }
   
   m_prevSpeed = m_speed;
@@ -440,12 +492,12 @@ void PartialMapScene::timerForMove(float dt)
 
 void PartialMapScene::Zoom(float direction)
 {
-  if(m_mapScale + direction*kZoomStep <= 0.1)
+  if(m_mapScale + direction <= 0.1)
     return;
-  if (m_mapScale + direction*kZoomStep >= 3.0)
+  if (m_mapScale + direction >= 3.0)
     return;
   
-  m_mapScale += direction*kZoomStep;
+  m_mapScale += direction;
   
   float scaleRatio = m_mapScale/m_rootNode->getScale();
   
@@ -466,12 +518,12 @@ void PartialMapScene::Zoom(float direction)
 
 void PartialMapScene::ZoomIn()
 {
-  Zoom(+1.0);
+  Zoom(+kZoomStep);
 }
 
 void PartialMapScene::ZoomOut()
 {
-  Zoom(-1.0);
+  Zoom(-kZoomStep);
 }
 
 void PartialMapScene::Move(const Vec2& direction, float animationDuration)
@@ -521,7 +573,7 @@ void PartialMapScene::CreateSpeedToolBar()
   speedWarpButton->addTouchEventListener([this](Ref*,ui::Widget::TouchEventType controlEvent)
                                       {
                                         if (controlEvent == ui::Widget::TouchEventType::ENDED)
-                                          this->SetSpeed(eSpeedWarp);
+                                          this->SetSpeed(eSpeedMax);
                                       });
   m_speedToolbar->addChild(speedWarpButton);
   speedWarpButton->setPosition(Vec2(-kButtonSize/2.f - kButtonSize*0, +kButtonSize/2.f));
@@ -571,32 +623,6 @@ void PartialMapScene::CreateToolBar()
   m_toolbarNode->addChild(restartButton);
   restartButton->setPosition(Vec2(-kButtonSize/2.f, -kButtonSize/2.f -3*kButtonSize));
   restartButton->setScale(kButtonScale);
-  
-#if CC_TARGET_PLATFORM == CC_PLATFORM_IOS
-  auto zoomIn = ui::Button::create("plusButton.png", "plusButton_hl.png");
-  zoomIn->addTouchEventListener([this](Ref*,ui::Widget::TouchEventType controlEvent)
-                                       {
-                                         if (controlEvent == ui::Widget::TouchEventType::ENDED)
-                                         {
-                                           this->zoomIn();
-                                         }
-                                       });
-  m_toolbarNode->addChild(zoomIn);
-  zoomIn->setPosition(Vec2(-buttonSize/2.f, -buttonSize/2.f -4*buttonSize));
-  zoomIn->setScale(buttonScale);
-  
-  auto zoomOut = ui::Button::create("minusButton.png", "minusButton_hl.png");
-  zoomOut->addTouchEventListener([this](Ref*,ui::Widget::TouchEventType controlEvent)
-                                       {
-                                         if (controlEvent == ui::Widget::TouchEventType::ENDED)
-                                         {
-                                           this->zoomOut();
-                                         }
-                                       });
-  m_toolbarNode->addChild(zoomOut);
-  zoomOut->setPosition(Vec2(-buttonSize/2.f, -buttonSize/2.f -5*buttonSize));
-  zoomOut->setScale(buttonScale);
-#endif
   
   //
   // Create brush selector
@@ -715,7 +741,7 @@ void PartialMapScene::SetSpeed(Speed speed)
     m_speed1Button->loadTextureNormal("speed1.png");
   if (m_speed == eSpeedDouble)
     m_speed2Button->loadTextureNormal("speed2.png");
-  if (m_speed == eSpeedWarp)
+  if (m_speed == eSpeedMax)
     m_speed10Button->loadTextureNormal("speed10.png");
   
   m_speed = speed;
@@ -724,7 +750,7 @@ void PartialMapScene::SetSpeed(Speed speed)
     m_speed1Button->loadTextureNormal("speed1_sel.png");
   if (m_speed == eSpeedDouble)
     m_speed2Button->loadTextureNormal("speed2_sel.png");
-  if (m_speed == eSpeedWarp)
+  if (m_speed == eSpeedMax)
     m_speed10Button->loadTextureNormal("speed10_sel.png");
   
   if (m_speed != eSpeedNormal)
@@ -782,5 +808,19 @@ komorki::CellType PartialMapScene::GetCurretnCellType()
   
   assert(0);
   return komorki::eCellTypeGreen;
+}
+
+float PartialMapScene::AspectToFit(const Size& source, const Size& target)
+{
+  float wAspect = target.width/source.width;
+  float hAspect = target.height/source.height;
+  return MIN(wAspect, hAspect);
+}
+
+float PartialMapScene::AspectToFill(const Size& source, const Size& target)
+{
+  float wAspect = target.width/source.width;
+  float hAspect = target.height/source.height;
+  return MAX(wAspect, hAspect);
 }
 

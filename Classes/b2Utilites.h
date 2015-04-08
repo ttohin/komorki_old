@@ -10,11 +10,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifndef Komorki_Utilites_h
+#define Komorki_Utilites_h
+
 #define RANDOM_MINUS1_1() ((2.0f*((float)rand()/RAND_MAX))-1.0f)
 #define RANDOM_0_1() ((float)rand()/RAND_MAX)
-
-#ifndef testBox2DiOS_b2Utilites_h
-#define testBox2DiOS_b2Utilites_h
 
 #define PTM_RATIO 32
 
@@ -24,10 +24,24 @@
 
 #define cRandEps(x, eps) (CCRANDOM_MINUS1_1()*eps + x)
 #define cRandAB(a, b) (CCRANDOM_0_1()*(b - a) + a)
-#define cRandABInt(a, b) (rand()%(b - a) + a)
+
+inline int cRandABInt(int a, int b)
+{
+  if (a == b)
+  {
+    return a;
+  }
+  
+  if (b < a)
+  {
+    std::swap(a, b);
+  }
+  
+  return rand()%abs(b - a) + a;
+}
 
 #define cBoolRandPercent(percent) (CCRANDOM_0_1() <= percent)
 
 #define cccb2(cgp) (CGPointMake(cgp.x * PTM_RATIO, cgp.y  * PTM_RATIO))
 
-#endif
+#endif // Komorki_Utilites_h

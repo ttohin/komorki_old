@@ -11,10 +11,12 @@
 namespace komorki
 {
   enum CellType {
-    eCellTypeGreen = 0,
+    eCellTypeStart = 0,
+    eCellTypeGreen = eCellTypeStart,
     eCellTypeSalat,
     eCellTypeHunter,
-    eCellTypeImprovedSalat
+    eCellTypeImprovedSalat,
+    eCellTypeEnd
   };
 
 class PixelDescriptorProvider : public IPixelDescriptorProvider
@@ -30,7 +32,7 @@ public:
     
     int greenHealth;
     int hunterHealth;
-    int basehealth;
+    int baseHealth;
     
     int hunterHealthIncome;
     int hunterAttack;
@@ -56,7 +58,8 @@ public:
     int salatSleepTime;
     int maxLifeTime;
     int hunterLifeTime;
-    float percentOfMMutations;
+    int baseArmor;
+    float percentOfMutations;
     
     Config();
   };
@@ -73,7 +76,7 @@ public:
   virtual komorki::Vec2 GetSize() const;
   virtual void Update(bool passUpdateResult, std::list<UpdateResult>& result);
   virtual ~PixelDescriptorProvider () {};
-  PixelDescriptor ProcessMutation(PixelDescriptor* pd);
+  void ProcessMutation(PixelDescriptor* source, PixelDescriptor* destination);
   void ProcessImprovedSalat(PixelDescriptor* pd, komorki::Vec2 pos, komorki::Optional<komorki::Movement>& movement, komorki::Optional<komorki::Action>& action);
   void ProcessSalat(PixelDescriptor* pd, komorki::Vec2 pos, komorki::Optional<komorki::Movement>& movement, komorki::Optional<komorki::Action>& action);
   void ProcessGreenCreature(PixelDescriptor* pd, komorki::Vec2 pos, komorki::Optional<komorki::Movement>& movement, komorki::Optional<komorki::Action>& action);

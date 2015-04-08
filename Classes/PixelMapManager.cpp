@@ -2,11 +2,14 @@
 
 #define PMM_ENABLE_LOGGING 0
 static const float spriteSize = 32;
+static const unsigned int kMapSegmentSize = 100;
 
-PixelMapManager::PixelMapManager(komorki::PixelDescriptorProvider::Config* config, int mapSegmentSize) : m_mapSegmentSize(mapSegmentSize)
+PixelMapManager::PixelMapManager(komorki::PixelDescriptorProvider::Config* config)
+: m_mapSegmentSize(kMapSegmentSize)
 {
   m_provider.InitWithConfig(config);
   m_manager = std::make_shared<komorki::AsyncPixelManager>(&m_provider);
+  m_lastUpdateId = 0;
 }
 
 PixelMapManager::~PixelMapManager()
@@ -34,7 +37,7 @@ void PixelMapManager::CleanUserData()
       auto pixelD = m_provider.GetDescriptor(i, j);
       if (pixelD->userData != nullptr)
       {
-        delete (PixelMapPartial::PixelDescriptorContext *)pixelD->userData;
+        delete static_cast<PixelMapPartial::PixelDescriptorContext*>(pixelD->userData);
         pixelD->userData = nullptr;
       }
     }
@@ -93,6 +96,12 @@ void PixelMapManager::UpdateAsync(float& updateTime)
     return;
   }
   
+  assert(m_lastUpdateId >= m_manager->GetUpdateId());
+  if ( m_lastUpdateId != m_manager->GetUpdateId() )
+  {
+    return;
+  }
+  
   float lastUpdateDuration = m_manager->GetLastUpdateTime();
   
   providerUpdateTime.AddValue(lastUpdateDuration);
@@ -122,6 +131,8 @@ void PixelMapManager::UpdateAsync(float& updateTime)
     }
   }
   
+  m_lastUpdateId++;
+  
   m_operationQueue.clear();
   
   m_manager->StartUpdate(1);
@@ -139,7 +150,15 @@ void PixelMapManager::UpdateWarp(float& updateTime, unsigned int numberOfUpdates
     return;
   }
   
+  assert(m_lastUpdateId >= m_manager->GetUpdateId());
+  if ( m_lastUpdateId != m_manager->GetUpdateId() )
+  {
+    return;
+  }
+  
   float lastUpdateDuration = m_manager->GetLastUpdateTime();
+  
+  log("warp lastUpdateDuration %f", lastUpdateDuration);
   
   providerUpdateTime.AddValue(lastUpdateDuration/(float)numberOfUpdates);
 
@@ -157,6 +176,8 @@ void PixelMapManager::UpdateWarp(float& updateTime, unsigned int numberOfUpdates
   
   m_operationQueue.clear();
   
+  m_lastUpdateId++;
+  
   m_manager->StartUpdate(numberOfUpdates);
 }
 
@@ -164,6 +185,8 @@ static int updateNumber = 0;
 
 void PixelMapManager::Update(float updateTime, float& outUpdateTime)
 {
+  assert(m_lastUpdateId == m_manager->GetUpdateId());
+  
   outUpdateTime = 0;
  
   struct timeval tv;
@@ -186,7 +209,7 @@ void PixelMapManager::Update(float updateTime, float& outUpdateTime)
     {
       std::string operationType;
       
-      PixelDescriptor* descriptor = (PixelDescriptor*)u.desc;
+      PixelDescriptor* descriptor = static_cast<PixelDescriptor*>(u.desc);
       
       Vec2 destinationPos(0,0);
       Vec2 initialPos = Vec2(u.source.x, u.source.y);

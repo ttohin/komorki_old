@@ -34,7 +34,7 @@ extern int kSalatIncomeMin;
 extern int kSalatIncomeMax;
 extern int kImprovedSalatIncomeMin;
 extern int kImprovedSalatIncomeMax;
-extern int ImprovedPlanArmor;
+extern int kImprovedSalatArmor;
 
 extern int kSalatArmor;
 extern int kSalatSleepTime;

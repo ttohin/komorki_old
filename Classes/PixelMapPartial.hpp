@@ -106,7 +106,7 @@ public:
   {
     if (m_spritesPull.size() < m_pullSize)
     {
-      sprite->setVisible(false);
+      sprite->stopAllActions();
       m_spritesPull.push_back(sprite);
     }
     else
@@ -123,8 +123,8 @@ public:
     }
     
     PixelDescriptorContext* context;
-    pixelD->userData = new PixelDescriptorContext;
-    context = (PixelDescriptorContext *)pixelD->userData;
+    pixelD->userData = static_cast<void*>(new PixelDescriptorContext);
+    context = static_cast<PixelDescriptorContext *>(pixelD->userData);
     
     Rect r = OffsetForType(pixelD);
     auto s = CreateSprite();
@@ -226,7 +226,7 @@ public:
             newDescriptor = u.addCreature.value.destinationDesc;
           }
           
-          auto context = (PixelDescriptorContext*)newDescriptor->userData;
+          auto context = static_cast<PixelDescriptorContext*>(newDescriptor->userData);
           context->i = destinationPos.x;
           context->j = destinationPos.y;
           
@@ -240,11 +240,11 @@ public:
   
   void Update(const std::list<IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime)
   {
-    for (auto u : updateResult) {
-      
+    for (auto u : updateResult)
+    {
       std::string operationType;
       
-      PixelDescriptor* descriptor = (PixelDescriptor*)u.desc;
+      PixelDescriptor* descriptor = static_cast<PixelDescriptor*>(u.desc);
      
       Vec2 destinationPos(0,0);
       Vec2 initialPos = Vec2(u.source.x, u.source.y);
@@ -277,7 +277,7 @@ public:
         continue;
       }
       
-      PixelDescriptorContext* context = (PixelDescriptorContext*)u.userData;
+      PixelDescriptorContext* context = static_cast<PixelDescriptorContext*>(u.userData);
       {
         Sprite* source = nullptr;
         if (context)
@@ -307,11 +307,12 @@ public:
         }
         
         auto source = context->sprite;
-        delete context;
         source->stopAllActions();
         RemoveSprite(source);
         
-        if (ANIMATED && ANIMATE_DEAD_CELLS)
+        delete context;
+        
+        if (_children.size() < m_width * m_height && ANIMATED && ANIMATE_DEAD_CELLS)
         {
           auto deadCellSprite = spriteDeadCell();
           
@@ -319,9 +320,11 @@ public:
           deadCellSprite->setPosition(spriteVector(pos, offset));
           
           auto fade = FadeTo::create(10, 0);
-          auto removeSelf = CallFunc::create([this, deadCellSprite](){
+          auto removeSelf = CallFunc::create([this, deadCellSprite]()
+          {
             this->RemoveSprite(deadCellSprite);
           });
+          
           deadCellSprite->runAction(Sequence::createWithTwoActions(fade, removeSelf));
         }
         
@@ -334,7 +337,7 @@ public:
         auto s = spriteForDescriptor(newDescriptor);
 
         Vec2 offset = RANDOM_OFFSET_VECTOR;
-        PixelDescriptorContext* context = (PixelDescriptorContext*)newDescriptor->userData;
+        auto context = static_cast<PixelDescriptorContext*>(newDescriptor->userData);
         context->offset = offset;
         
         if (ANIMATED)

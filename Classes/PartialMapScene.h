@@ -33,6 +33,7 @@ private:
   {
     eSpeedNormal,
     eSpeedDouble,
+    eSpeedMax,
     eSpeedWarp
   };
   
@@ -86,6 +87,9 @@ private:
   void SetEraseMode(bool enabled);
   void SetSpeed(Speed speed);
   komorki::CellType GetCurretnCellType();
+  
+  float AspectToFill(const Size& source, const Size& target);
+  float AspectToFit(const Size& source, const Size& target);
   
   std::vector<cocos2d::Touch*> zoomToches;
   
