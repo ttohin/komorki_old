@@ -26,6 +26,7 @@
 #define PMP_ENABLE_LOGGING 0
 #define PMP_DEBUG_FRAMES 0
 #define PMP_PULL_SIZE 32
+#define PMP_MAX_NUMBER_OF_CHILDREN 2000
 
 #define RANDOM_OFFSET cRandEps(0.f, kTileFrameSize*0.1f)
 #define RANDOM_OFFSET_VECTOR Vec2(RANDOM_OFFSET, RANDOM_OFFSET)
@@ -67,16 +68,16 @@ public:
     m_pullSize = PMP_PULL_SIZE;
   }
   
-  Rect OffsetForType(IPixelDescriptor* d)
+  Rect OffsetForType(komorki::IPixelDescriptor* d)
   {
-    IPixelDescriptor::Type t = d->GetType();
-    if(t == IPixelDescriptor::CreatureType)
+    komorki::IPixelDescriptor::Type t = d->GetType();
+    if(t == komorki::IPixelDescriptor::CreatureType)
     {
       int index = cRandABInt(0, 4);
       int line = (CREATURE_LINE_START + d->m_character)%CREATURE_LINE_END;
       return Rect(index*kTileFrameSize, line*kTileFrameSize, kTileFrameSize, kTileFrameSize);
     }
-    if(t == IPixelDescriptor::TerrainType)
+    if(t == komorki::IPixelDescriptor::TerrainType)
     {
       return Rect(cRandABInt(GROWND_START, GROWND_END)*kTileFrameSize, GROWND_LINE*kTileFrameSize, kTileFrameSize, kTileFrameSize);
     }
@@ -92,6 +93,7 @@ public:
       s->setVisible(true);
       s->setLocalZOrder(0);
       m_spritesPull.pop_front();
+      
       return s;
     }
     else
@@ -107,6 +109,7 @@ public:
     if (m_spritesPull.size() < m_pullSize)
     {
       sprite->stopAllActions();
+      sprite->setVisible(false);
       m_spritesPull.push_back(sprite);
     }
     else
@@ -115,9 +118,9 @@ public:
     }
   }
   
-  Sprite* spriteForDescriptor(IPixelDescriptor* pixelD)
+  Sprite* spriteForDescriptor(komorki::IPixelDescriptor* pixelD)
   {
-    if (pixelD->GetType() == IPixelDescriptor::Empty)
+    if (pixelD->GetType() == komorki::IPixelDescriptor::Empty)
     {
       return nullptr;
     }
@@ -130,7 +133,7 @@ public:
     auto s = CreateSprite();
     s->setTextureRect(r);
     s->setScale(kSpriteScale);
-    if (pixelD->GetType() == IPixelDescriptor::CreatureType)
+    if (pixelD->GetType() == komorki::IPixelDescriptor::CreatureType)
     {
       s->setOpacity(180);
     }
@@ -173,7 +176,7 @@ public:
     return result;
   }
 
-  void PreUpdate(const std::list<IPixelDescriptorProvider::UpdateResult>& updateResult)
+  void PreUpdate(const std::list<komorki::IPixelDescriptorProvider::UpdateResult>& updateResult)
   {
     for (auto context : m_upcomingDescriptors)
     {
@@ -189,7 +192,7 @@ public:
 
   }
   
-  void PostUpdate(const std::list<IPixelDescriptorProvider::UpdateResult>& updateResult)
+  void PostUpdate(const std::list<komorki::IPixelDescriptorProvider::UpdateResult>& updateResult)
   {
     for (auto u : updateResult)
     {
@@ -215,7 +218,7 @@ public:
       {
         if(IsInAABB(destinationPos))
         {
-          IPixelDescriptor* newDescriptor = nullptr;
+          komorki::IPixelDescriptor* newDescriptor = nullptr;
           
           if (m == true)
           {
@@ -238,13 +241,13 @@ public:
     }
   }
   
-  void Update(const std::list<IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime)
+  void Update(const std::list<komorki::IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime)
   {
     for (auto u : updateResult)
     {
       std::string operationType;
       
-      PixelDescriptor* descriptor = static_cast<PixelDescriptor*>(u.desc);
+      komorki::PixelDescriptor* descriptor = static_cast<komorki::PixelDescriptor*>(u.desc);
      
       Vec2 destinationPos(0,0);
       Vec2 initialPos = Vec2(u.source.x, u.source.y);
@@ -312,7 +315,7 @@ public:
         
         delete context;
         
-        if (_children.size() < m_width * m_height && ANIMATED && ANIMATE_DEAD_CELLS)
+        if (_children.size() < PMP_MAX_NUMBER_OF_CHILDREN && ANIMATED && ANIMATE_DEAD_CELLS)
         {
           auto deadCellSprite = spriteDeadCell();
           
@@ -406,10 +409,8 @@ public:
         auto spawn1 = cocos2d::Spawn::createWithTwoActions(m1, s1);
         auto spawn2 = cocos2d::Spawn::createWithTwoActions(m2, s2);
         source->runAction(Sequence::createWithTwoActions(spawn1, spawn2));
-      }
-      
+      } // else if (a == true)
     }
-    
   }
   
   bool init()

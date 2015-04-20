@@ -7,7 +7,6 @@
 //
 
 #include "CellsLogic.h"
-#include "CellsParameters.h"
 #include "b2Utilites.h"
 
 namespace komorki
@@ -16,7 +15,7 @@ namespace komorki
 //**************************************************************************************************
 bool CheckBounds(int x, int y)
 {
-  if(x < 0 || x >= kMapWidth || y < 0 || y >= kMapHeight)
+  if(x < 0 || x >= mapWidth || y < 0 || y >= mapHeight)
     return false;
   
   return true;
@@ -48,8 +47,30 @@ int CountTypeAroundPosition(komorki::Vec2 pos, const PixelDescriptorProvider::Pi
 }
 
 //**************************************************************************************************
+void Attack(PixelDescriptor* me,
+            PixelDescriptor* food,
+            Vec2 pos,
+            Vec2 delta,
+            PixelDescriptorProvider::Config::CellConfig* config,
+            Optional<Action>& action)
+{
+  Transaction enemyInput;
+  enemyInput.m_armor = -config->attack;
+  food->nextTurnTransaction.push_back(enemyInput);
+  
+  Transaction myInput;
+  myInput.m_health = config->healthPerAttack;
+  me->nextTurnTransaction.push_back(myInput);
+  
+  action.SetValue(true);
+  action.value.source = pos;
+  action.value.delta = delta;
+}
+  
+//**************************************************************************************************
 void ProcessHunterCreature(PixelDescriptor* pd,
                            Vec2 pos,
+                           PixelDescriptorProvider::Config::CellConfig* config,
                            const PixelDescriptorProvider::PixelMap& map, // ugly hack
                            Optional<Movement>& movement,
                            Optional<Action>& action)
@@ -82,17 +103,7 @@ void ProcessHunterCreature(PixelDescriptor* pd,
         
         if (targetPd->m_character == eCellTypeGreen)
         {
-          Transaction enemyInput;
-          enemyInput.m_armor = -kHunterAttack;
-          targetPd->nextTurnTransaction.push_back(enemyInput);
-          
-          Transaction myInput;
-          myInput.m_health = kHunterHealthIncome;
-          pd->nextTurnTransaction.push_back(myInput);
-          
-          action.SetValue(true);
-          action.value.source = pos;
-          action.value.delta = Vec2(i, j);
+          Attack(pd, targetPd, pos, Vec2(i, j), config, action);
           return;
         }
       }
@@ -124,8 +135,9 @@ void ProcessHunterCreature(PixelDescriptor* pd,
 }
   
 //**************************************************************************************************
-void ProcessSalat(PixelDescriptor* pd,
+void ProcessSalad(PixelDescriptor* pd,
                   Vec2 pos,
+                  PixelDescriptorProvider::Config::CellConfig* config,
                   const PixelDescriptorProvider::PixelMap& map, // ugly hack
                   Optional<Movement>& movement,
                   Optional<Action>& action)
@@ -175,13 +187,14 @@ void ProcessSalat(PixelDescriptor* pd,
 }
 
 //**************************************************************************************************
-void ProcessImprovedSalat(PixelDescriptor* pd,
+void ProcessImprovedSalad(PixelDescriptor* pd,
                           Vec2 pos,
+                          PixelDescriptorProvider::Config::CellConfig* config,
                           const PixelDescriptorProvider::PixelMap& map, // ugly hack
                           Optional<Movement>& movement,
                           Optional<Action>& action)
 {
-  int improvedSalatCount = 0;
+  int improvedSaladCount = 0;
   
   const int xStart = rand()%2 == 0 ? 1 : -1;
   const int yStart = rand()%2 == 0 ? 1 : -1;
@@ -216,9 +229,9 @@ void ProcessImprovedSalat(PixelDescriptor* pd,
           return;
         }
         
-        if (targetPd->m_character == eCellTypeImprovedSalat)
+        if (targetPd->m_character == eCellTypeImprovedSalad)
         {
-          ++improvedSalatCount;
+          ++improvedSaladCount;
         }
       }
     }
@@ -234,7 +247,7 @@ void ProcessImprovedSalat(PixelDescriptor* pd,
     pd->m_sleepCounter = pd->m_sleepTime;
   }
   
-  if (improvedSalatCount >= 2)
+  if (improvedSaladCount >= 2)
   {
     pd->m_sleepCounter = pd->m_sleepTime = 10;
     return;
@@ -259,7 +272,7 @@ void ProcessImprovedSalat(PixelDescriptor* pd,
 }
   
   //**************************************************************************************************
-//  void ProcessImprovedSalat(PixelDescriptor* pd,
+//  void ProcessImprovedSalad(PixelDescriptor* pd,
 //                            Vec2 pos,
 //                            const PixelDescriptorProvider::PixelMap& map, // ugly hack
 //                            Optional<Movement>& movement,
@@ -278,8 +291,8 @@ void ProcessImprovedSalat(PixelDescriptor* pd,
 //    komorki::Vec2 minPos = pos;
 //    komorki::Vec2 maxPos = pos;
 //    
-//    int salatCountMax = 0;
-//    int salatCountMin = 0;
+//    int saladCountMax = 0;
+//    int saladCountMin = 0;
 //    
 //    int xStart = rand()%2 == 0 ? 1 : -1;
 //    int yStart = rand()%2 == 0 ? 1 : -1;
@@ -303,28 +316,28 @@ void ProcessImprovedSalat(PixelDescriptor* pd,
 //        
 //        komorki::Vec2 p = Vec2(dx, dy);
 //        
-//        int pc = CountTypeAroundPosition(p, map, eCellTypeImprovedSalat);
-//        if (pc < salatCountMin) {
-//          salatCountMin = pc;
+//        int pc = CountTypeAroundPosition(p, map, eCellTypeImprovedSalad);
+//        if (pc < saladCountMin) {
+//          saladCountMin = pc;
 //          minPos = p;
 //        }
 //        
-//        if (pc > salatCountMax) {
-//          salatCountMax = pc;
+//        if (pc > saladCountMax) {
+//          saladCountMax = pc;
 //          maxPos = p;
 //        }
 //      }
 //    }
 //    
-//    int salatCount = CountTypeAroundPosition(pos, map, eCellTypeImprovedSalat);
-//    if (salatCount <= 2 &&  maxPos != pos && salatCountMax > salatCount)
+//    int saladCount = CountTypeAroundPosition(pos, map, eCellTypeImprovedSalad);
+//    if (saladCount <= 2 &&  maxPos != pos && saladCountMax > saladCount)
 //    {
 //      movement.SetValue(true);
 //      movement.value.source = pos;
 //      movement.value.destination = maxPos;
 //      
 //    }
-//    else if (salatCount > 2 && minPos != pos)
+//    else if (saladCount > 2 && minPos != pos)
 //    {
 //      movement.SetValue(true);
 //      movement.value.source = pos;
@@ -351,6 +364,7 @@ void ProcessImprovedSalat(PixelDescriptor* pd,
 //**************************************************************************************************
 void ProcessGreenCell(PixelDescriptor* pd,
                       Vec2 pos,
+                      PixelDescriptorProvider::Config::CellConfig* config,
                       const PixelDescriptorProvider::PixelMap& map, // ugly hack
                       Optional<Movement>& movement,
                       Optional<Action>& action)
@@ -392,20 +406,10 @@ void ProcessGreenCell(PixelDescriptor* pd,
           return;
         }
         
-        if (targetPd->m_character == eCellTypeSalat ||
-            targetPd->m_character == eCellTypeImprovedSalat)
+        if (targetPd->m_character == eCellTypeSalad ||
+            targetPd->m_character == eCellTypeImprovedSalad)
         {
-          Transaction enemyInput;
-          enemyInput.m_armor = -kGreenAttack;
-          targetPd->nextTurnTransaction.push_back(enemyInput);
-          
-          Transaction myInput;
-          myInput.m_health = kGreenHealthIncome;
-          pd->nextTurnTransaction.push_back(myInput);
-          
-          action.SetValue(true);
-          action.value.source = pos;
-          action.value.delta = Vec2(i, j);
+          Attack(pd, targetPd, pos, Vec2(i, j), config, action);
           return;
         }
       }
@@ -460,37 +464,32 @@ void ProcessGreenCell(PixelDescriptor* pd,
 //**************************************************************************************************
 void ProcessCell(PixelDescriptor* d,
                  Vec2 pos,
+                 PixelDescriptorProvider::Config* config,
                  const PixelDescriptorProvider::PixelMap& map, // ugly hack
                  Optional<Movement>& m,
                  Optional<Action>& a)
 {
+  PixelDescriptorProvider::Config::CellConfig* cellConfig = config->ConfigForCell(d->m_character);
+  
+  Transaction t;
+  t.m_health = cRandABInt(cellConfig->passiveHealthChunkMin, cellConfig->passiveHealthChunkMax);
+  d->nextTurnTransaction.push_back(t);
+  
   if (d->m_character == eCellTypeGreen)
   {
-    Transaction t;
-    t.m_health = kHunterHungryDamage;
-    d->nextTurnTransaction.push_back(t);
-    ProcessGreenCell(d, pos, map, m, a);
+    ProcessGreenCell(d, pos, cellConfig, map, m, a);
   }
   else if (d->m_character == eCellTypeHunter)
   {
-    Transaction t;
-    t.m_health = kGreenHungryDamage;
-    d->nextTurnTransaction.push_back(t);
-    ProcessHunterCreature(d, pos, map, m, a);
+    ProcessHunterCreature(d, pos, cellConfig, map, m, a);
   }
-  else if (d->m_character == eCellTypeSalat)
+  else if (d->m_character == eCellTypeSalad)
   {
-    Transaction t;
-    t.m_health = cRandABInt(kSalatIncomeMin, kSalatIncomeMax);
-    d->nextTurnTransaction.push_back(t);
-    ProcessSalat(d, pos, map, m, a);
+    ProcessSalad(d, pos, cellConfig, map, m, a);
   }
-  else if (d->m_character == eCellTypeImprovedSalat)
+  else if (d->m_character == eCellTypeImprovedSalad)
   {
-    Transaction t;
-    t.m_health = cRandABInt(kImprovedSalatIncomeMin, kImprovedSalatIncomeMax);
-    d->nextTurnTransaction.push_back(t);
-    ProcessImprovedSalat(d, pos, map, m, a);
+    ProcessImprovedSalad(d, pos, cellConfig, map, m, a);
   }
 }
 

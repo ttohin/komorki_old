@@ -10,15 +10,9 @@
 
 namespace komorki
 {
-  enum CellType {
-    eCellTypeStart = 0,
-    eCellTypeGreen = eCellTypeStart,
-    eCellTypeSalat,
-    eCellTypeHunter,
-    eCellTypeImprovedSalat,
-    eCellTypeEnd
-  };
-
+  extern int mapWidth;
+  extern int mapHeight;
+  
 class PixelDescriptorProvider : public IPixelDescriptorProvider
 {
 public:
@@ -26,40 +20,36 @@ public:
   class Config
   {
   public:
+    
+    struct CellConfig
+    {
+      int health;
+      int sleepTime;
+      int attack;
+      int passiveHealthChunkMin;
+      int passiveHealthChunkMax;
+      int healthPerAttack;
+      int armor;
+      int lifeTime;
+      float percentOfMutations;
+    };
+    
     int terrainSize;
     int mapHeight;
     int mapWidth;
     
-    int greenHealth;
-    int hunterHealth;
-    int baseHealth;
-    
-    int hunterHealthIncome;
-    int hunterAttack;
-    int hunterHungryDamage;
-    
-    int greenHealthIncome;
-    int greenAttack;
-    int greenHugryDamage;
-    int greenSleepTime;
-    
     float percentOfCreatures;
-    float percentOfHunters;
+    float percentOfOrange;
     float percentOfGreen;
-    float percentOfSalat;
+    float percentOfSalad;
+    float percentOfCyan;
     
-    int salatIncomeMin;
-    int salatIncomeMax;
-    int imporvedSalatIncomeMin;
-    int improvedSalatIncomeMax;
-   
-    int improvedSalatArmor;
-    int salatArmor;
-    int salatSleepTime;
-    int maxLifeTime;
-    int hunterLifeTime;
-    int baseArmor;
-    float percentOfMutations;
+    CellConfig orange;
+    CellConfig green;
+    CellConfig salad;
+    CellConfig cyan;
+    
+    Config::CellConfig* ConfigForCell(CellType type);
     
     Config();
   };
@@ -67,9 +57,7 @@ public:
   typedef std::shared_ptr<PixelDescriptor> PixelPtr;
   typedef std::vector<std::vector<PixelPtr> > PixelMap;
   
-  void InitWithDefaults();
-  void InitWithMutations(Config* config);
-  void InitWithHighMutations(Config* config);
+  void Init();
   void InitWithConfig(Config* config);
   
   virtual IPixelDescriptor* GetDescriptor(komorki::PixelPos x, komorki::PixelPos y) const;
@@ -77,8 +65,8 @@ public:
   virtual void Update(bool passUpdateResult, std::list<UpdateResult>& result);
   virtual ~PixelDescriptorProvider () {};
   void ProcessMutation(PixelDescriptor* source, PixelDescriptor* destination);
-  void ProcessImprovedSalat(PixelDescriptor* pd, komorki::Vec2 pos, komorki::Optional<komorki::Movement>& movement, komorki::Optional<komorki::Action>& action);
-  void ProcessSalat(PixelDescriptor* pd, komorki::Vec2 pos, komorki::Optional<komorki::Movement>& movement, komorki::Optional<komorki::Action>& action);
+  void ProcessImprovedSalad(PixelDescriptor* pd, komorki::Vec2 pos, komorki::Optional<komorki::Movement>& movement, komorki::Optional<komorki::Action>& action);
+  void ProcessSalad(PixelDescriptor* pd, komorki::Vec2 pos, komorki::Optional<komorki::Movement>& movement, komorki::Optional<komorki::Action>& action);
   void ProcessGreenCreature(PixelDescriptor* pd, komorki::Vec2 pos, komorki::Optional<komorki::Movement>& movement, komorki::Optional<komorki::Action>& action);
   void ProcessHunterCreature(PixelDescriptor* pd, komorki::Vec2 pos, komorki::Optional<komorki::Movement>& movement, komorki::Optional<komorki::Action>& action);
   void KillAllCells();
@@ -89,6 +77,7 @@ public:
   PixelPtr CreateCell(CellType type);
   
   std::map<int, int> m_population;
+  Config* m_config;
   
 private:
   int CountTypeAroundPosition(komorki::Vec2 pos, int character);

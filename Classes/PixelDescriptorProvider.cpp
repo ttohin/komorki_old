@@ -1,146 +1,97 @@
 #include "PixelDescriptorProvider.h"
 #include "b2Utilites.h"
 #include <math.h>
-#include "CellsParameters.h"
 #include "CellsLogic.h"
 
 #define COLLECT_POPULATION_METRICS 0
 
-int kGroundSize = 8;
-int kMapHeight = 500;
-int kMapWidth = 500;
-
-int kGreenHealth = 301;
-int kHunterHealth = 1400;
-int kBaseHealth = 200;
-
-int kHunterHealthIncome = 55;
-int kHunterAttack = 15;
-int kHunterHungryDamage = -1;
-
-int kGreenHealthIncome = 66;
-int kGreenAttack = 14;
-int kGreenHungryDamage = -1;
-int kGreenSleepTime = 1;
-
-float kPercentOfCreature = .1;
-float kPercentOfHunters = 0.1;
-float kPercentOfGreen = 0.5;
-float kPercentOfSalat = 0.4;
-int kSalatIncomeMin = -10;
-int kSalatIncomeMax = 16;
-int kImprovedSalatIncomeMin = -10;
-int kImprovedSalatIncomeMax = 14;
-int kImprovedSalatArmor = 30;
-
-int kSalatArmor = 21;
-int kSalatSleepTime = 30;
-
-int kBaseArmor = 10;
-
-int kMaxLifeTime = 830;
-int kHunterLifeTime = 1530;
-float kPercentOfMutations = 0.0;
-
 namespace komorki
 {
 
+int mapWidth = 0;
+int mapHeight = 0;
+  
 int nextId = 0;
 
 PixelDescriptorProvider::Config::Config()
 {
-  this->terrainSize = kGroundSize;
-  this->mapWidth = kMapWidth;
-  this->mapHeight = kMapHeight;
+  this->terrainSize = 8;
+  this->mapWidth = 150;
+  this->mapHeight = 100;
+
+  this->green.health = 301;
+  this->green.sleepTime = 1;
+  this->green.attack = 14;
+  this->green.passiveHealthChunkMin = -1;
+  this->green.passiveHealthChunkMax = -1;
+  this->green.armor = 10;
+  this->green.lifeTime = 830;
+  this->green.percentOfMutations = 0.0;
+  this->green.healthPerAttack = 90;
   
-  this->greenHealth = kGreenHealth;
-  this->hunterHealth = kHunterHealth;
-  this->baseHealth = kBaseHealth;
-  this->hunterHealthIncome = kHunterHealthIncome;
-  this->hunterAttack = kHunterAttack;
-  this->greenHealthIncome = kGreenHealthIncome;
-  this->greenAttack = kGreenAttack;
-  this->salatArmor = kSalatArmor;
-  this->maxLifeTime = kMaxLifeTime;
+  this->orange.health = 1400;
+  this->orange.sleepTime = 0;
+  this->orange.attack = 15;
+  this->orange.passiveHealthChunkMin = -1;
+  this->orange.passiveHealthChunkMax = -1;
+  this->orange.armor = 1;
+  this->orange.lifeTime = 1530;
+  this->orange.percentOfMutations = 0.0;
+  this->orange.healthPerAttack = 66;
   
-  this->hunterHungryDamage = kHunterHungryDamage;
+  this->salad.health = 301;
+  this->salad.sleepTime = 30;
+  this->salad.attack = 0;
+  this->salad.passiveHealthChunkMin = -10;
+  this->salad.passiveHealthChunkMax = 16;
+  this->salad.armor = 21;
+  this->salad.lifeTime = 830;
+  this->salad.percentOfMutations = 0.0;
+  this->salad.healthPerAttack = 0;
   
-  this->greenHugryDamage = kGreenHungryDamage;
-  this->greenSleepTime = kGreenSleepTime;
+  this->cyan.health = 301;
+  this->cyan.sleepTime = 0;
+  this->cyan.attack = 0;
+  this->cyan.passiveHealthChunkMin = -10;
+  this->cyan.passiveHealthChunkMax = 14;
+  this->cyan.armor = 30;
+  this->cyan.lifeTime = 830;
+  this->cyan.percentOfMutations = 0.0;
+  this->cyan.healthPerAttack = 0;
   
-  this->percentOfCreatures = kPercentOfCreature;
-  this->percentOfHunters = kPercentOfHunters;
-  this->percentOfGreen = kPercentOfGreen;
-  this->percentOfSalat = kPercentOfSalat;
-  
-  this->salatIncomeMin = kSalatIncomeMin;
-  this->salatIncomeMax = kSalatIncomeMax;
-  this->imporvedSalatIncomeMin = kImprovedSalatIncomeMin;
-  this->improvedSalatIncomeMax = kImprovedSalatIncomeMax;
-  this->improvedSalatArmor = kImprovedSalatArmor;
-  
-  this->salatSleepTime = kSalatSleepTime;
-  this->percentOfMutations = kPercentOfMutations;
-  this->hunterLifeTime = kHunterLifeTime;
+  this->percentOfCreatures = 1.0;
+  this->percentOfOrange = 0.05;
+  this->percentOfGreen = 0.2;
+  this->percentOfSalad = 0.4;
+  this->percentOfCyan = 0.4;
 }
 
-void PixelDescriptorProvider::InitWithConfig(PixelDescriptorProvider::Config *config)
+void PixelDescriptorProvider::InitWithConfig(Config* config)
 {
-  kGroundSize = config->terrainSize;
-  kMapWidth = config->mapWidth;
-  kMapHeight = config->mapHeight;
+  m_config = config;
   
-  kGreenHealth = config->greenHealth;
-  kHunterHealth = config->hunterHealth;
-  kBaseHealth = config->baseHealth;
-  kHunterHealthIncome = config->hunterHealthIncome;
-  kHunterAttack = config->hunterAttack;
-  kGreenHealthIncome = config->greenHealthIncome;
-  kGreenAttack = config->greenAttack;
-  kSalatArmor = config->salatArmor;
-  kMaxLifeTime = config->maxLifeTime;
+  if (m_config->terrainSize <= 0 || m_config->terrainSize >= m_config->mapHeight || m_config->terrainSize >= m_config->mapWidth)
+    m_config->terrainSize = 1;
+  
+  if ( m_config->mapHeight <= 3)
+     m_config->mapHeight = 3;
+  
+  if ( m_config->mapWidth <= 3)
+     m_config->mapWidth = 3;
+  
+  if (m_config->mapHeight > 1000)
+    m_config->mapHeight = 1000;
+  
+  if (m_config->mapWidth > 1000)
+    m_config->mapWidth = 1000;
+  
+  mapWidth = m_config->mapWidth;
+  mapHeight = m_config->mapHeight;
 
-  kHunterHungryDamage = config->hunterHungryDamage;
-  
-  kGreenHungryDamage = config->greenHugryDamage;
-  kGreenSleepTime = config->greenSleepTime;
-  
-  kPercentOfCreature = config->percentOfCreatures;
-  kPercentOfHunters = config->percentOfHunters;
-  kPercentOfGreen = config->percentOfGreen;
-  kPercentOfSalat = config->percentOfSalat;
-  
-  kSalatIncomeMin = config->salatIncomeMin;
-  kSalatIncomeMax = config->salatIncomeMax;
-  kImprovedSalatIncomeMin = config->imporvedSalatIncomeMin;
-  kImprovedSalatIncomeMax = config->improvedSalatIncomeMax;
-  kImprovedSalatArmor = config->improvedSalatArmor;
-  
-  kSalatSleepTime = config->salatSleepTime;
-  kPercentOfMutations = config->percentOfMutations;
-  kHunterLifeTime = config->hunterLifeTime;
-  
-  kBaseArmor = config->baseArmor;
-  
-  if (kGroundSize <= 0 || kGroundSize >= kMapHeight || kGroundSize >= kMapWidth)
-    kGroundSize = 1;
-  
-  if (kMapHeight <= 3 || kMapHeight > 1000)
-    kMapHeight = 3;
-  
-  if (kMapWidth <= 3 || kMapWidth > 1000)
-    kMapWidth = 3;
-  
-  if (kMapHeight > 1000)
-    kMapHeight = 1000;
-  
-  if (kMapWidth > 1000)
-    kMapWidth = 1000;
-
-  InitWithDefaults();
+  Init();
 }
   
-void CreateCell(PixelDescriptor* pd, CellType creatureType)
+void CreateCell(PixelDescriptor* pd, CellType creatureType, PixelDescriptorProvider::Config::CellConfig* cellConfig)
 {
   if (pd == nullptr)
   {
@@ -151,62 +102,56 @@ void CreateCell(PixelDescriptor* pd, CellType creatureType)
   pd->m_character = creatureType;
   pd->m_id = nextId++;
   
-  pd->m_health = pd->m_baseHealth = kBaseHealth;
-  pd->m_armor = pd->m_baseArmor = kBaseArmor;
-  pd->m_damage = 0;
+  pd->m_health = pd->m_baseHealth = cellConfig->health;
+  pd->m_armor = pd->m_baseArmor = cellConfig->armor;
+  pd->m_damage = cellConfig->attack;
   pd->m_age = cRandABInt(0, 50);
-  pd->m_sleepCounter = 0;
-  pd->m_lifeTime = kMaxLifeTime;
-  
-  if (creatureType == eCellTypeHunter)
-  {
-    pd->m_health = pd->m_baseHealth = kHunterHealth;
-    pd->m_damage = kHunterAttack;
-    pd->m_lifeTime = kHunterLifeTime;
-  }
-  if (creatureType == eCellTypeGreen)
-  {
-    pd->m_health = pd->m_baseHealth = kGreenHealth;
-    pd->m_damage = kGreenAttack;
-    pd->m_sleepCounter = pd->m_sleepTime = kGreenSleepTime;
-  }
-  if (creatureType == eCellTypeSalat)
-  {
-    pd->m_armor = pd->m_baseArmor = kSalatArmor;
-    pd->m_sleepCounter = pd->m_sleepTime = kSalatSleepTime;
-  }
-  if (creatureType == eCellTypeImprovedSalat)
-  {
-    pd->m_armor = pd->m_baseArmor = kImprovedSalatArmor;
-  }
+  pd->m_sleepTime = cellConfig->sleepTime;
+  pd->m_sleepCounter =  cRandABInt(0, pd->m_sleepTime);
+  pd->m_lifeTime = cellConfig->lifeTime;
 }
 
 PixelDescriptorProvider::PixelPtr PixelDescriptorProvider::CreateCell(CellType creatureType)
 {
   auto pd = std::make_shared<PixelDescriptor>(IPixelDescriptor::CreatureType);
-  komorki::CreateCell(pd.get(), creatureType);
+  
+  komorki::CreateCell(pd.get(), creatureType, m_config->ConfigForCell(creatureType));
+
   return pd;
 }
 
-void PixelDescriptorProvider::InitWithDefaults()
+void PixelDescriptorProvider::Init()
 {
   nextId = 0;
-  m_map.reserve(kMapWidth);
-  m_typeMap.reserve(kMapWidth);
-  for (int i = 0; i < kMapWidth; ++i)
+  m_map.reserve(m_config->mapWidth);
+  m_typeMap.reserve(m_config->mapWidth);
+  for (int i = 0; i < m_config->mapWidth; ++i)
   {
     m_map.push_back(std::vector<PixelPtr>());
-    m_map[i].reserve(kMapHeight);
+    m_map[i].reserve(m_config->mapHeight);
     m_typeMap.push_back(std::vector<IPixelDescriptor::Type>());
-    m_typeMap[i].reserve(kMapHeight);
-    for (int j = 0; j < kMapHeight; ++j)
+    m_typeMap[i].reserve(m_config->mapHeight);
+    for (int j = 0; j < m_config->mapHeight; ++j)
     {
-      IPixelDescriptor::Type type = cBoolRandPercent(kPercentOfCreature) ? IPixelDescriptor::CreatureType : IPixelDescriptor::Empty;
+      IPixelDescriptor::Type type = cBoolRandPercent(m_config->percentOfCreatures) ? IPixelDescriptor::CreatureType : IPixelDescriptor::Empty;
       if (type == IPixelDescriptor::CreatureType)
       {
-        CellType creatureType = cBoolRandPercent(kPercentOfHunters) ? eCellTypeHunter :
-        cBoolRandPercent(kPercentOfGreen) ? eCellTypeGreen :
-        cBoolRandPercent(kPercentOfSalat) ? eCellTypeSalat : eCellTypeImprovedSalat;
+        CellType creatureType = eCellTypeEnd;
+        if (cBoolRandPercent(m_config->percentOfGreen))
+          creatureType = eCellTypeGreen;
+        else if (cBoolRandPercent(m_config->percentOfOrange))
+          creatureType = eCellTypeHunter;
+        else if (cBoolRandPercent(m_config->percentOfSalad))
+          creatureType = eCellTypeSalad;
+        else if (cBoolRandPercent(m_config->percentOfCyan))
+          creatureType = eCellTypeImprovedSalad;
+        
+        if (creatureType == eCellTypeEnd)
+        {
+          m_map[i].push_back(std::make_shared<PixelDescriptor>(IPixelDescriptor::Empty));
+          continue;
+        }
+
         auto pd = CreateCell(creatureType);
         
         m_map[i].push_back(pd);
@@ -219,38 +164,61 @@ void PixelDescriptorProvider::InitWithDefaults()
     }
   }
   
-  for (int i = 0; i < kMapWidth; ++i)
+  for (int i = 0; i < m_config->mapWidth; ++i)
   {
-    int numberOfTerrains = cRandABInt(1, kGroundSize);
+    int numberOfTerrains = cRandABInt(1, m_config->terrainSize);
     for (int j = 0; j < numberOfTerrains; ++j)
     {
-      m_map[i][kMapHeight - j - 1]->SetType(IPixelDescriptor::TerrainType);
+      m_map[i][m_config->mapHeight - j - 1]->SetType(IPixelDescriptor::TerrainType);
     }
   }
-  for (int i = 0; i < kMapHeight; ++i)
+  for (int i = 0; i < m_config->mapHeight; ++i)
   {
-    int numberOfTerrains = cRandABInt(1, kGroundSize);
+    int numberOfTerrains = cRandABInt(1, m_config->terrainSize);
     for (int j = 0; j < numberOfTerrains; ++j)
     {
-      m_map[kMapWidth - j - 1][i]->SetType(IPixelDescriptor::TerrainType);
+      m_map[m_config->mapWidth - j - 1][i]->SetType(IPixelDescriptor::TerrainType);
     }
   }
-  for (int i = 0; i < kMapHeight; ++i)
+  for (int i = 0; i < m_config->mapHeight; ++i)
   {
-    int numberOfTerrains = cRandABInt(1, kGroundSize);
+    int numberOfTerrains = cRandABInt(1, m_config->terrainSize);
     for (int j = 0; j < numberOfTerrains; ++j)
     {
       m_map[j][i]->SetType(IPixelDescriptor::TerrainType);
     }
   }
-  for (int i = 0; i < kMapWidth; ++i)
+  for (int i = 0; i < m_config->mapWidth; ++i)
   {
-    int numberOfTerrains = cRandABInt(1, kGroundSize);
+    int numberOfTerrains = cRandABInt(1, m_config->terrainSize);
     for (int j = 0; j < numberOfTerrains; ++j)
     {
       m_map[i][j]->SetType(IPixelDescriptor::TerrainType);
     }
   }
+}
+  
+PixelDescriptorProvider::Config::CellConfig* PixelDescriptorProvider::Config::ConfigForCell(CellType type)
+{
+  if (type == CellType::eCellTypeGreen)
+  {
+    return &green;
+  }
+  if (type == CellType::eCellTypeHunter)
+  {
+    return &orange;
+  }
+  if (type == CellType::eCellTypeSalad)
+  {
+    return &salad;
+  }
+  if (type == CellType::eCellTypeImprovedSalad)
+  {
+    return &cyan;
+  }
+  
+  assert(0);
+  return nullptr;
 }
 
 IPixelDescriptor* PixelDescriptorProvider::GetDescriptor(PixelPos x, PixelPos y) const
@@ -260,12 +228,12 @@ IPixelDescriptor* PixelDescriptorProvider::GetDescriptor(PixelPos x, PixelPos y)
 
 Vec2 PixelDescriptorProvider::GetSize() const
 {
-  return Vec2(kMapWidth, kMapHeight);
+  return Vec2(m_config->mapWidth, m_config->mapHeight);
 }
 
 bool PixelDescriptorProvider::CheckBounds(int x, int y)
 {
-  if(x < 0 || x >= kMapWidth || y < 0 || y >= kMapHeight)
+  if(x < 0 || x >= m_config->mapWidth || y < 0 || y >= m_config->mapHeight)
     return false;
   
   return true;
@@ -273,126 +241,103 @@ bool PixelDescriptorProvider::CheckBounds(int x, int y)
 
 void PixelDescriptorProvider::ProccessTransaction(bool passUpdateResult, std::list<UpdateResult>& result)
 {
-  for (int i = 0; i < kMapWidth; ++i)
+  for (int i = 0; i < m_config->mapWidth; ++i)
   {
-    for (int j = 0; j < kMapHeight; ++j)
+    for (int j = 0; j < m_config->mapHeight; ++j)
     {
       auto d = m_map[i][j].get();
-      if (d->GetType() == IPixelDescriptor::CreatureType)
+      if (d->GetType() != IPixelDescriptor::CreatureType)
       {
-        d->m_age += 1;
+        continue;
+      }
+      
+      d->m_age += 1;
+      
+      for (auto i : d->nextTurnTransaction)
+      {
+        d->m_armor += i.m_armor;
+        d->m_health += i.m_health;
+      }
+      
+      d->nextTurnTransaction.clear();
+      
+      bool shouldBeRemoved = d->m_age > d->m_lifeTime;
+      
+      if(d->m_armor <= 0 || d->m_health <= 0 || shouldBeRemoved)
+      {
+        d->SetType(IPixelDescriptor::Empty);
         
-        for (auto i : d->nextTurnTransaction)
+        if (passUpdateResult)
         {
-          d->m_armor += i.m_armor;
-          d->m_health += i.m_health;
+          UpdateResult r(d);
+          r.source = Vec2(i, j);
+          r.shouldDelete = true;
+          result.push_back(r);
         }
-
-        d->nextTurnTransaction.clear();
         
-        bool shouldBeRemoved = d->m_age > d->m_lifeTime;
-
-        if(d->m_armor <= 0 || d->m_health <= 0 || shouldBeRemoved)
+        continue;
+      }
+      
+      int maxHealth = d->m_baseHealth;
+      if(d->m_health >= maxHealth * 2)
+      {
+        Vec2 newPdPos;
+        
+        PixelDescriptor* destinationDesc = nullptr;
+        
+        const int xStart = rand()%2 == 0 ? 1 : -1;
+        const int yStart = rand()%2 == 0 ? 1 : -1;
+        
+        for (int di = xStart; di != -2*xStart; di += -xStart)
         {
-          d->SetType(IPixelDescriptor::Empty);
+          if (destinationDesc != nullptr)
+            break;
           
-          if (passUpdateResult)
-          {
-            UpdateResult r(d);
-            r.source = Vec2(i, j);
-            r.shouldDelete = true;
-            result.push_back(r);
-          }
-
-          continue;
-        }
-
-        int maxHealth = d->m_baseHealth;
-        if(d->m_health >= maxHealth * 2)
-        {
-          Vec2 newPdPos;
-
-          PixelDescriptor* destinationDesc = nullptr;
-          
-          const int xStart = rand()%2 == 0 ? 1 : -1;
-          const int yStart = rand()%2 == 0 ? 1 : -1;
-          
-          for (int di = xStart; di != -2*xStart; di += -xStart)
+          for (int dj = yStart; dj != -2*yStart; dj += -yStart)
           {
             if (destinationDesc != nullptr)
               break;
             
-            for (int dj = yStart; dj != -2*yStart; dj += -yStart)
-            {
-              if (destinationDesc != nullptr)
-                break;
-              
-              int dx = i + di;
-              int dy = j + dj;
-
-              if(!CheckBounds(dx, dy))
-                continue;
-
-              auto targetPd = m_map[dx][dy];
-              if(targetPd->GetType() == IPixelDescriptor::Empty)
-              {
-                newPdPos = Vec2(dx, dy);
-                destinationDesc = targetPd.get();
-              }
-            }
-          }
-
-          if (destinationDesc != nullptr)
-          {
-            d->m_health = d->m_baseHealth;
-            ProcessMutation(d, destinationDesc);
+            int dx = i + di;
+            int dy = j + dj;
             
-            if (passUpdateResult)
+            if(!CheckBounds(dx, dy))
+              continue;
+            
+            auto targetPd = m_map[dx][dy];
+            if(targetPd->GetType() == IPixelDescriptor::Empty)
             {
-              UpdateResult r(destinationDesc);
-              r.source = Vec2(i, j);
-              
-              r.addCreature.SetValue(true);
-              r.addCreature.value.to = newPdPos;
-              r.addCreature.value.destinationDesc = destinationDesc;
-              result.push_back(r);
-            }
-          }
-        }
-
-        if (d->m_age > d->m_lifeTime)
+              newPdPos = Vec2(dx, dy);
+              destinationDesc = targetPd.get();
+            } // if(targetPd->GetType() == IPixelDescriptor::Empty)
+          } // for (int dj = yStart; dj != -2*yStart; dj += -yStart)
+        } // for (int di = xStart; di != -2*xStart; di += -xStart)
+        
+        if (destinationDesc != nullptr)
         {
-          if (cBoolRandPercent(1.0f - kPercentOfMutations))
-            continue;
-          
-          d->m_age = 0;
-          d->m_skipFirstStep = true;
-          bool isHunter = cBoolRandPercent(0.1);
-          d->m_character = isHunter ? eCellTypeHunter : cRandABInt(eCellTypeGreen, eCellTypeHunter);
+          d->m_health = d->m_baseHealth;
+          ProcessMutation(d, destinationDesc);
           
           if (passUpdateResult)
           {
-            UpdateResult r1(d);
-            r1.source = Vec2(i, j);
-            r1.shouldDelete = true;
-            result.push_back(r1);
+            UpdateResult r(destinationDesc);
+            r.source = Vec2(i, j);
             
-            UpdateResult r2(d);
-            r2.source = Vec2(i, j);
-            
-            r2.addCreature.SetValue(true);
-            r2.addCreature.value.to = Vec2(i, j);
-            r2.addCreature.value.destinationDesc = d;
-            result.push_back(r2);
-          }
-        }
-      }
+            r.addCreature.SetValue(true);
+            r.addCreature.value.to = newPdPos;
+            r.addCreature.value.destinationDesc = destinationDesc;
+            result.push_back(r);
+          } // if (passUpdateResult)
+        } // (destinationDesc != nullptr)
+      } // if(d->m_health >= maxHealth * 2)
     }
   }
 }
 
 void PixelDescriptorProvider::ProcessMutation(PixelDescriptor* source, PixelDescriptor* destination)
 {
+  auto sourceConfig = m_config->ConfigForCell(source->m_character);
+  
   destination->Copy(source);
   destination->SetType(IPixelDescriptor::CreatureType);
   destination->nextTurnTransaction.clear();
@@ -401,12 +346,13 @@ void PixelDescriptorProvider::ProcessMutation(PixelDescriptor* source, PixelDesc
   destination->m_skipFirstStep = true;
   destination->m_age = 0;
   
-  if (cBoolRandPercent(kPercentOfMutations))
+  if (cBoolRandPercent(sourceConfig->percentOfMutations))
   {
     CellType newType = (CellType)cRandABInt(eCellTypeStart, eCellTypeEnd);
     if (newType != destination->m_character)
     {
-      komorki::CreateCell(destination, newType);
+      auto destConfig = m_config->ConfigForCell(newType);
+      komorki::CreateCell(destination, newType, destConfig);
     }
   }
 }
@@ -419,20 +365,20 @@ void PixelDescriptorProvider::Update(bool passUpdateResult, std::list<IPixelDesc
   
   ProccessTransaction(passUpdateResult, result);
 
-  for (int i = 0; i < kMapWidth; ++i)
+  for (int i = 0; i < m_config->mapWidth; ++i)
   {
     const std::vector<PixelPtr>& line = m_map[i];
-    for (int j = 0; j < kMapHeight; ++j)
+    for (int j = 0; j < m_config->mapHeight; ++j)
     {
       m_typeMap[i][j] = line[j].get()->GetType();
     }
   }
 
-  for (int i = 0; i < kMapWidth; ++i)
+  for (int i = 0; i < m_config->mapWidth; ++i)
   {
     const std::vector<IPixelDescriptor::Type>& typeMapLine = m_typeMap[i];
     const std::vector<PixelPtr>& line = m_map[i];
-    for (int j = 0; j < kMapHeight; ++j)
+    for (int j = 0; j < m_config->mapHeight; ++j)
     {
       auto oldPd = typeMapLine[j];
       
@@ -471,6 +417,7 @@ void PixelDescriptorProvider::Update(bool passUpdateResult, std::list<IPixelDesc
 
         komorki::ProcessCell(d.get(),
                         Vec2(i, j),
+                        m_config,
                         m_map,
                         m,
                         a);
@@ -548,10 +495,10 @@ void PixelDescriptorProvider::SetCreatureType(const Vec2& pos, CellType type)
   
 void PixelDescriptorProvider::KillAllCells()
 {
-  for (int i = 0; i < kMapWidth; ++i)
+  for (int i = 0; i < m_config->mapWidth; ++i)
   {
     const std::vector<PixelPtr>& line = m_map[i];
-    for (int j = 0; j < kMapHeight; ++j)
+    for (int j = 0; j < m_config->mapHeight; ++j)
     {
       auto d = line[j];
       if (d->GetType() == IPixelDescriptor::CreatureType)

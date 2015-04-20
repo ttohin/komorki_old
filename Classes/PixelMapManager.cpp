@@ -2,7 +2,7 @@
 
 #define PMM_ENABLE_LOGGING 0
 static const float spriteSize = 32;
-static const unsigned int kMapSegmentSize = 100;
+static const unsigned int kMapSegmentSize = 50;
 
 PixelMapManager::PixelMapManager(komorki::PixelDescriptorProvider::Config* config)
 : m_mapSegmentSize(kMapSegmentSize)
@@ -201,7 +201,7 @@ void PixelMapManager::Update(float updateTime, float& outUpdateTime)
     log("update %d", updateNumber++);
   }
  
-  const std::list<IPixelDescriptorProvider::UpdateResult>& result = m_manager->GetUpdateResult();
+  const std::list<komorki::IPixelDescriptorProvider::UpdateResult>& result = m_manager->GetUpdateResult();
 
   if (PMM_ENABLE_LOGGING)
   {
@@ -209,7 +209,7 @@ void PixelMapManager::Update(float updateTime, float& outUpdateTime)
     {
       std::string operationType;
       
-      PixelDescriptor* descriptor = static_cast<PixelDescriptor*>(u.desc);
+      komorki::PixelDescriptor* descriptor = static_cast<komorki::PixelDescriptor*>(u.desc);
       
       Vec2 destinationPos(0,0);
       Vec2 initialPos = Vec2(u.source.x, u.source.y);

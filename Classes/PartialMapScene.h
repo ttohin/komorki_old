@@ -1,15 +1,21 @@
 #ifndef __PARTIALMAP_SCENE_H__
 #define __PARTIALMAP_SCENE_H__
 
+#include <vector>
+
 #include "cocos2d.h"
 #include "PixelMapManager.h"
 #include "UIButton.h"
-#include <vector>
+#include "OptionsMenu.h"
+#include "MainMenu.h"
+#include "LoadConfigMenu.h"
+#include "SaveConfigMenu.h"
+#include "IFullScreenMenu.h"
 
 class PartialMapScene : public cocos2d::Layer, cocos2d::TextFieldDelegate
 {
 public:
-  static cocos2d::Scene* createScene(const char* configPath);
+  static cocos2d::Scene* createScene();
   virtual bool init();
   CREATE_FUNC(PartialMapScene);
   
@@ -58,15 +64,22 @@ private:
   ui::Button* m_speed1Button;
   ui::Button* m_speed2Button;
   ui::Button* m_speed10Button;
+  ui::Button* m_menuButton;
   Node* m_toolbarNode;
   Node* m_cellsSelectoToolbar;
   Node* m_speedToolbar;
+  std::shared_ptr<OptionsMenu> m_optionsMenu;
+  std::shared_ptr<MainMenu> m_mainMenu;
+  std::shared_ptr<LoadConfigMenu> m_loadConfigMenu;
+  std::shared_ptr<SaveConfigMenu> m_saveConfigMenu;
+  std::shared_ptr<IFullScreenMenu> m_currenMenu;
   
   float m_mapScale;
   Vec2 m_mapPos;
   Vec2 m_moveDirection;
   float m_updateTime;
   bool m_stopManager;
+  bool m_restartManagerFromOptionMenu;
   void ZoomIn();
   void ZoomOut();
   void Zoom(float direction);
@@ -75,6 +88,18 @@ private:
   void timerForUpdate(float dt);
   void timerForMove(float dt);
   void CreateMap();
+  
+  void ShowMainMenu();
+  void ShowOptionsMenu();
+  void ShowSaveAsMenu();
+  void ShowLoadMenu();
+  void SetCurrentMenu(const std::shared_ptr<IFullScreenMenu> menu);
+  void Exit();
+  void ShowMainScreen();
+  
+  void ConfirmNewOptions();
+  void CancelOptionSelection();
+  
   void SetBackgroundPosition(float animationDuration = 0.0f);
   void CreateSpeedToolBar();
   void CreateToolBar();
@@ -90,6 +115,8 @@ private:
   
   float AspectToFill(const Size& source, const Size& target);
   float AspectToFit(const Size& source, const Size& target);
+  
+  std::shared_ptr<komorki::PixelDescriptorProvider::Config> m_config;
   
   std::vector<cocos2d::Touch*> zoomToches;
   

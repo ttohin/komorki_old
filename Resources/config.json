@@ -1,37 +1,56 @@
 {
-	"maxTerrainSize" : 8,
-	"width" : 300,
-	"height" : 200,
-	"greenHealth" : 335,
-
-	"hunterAttack" : 15,
-	"hunterHealth" : 1400,
-	"baseHealth" : 200,
-	"hunterHealthIncome" : 66,
-	"hunterHungryDamage" : -1,
-	"greenHealthIncome" : 90,
-	"greenAttack" : 14,
-	"greenHugryDamage" : -1,
-	"greenSleepTime" : 2,
-
-	"percentOfCreatures" : 0.1,
-	"percentOfHunters" : 0.05,
-	"percentOfGreen" : 0.5,
-	"percentOfSalat" : 0.4,
-
-	"salatIncomeMin" : -10,
-	"salatIncomeMax" : 16,
-
-	"imporvedSalatIncomeMin" : -10,
-	"improvedSalatIncomeMax" : 14,
-
-	"improvedSalatArmor" : 30,
-	"salatSleepTime" : 30,
-
-	"percentOfMutations" : 0.01,
-
-	"salatArmor" : 21,
-	"baseArmor" : 10,
-	"maxLifeTime" : 530,
-	"hunterLifeTime" : 1530
+  "map": {
+    "maxTerrainSize": 8,
+    "width": 300,
+    "height": 200
+  },
+  "greenCell": {
+    "health": 0,
+    "sleepTime": 0,
+    "attack": 0,
+    "passiveHealthChunkMin": 0,
+    "passiveHealthChunkMax": 0,
+    "healthPerAttack": 0,
+    "armor": 0,
+    "lifeTime": 0,
+    "percentOfMutations": 0
+  },
+  "orangeCell": {
+    "health": 0,
+    "sleepTime": 0,
+    "attack": 0,
+    "passiveHealthChunkMin": 0,
+    "passiveHealthChunkMax": 0,
+    "healthPerAttack": 0,
+    "armor": 0,
+    "lifeTime": 0,
+    "percentOfMutations": 0
+  },
+  "salatCell": {
+    "health": 0,
+    "sleepTime": 0,
+    "attack": 0,
+    "passiveHealthChunkMin": 0,
+    "passiveHealthChunkMax": 0,
+    "healthPerAttack": 0,
+    "armor": 0,
+    "lifeTime": 0,
+    "percentOfMutations": 0
+  },
+  "cyanCell": {
+    "health": 0,
+    "sleepTime": 0,
+    "attack": 0,
+    "passiveHealthChunkMin": 0,
+    "passiveHealthChunkMax": 0,
+    "healthPerAttack": 0,
+    "armor": 0,
+    "lifeTime": 0,
+    "percentOfMutations": 0
+  },
+  "percentOfCreatures": 0.1,
+  "percentOfOrange": 0.05,
+  "percentOfGreen": 0.2,
+  "percentOfSalat": 0.5,
+  "percentOfCyan": 0.4
 }

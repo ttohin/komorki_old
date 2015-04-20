@@ -129,8 +129,8 @@ void GetResultsFromConfig(std::map<std::string, std::vector<int>>& results, cons
   results["hunterHealthIncome"].emplace_back(config.hunterHealthIncome);
   results["greenHealthIncome"].emplace_back(config.greenHealthIncome);
   results["greenAttack"].emplace_back(config.greenAttack);
-  results["salatArmor"].emplace_back(config.salatArmor);
-  results["improvedSalatArmor"].emplace_back(config.improvedSalatArmor);
+  results["saladArmor"].emplace_back(config.saladArmor);
+  results["improvedSaladArmor"].emplace_back(config.improvedSaladArmor);
   results["maxLifeTime"].emplace_back(config.maxLifeTime);
 }
 
@@ -148,8 +148,8 @@ int main(int argc, char *argv[])
   keysArray.push_back("hunterHealthIncome");
   keysArray.push_back("greenHealthIncome");
   keysArray.push_back("greenAttack");
-  keysArray.push_back("salatArmor");
-  keysArray.push_back("improvedSalatArmor");
+  keysArray.push_back("saladArmor");
+  keysArray.push_back("improvedSaladArmor");
   keysArray.push_back("maxLifeTime");
   keysArray.push_back("time");
  
@@ -181,20 +181,20 @@ int main(int argc, char *argv[])
       provider.Update();
       
       int greenCount = provider.m_population[eCellTypeGreen];
-      int hunterCount = provider.m_population[eCellTypeSalat];
-      int salatCount = provider.m_population[eCellTypeSalat];
-      int improvedSalatCount = provider.m_population[eCellTypeImprovedSalat];
+      int hunterCount = provider.m_population[eCellTypeSalad];
+      int saladCount = provider.m_population[eCellTypeSalad];
+      int improvedSaladCount = provider.m_population[eCellTypeImprovedSalad];
       
       wArray.push_back(greenCount);
       hArray.push_back(hunterCount);
-      iArray.push_back(improvedSalatCount);
-      pArray.push_back(salatCount);
+      iArray.push_back(improvedSaladCount);
+      pArray.push_back(saladCount);
       
       int numberOfBreeds =
       (greenCount ? 1 : 0) +
       (hunterCount != 0 ? 1 : 0) +
-      (salatCount != 0 ? 1 : 0) +
-      (improvedSalatCount != 0 ? 1 : 0);
+      (saladCount != 0 ? 1 : 0) +
+      (improvedSaladCount != 0 ? 1 : 0);
       
       if (numberOfBreeds != 4) {
         break;

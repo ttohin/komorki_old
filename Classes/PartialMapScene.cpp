@@ -2,6 +2,7 @@
 #include "PixelDescriptorProvider.h"
 #include "cocostudio/DictionaryHelper.h"
 #include "UIButton.h"
+#include "ConfigManager.h"
 
 static const float kUpdateTime = 0.2;
 
@@ -20,14 +21,11 @@ static float kButtonSize = 40.f;
 static const float kMoveTimer = 0.2;
 #endif
 
-static const char* s_configPath = nullptr;
-
 USING_NS_CC;
 using namespace cocostudio;
 
-Scene* PartialMapScene::createScene(const char* configPath)
+Scene* PartialMapScene::createScene()
 {
-  s_configPath = configPath;
   auto scene = Scene::create();
   auto layer = PartialMapScene::create();
   scene->addChild(layer);
@@ -36,54 +34,8 @@ Scene* PartialMapScene::createScene(const char* configPath)
 
 void PartialMapScene::CreateMap()
 {
-  std::string path;
-  if(s_configPath)
-    path = s_configPath;
-  
-  std::string contentStr = FileUtils::getInstance()->getStringFromFile(path);
-  
-  rapidjson::Document doc;
-  doc.Parse<0>(contentStr.c_str());
-  
-  komorki::PixelDescriptorProvider::Config config;
-  
-  config.terrainSize = DICTOOL->getIntValue_json(doc, "maxTerrainSize", config.terrainSize);
-  config.mapWidth = DICTOOL->getIntValue_json(doc, "width", config.mapWidth);
-  config.mapHeight = DICTOOL->getIntValue_json(doc, "height", config.mapHeight);
-  
-  config.greenHealth = DICTOOL->getIntValue_json(doc, "greenHealth", config.greenHealth);
-  config.hunterHealth = DICTOOL->getIntValue_json(doc, "hunterHealth", config.hunterHealth);
-  config.baseHealth = DICTOOL->getIntValue_json(doc, "baseHealth", config.baseHealth);
-  
-  config.hunterHealthIncome = DICTOOL->getIntValue_json(doc, "hunterHealthIncome", config.hunterHealthIncome);
-  config.hunterAttack = DICTOOL->getIntValue_json(doc, "hunterAttack", config.hunterAttack);
-  config.hunterHungryDamage = DICTOOL->getIntValue_json(doc, "hunterHungryDamage", config.hunterHungryDamage);
-  
-  config.greenHealthIncome = DICTOOL->getIntValue_json(doc, "greenHealthIncome", config.greenHealthIncome);
-  config.greenAttack = DICTOOL->getIntValue_json(doc, "greenAttack", config.greenAttack);
-  config.greenHugryDamage = DICTOOL->getIntValue_json(doc, "greenHugryDamage", config.greenHugryDamage);
-  config.greenSleepTime = DICTOOL->getIntValue_json(doc, "greenSleepTime", config.greenSleepTime);
-  
-  config.percentOfCreatures = DICTOOL->getFloatValue_json(doc, "percentOfCreatures", config.percentOfCreatures);
-  config.percentOfHunters = DICTOOL->getFloatValue_json(doc, "percentOfHunters", config.percentOfHunters);
-  config.percentOfGreen = DICTOOL->getFloatValue_json(doc, "percentOfGreen", config.percentOfGreen);
-  config.percentOfSalat = DICTOOL->getFloatValue_json(doc, "percentOfSalat", config.percentOfSalat);
-  
-  config.salatIncomeMin = DICTOOL->getIntValue_json(doc, "salatIncomeMin", config.salatIncomeMin);
-  config.salatIncomeMax = DICTOOL->getIntValue_json(doc, "salatIncomeMax", config.salatIncomeMax);
-  config.imporvedSalatIncomeMin = DICTOOL->getIntValue_json(doc, "imporvedSalatIncomeMin", config.imporvedSalatIncomeMin);
-  config.improvedSalatIncomeMax = DICTOOL->getIntValue_json(doc, "improvedSalatIncomeMax", config.improvedSalatIncomeMax);
-  
-  config.improvedSalatArmor = DICTOOL->getIntValue_json(doc, "improvedSalatArmor", config.improvedSalatArmor);
-  config.salatArmor = DICTOOL->getIntValue_json(doc, "salatArmor", config.salatArmor);
-  config.salatSleepTime = DICTOOL->getIntValue_json(doc, "salatSleepTime", config.salatSleepTime);
-  config.maxLifeTime = DICTOOL->getIntValue_json(doc, "maxLifeTime", config.maxLifeTime);
-  config.hunterLifeTime = DICTOOL->getIntValue_json(doc, "hunterLifeTime", config.hunterLifeTime);
-  config.percentOfMutations = DICTOOL->getFloatValue_json(doc, "percentOfMutations", config.percentOfMutations);
-  
-  config.baseArmor = DICTOOL->getIntValue_json(doc, "baseArmor", config.baseArmor);
-  
-  m_mapManager = new PixelMapManager(&config);
+  auto config = komorki::ConfigManager::GetInstance()->GetCurrentConfig();
+  m_mapManager = new PixelMapManager(config.get());
   m_mapManager->CreateMap(m_rootNode);
 }
 
@@ -124,6 +76,7 @@ bool PartialMapScene::init()
   m_rootNode = Node::create();
   addChild(m_rootNode);
   
+  komorki::ConfigManager::GetInstance()->CreateNewConfig();
   CreateMap();
   
   Size mapSize = m_mapManager->GetTotalMapSize();
@@ -225,6 +178,12 @@ bool PartialMapScene::init()
   auto mouseListener = EventListenerMouse::create();
   mouseListener->onMouseScroll = [this](Event* event)
   {
+    if(this->m_currenMenu)
+    {
+      m_currenMenu->OnMouseScroll(event);
+      return;
+    }
+    
     EventMouse* mouseEvent = dynamic_cast<EventMouse*>(event);
     float scrollY = mouseEvent->getScrollY();
     
@@ -277,21 +236,7 @@ bool PartialMapScene::init()
   auto keyboardListener = EventListenerKeyboard::create();
   keyboardListener->onKeyReleased = [this](EventKeyboard::KeyCode keyCode, Event* event)
   {
-    if (keyCode == EventKeyboard::KeyCode::KEY_ESCAPE)
-    {
-      this->SetEraseMode(false);
-      this->SetDrawingMode(false);
-    }
-    else if (keyCode == EventKeyboard::KeyCode::KEY_EQUAL ||
-             keyCode == EventKeyboard::KeyCode::KEY_PLUS)
-    {
-      this->ZoomIn();
-    }
-    else if (keyCode == EventKeyboard::KeyCode::KEY_MINUS)
-    {
-      this->ZoomOut();
-    }
-    
+    // pass move keys
     if (keyCode == EventKeyboard::KeyCode::KEY_LEFT_ARROW)
     {
       m_moveDirection -= Vec2(1, 0);
@@ -312,6 +257,43 @@ bool PartialMapScene::init()
     if (m_moveDirection == Vec2::ZERO)
     {
       this->unschedule(schedule_selector(PartialMapScene::timerForMove));
+    }
+    
+    if(this->m_currenMenu)
+    {
+      m_currenMenu->OnKeyRelease(keyCode, event);
+      return;
+    }
+
+    if (keyCode == EventKeyboard::KeyCode::KEY_ESCAPE)
+    {
+      if (m_touchMode == eTouchModeMove)
+      {
+        this->ShowMainMenu();
+        m_moveDirection = Vec2::ZERO;
+        this->unschedule(schedule_selector(PartialMapScene::timerForMove));
+        return;
+      }
+      
+      this->SetEraseMode(false);
+      this->SetDrawingMode(false);
+    }
+    else if (keyCode == EventKeyboard::KeyCode::KEY_EQUAL ||
+             keyCode == EventKeyboard::KeyCode::KEY_PLUS)
+    {
+      this->ZoomIn();
+    }
+    else if (keyCode == EventKeyboard::KeyCode::KEY_MINUS)
+    {
+      this->ZoomOut();
+    }
+    else if (keyCode == EventKeyboard::KeyCode::KEY_Q)
+    {
+      this->Exit();
+    }
+    else if (keyCode == EventKeyboard::KeyCode::KEY_O)
+    {
+      this->ShowOptionsMenu();
     }
   };
   
@@ -340,11 +322,28 @@ bool PartialMapScene::init()
       this->timerForMove(kMoveTimer);
       schedule(schedule_selector(PartialMapScene::timerForMove), kMoveTimer, kRepeatForever, 0);
     }
+    
+    if(this->m_currenMenu)
+    {
+      m_currenMenu->OnKeyPressed(keyCode, event);
+      return;
+    }
   };
   
   _eventDispatcher->addEventListenerWithSceneGraphPriority(keyboardListener, this);
   
 #endif // CC_TARGET_PLATFORM == CC_PLATFORM_IOS
+  
+  auto menuButton = ui::Button::create("menuButton.png", "menuButtons_hl.png");
+  menuButton->addTouchEventListener([this](Ref*,ui::Widget::TouchEventType controlEvent)
+                                      {
+                                        if (controlEvent == ui::Widget::TouchEventType::ENDED)
+                                          this->ShowMainMenu();
+                                      });
+  this->addChild(menuButton);
+  menuButton->setPosition(Vec2(kButtonSize/2.f, visibleSize.height - kButtonSize/2.f));
+  menuButton->setScale(kButtonScale);
+  m_menuButton = menuButton;
 
   CreateToolBar();
   CreateSpeedToolBar();
@@ -354,6 +353,107 @@ bool PartialMapScene::init()
                                    origin.y));
   
   return true;
+}
+
+void PartialMapScene::ShowMainMenu()
+{
+  if (!m_mainMenu)
+  {
+    m_mainMenu = std::make_shared<MainMenu>();
+    m_mainMenu->Init(std::bind(&PartialMapScene::ShowOptionsMenu, this),
+                     std::bind(&PartialMapScene::Exit, this),
+                     std::bind(&PartialMapScene::ShowMainScreen, this));
+  }
+  
+  SetCurrentMenu(m_mainMenu);
+}
+
+void PartialMapScene::ShowOptionsMenu()
+{
+  if (!m_optionsMenu)
+  {
+    m_optionsMenu = std::make_shared<OptionsMenu>();
+    m_optionsMenu->Init(std::bind(&PartialMapScene::ConfirmNewOptions, this),
+                        std::bind(&PartialMapScene::CancelOptionSelection, this),
+                        std::bind(&PartialMapScene::ShowSaveAsMenu, this),
+                        std::bind(&PartialMapScene::ShowLoadMenu, this));
+  }
+  
+  SetCurrentMenu(m_optionsMenu);
+}
+
+void PartialMapScene::ShowSaveAsMenu()
+{
+  if (!m_saveConfigMenu)
+  {
+    m_saveConfigMenu = std::make_shared<SaveConfigMenu>();
+    m_saveConfigMenu->Init(std::bind(&PartialMapScene::ShowOptionsMenu, this),
+                           std::bind(&PartialMapScene::ShowOptionsMenu, this));
+  }
+  
+  SetCurrentMenu(m_saveConfigMenu);
+}
+
+void PartialMapScene::ShowLoadMenu()
+{
+  if (!m_loadConfigMenu)
+  {
+    m_loadConfigMenu = std::make_shared<LoadConfigMenu>();
+    m_loadConfigMenu->Init(std::bind(&PartialMapScene::ShowOptionsMenu, this),
+                           std::bind(&PartialMapScene::ShowOptionsMenu, this));
+  }
+  
+  SetCurrentMenu(m_loadConfigMenu);
+}
+
+void PartialMapScene::SetCurrentMenu(const std::shared_ptr<IFullScreenMenu> menu)
+{
+  if (m_currenMenu == menu)
+  {
+    return;
+  }
+  
+  if (m_currenMenu)
+  {
+    m_currenMenu->Hide();
+  }
+  
+  m_currenMenu = menu;
+  
+  m_currenMenu->ShowInView(this);
+}
+
+void PartialMapScene::Exit()
+{
+  exit(0);
+}
+
+void PartialMapScene::ShowMainScreen()
+{
+  m_currenMenu->Hide();
+  m_currenMenu = nullptr;
+  m_optionsMenu = nullptr;
+  m_mainMenu = nullptr;
+  m_loadConfigMenu = nullptr;
+  m_saveConfigMenu = nullptr;
+}
+
+void PartialMapScene::ConfirmNewOptions()
+{
+  m_restartManagerFromOptionMenu = true;
+  ShowMainScreen();
+}
+
+void PartialMapScene::CancelOptionSelection()
+{
+  if (m_mainMenu)
+  {
+    ShowMainMenu();
+  }
+  else
+  {
+    ShowMainScreen();
+  }
 }
 
 void PartialMapScene::SetBackgroundPosition(float animationDuration)
@@ -431,6 +531,8 @@ void PartialMapScene::visit(cocos2d::Renderer *renderer, const cocos2d::Mat4 &pa
                                     origin.y + visibleSize.height));
     m_speedToolbar->setPosition(Vec2(origin.x + visibleSize.width,
                                      origin.y));
+    m_menuButton->setPosition(Vec2(kButtonSize/2.f, visibleSize.height - kButtonSize/2.f));
+    if (m_currenMenu) m_currenMenu->Resize(visibleSize);
   }
   
   Layer::visit(renderer, parentTransform, parentFlags);
@@ -440,6 +542,17 @@ void PartialMapScene::timerForUpdate(float dt)
 {
   if(!m_mapManager->IsAvailable())
   {
+    return;
+  }
+  
+  if (m_restartManagerFromOptionMenu)
+  {
+    delete m_mapManager;
+    
+    komorki::ConfigManager::GetInstance()->ApplyPendingConfig();
+    
+    CreateMap();
+    m_restartManagerFromOptionMenu = false;
     return;
   }
   
@@ -480,6 +593,8 @@ void PartialMapScene::timerForUpdate(float dt)
 
 void PartialMapScene::timerForMove(float dt)
 {
+  if (m_currenMenu) return;
+  
   Vec2 moveDirection = m_moveDirection;
   
   float scaleRatio = (m_mapScale - kMinMapScale)/(kMaxMapScale - kMinMapScale);
@@ -616,9 +731,7 @@ void PartialMapScene::CreateToolBar()
   restartButton->addTouchEventListener([this](Ref*,ui::Widget::TouchEventType controlEvent)
                                         {
                                           if (controlEvent == ui::Widget::TouchEventType::ENDED)
-                                          {
                                             m_stopManager = true;
-                                          }
                                         });
   m_toolbarNode->addChild(restartButton);
   restartButton->setPosition(Vec2(-kButtonSize/2.f, -kButtonSize/2.f -3*kButtonSize));
@@ -802,9 +915,9 @@ komorki::CellType PartialMapScene::GetCurretnCellType()
   if (m_brushMode == eBrushModeHunter)
     return komorki::eCellTypeHunter;
   if (m_brushMode == eBrushModeSalad)
-    return komorki::eCellTypeSalat;
+    return komorki::eCellTypeSalad;
   if (m_brushMode == eBrushModeImprovedSalad)
-    return komorki::eCellTypeImprovedSalat;
+    return komorki::eCellTypeImprovedSalad;
   
   assert(0);
   return komorki::eCellTypeGreen;

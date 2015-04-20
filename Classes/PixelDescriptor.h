@@ -4,6 +4,9 @@
 #include "IPixelDescriptor.h"
 #include <vector>
 
+namespace komorki
+{
+  
 struct Transaction
 {
   Transaction(): m_armor(0), m_health(0) {}
@@ -67,5 +70,7 @@ private:
   float m_temperature;
   Type m_type;
 };
+  
+} // namespace komorki;
 
 #endif /* end of include guard: PIXELDESCRIPTOR_H */

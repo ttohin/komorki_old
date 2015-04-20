@@ -29,11 +29,7 @@ USING_NS_CC;
 
 int main(int argc, char *argv[])
 {
-  timeval tval;
-  gettimeofday(&tval, NULL);
-  srand(tval.tv_sec);
-
-  AppDelegate app(argc, argv);
+  AppDelegate app;
   return Application::getInstance()->run();
 
 }

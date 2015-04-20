@@ -70,7 +70,6 @@ namespace komorki
     }
     
   };
-}
 
 class IPixelDescriptorProvider
 {
@@ -96,8 +95,6 @@ public:
   virtual ~IPixelDescriptorProvider () {};
 };
 
-namespace pr
-{
 }
 
 #endif /* end of include guard: IPIXELDESCRIPTORPROVIDER_H_69TPCKTG */

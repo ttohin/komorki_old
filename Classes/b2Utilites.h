@@ -22,8 +22,8 @@
 #define cEqualPoints(p1, p2, epsilon) (cEqualFloats(p1.x, p2.x, epsilon) && cEqualFloats(p1.y, p2.y, epsilon))
 #define cBetween(x, a, b) (cEqualFloats(((b - a) - (x - a)), 0.f, 0.2f))
 
-#define cRandEps(x, eps) (CCRANDOM_MINUS1_1()*eps + x)
-#define cRandAB(a, b) (CCRANDOM_0_1()*(b - a) + a)
+#define cRandEps(x, eps) (RANDOM_MINUS1_1()*eps + x)
+#define cRandAB(a, b) (RANDOM_0_1()*(b - a) + a)
 
 inline int cRandABInt(int a, int b)
 {
@@ -40,7 +40,7 @@ inline int cRandABInt(int a, int b)
   return rand()%abs(b - a) + a;
 }
 
-#define cBoolRandPercent(percent) (CCRANDOM_0_1() <= percent)
+#define cBoolRandPercent(percent) (RANDOM_0_1() <= percent)
 
 #define cccb2(cgp) (CGPointMake(cgp.x * PTM_RATIO, cgp.y  * PTM_RATIO))
 
