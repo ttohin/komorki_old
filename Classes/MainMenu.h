@@ -19,7 +19,8 @@ class MainMenu : public IFullScreenMenu
 public:
   
   typedef std::function<void(void)> MainMenuCallback;
-  
+ 
+  MainMenu();
   void Init(const MainMenuCallback& optionCallback,
             const MainMenuCallback& exitCallback,
             const MainMenuCallback& backCallback);
@@ -39,6 +40,7 @@ private:
   cocos2d::Node* m_rootNode;
   cocos2d::ui::Layout* m_bg;
   cocos2d::ui::Layout* m_mainMenu;
+  cocos2d::Node* m_titleNode;
   MainMenuCallback m_optionCallback;
   MainMenuCallback m_exitCallback;
   MainMenuCallback m_backCallback;

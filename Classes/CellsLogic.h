@@ -14,7 +14,7 @@
 
 namespace komorki
 {
-  void ProcessCell(PixelDescriptor* pd,
+  void ProcessCell(CellDescriptor* pd,
                    Vec2 pos,
                    PixelDescriptorProvider::Config* config,
                    const PixelDescriptorProvider::PixelMap& map, // ugly hack

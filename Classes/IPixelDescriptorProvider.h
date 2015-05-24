@@ -1,41 +1,35 @@
 #ifndef IPIXELDESCRIPTORPROVIDER_H_69TPCKTG
 #define IPIXELDESCRIPTORPROVIDER_H_69TPCKTG
 
-#include "IPixelDescriptor.h"
+#include "PixelDescriptor.h"
 #include <list>
+#include "Common.h"
+#include "CellDescriptor.h"
 
 namespace komorki
 {
-  typedef int PixelPos;
-  
-  struct Vec2
-  {
-    PixelPos x;
-    PixelPos y;
-    Vec2():x(0),y(0){}
-    Vec2(PixelPos _x, PixelPos _y):x(_x),y(_y){}
-    Vec2& operator=(const Vec2& pos) {x = pos.x; y = pos.y; return *this; }
-    bool operator==(const Vec2& pos) {return x == pos.x && y == pos.y;}
-    bool operator!=(const Vec2& pos) {return !(*this==pos);}
-  };
+  class CellDescriptor;
+  class PixelDescriptor;
+
   
   struct AddCreature
   {
-    Vec2 to;
-    IPixelDescriptor* destinationDesc;
+    PixelDescriptor* destinationDesc;
   };
   
   struct Action
   {
-    Vec2 source;
     Vec2 delta;
+  };
+  
+  struct DeleteCreature
+  {
+    std::shared_ptr<CellDescriptor> cellDescriptor;
   };
   
   struct Movement
   {
-    Vec2 source;
-    Vec2 destination;
-    IPixelDescriptor* destinationDesc;
+    PixelDescriptor* destinationDesc;
   };
   
   template<typename T>
@@ -64,9 +58,15 @@ namespace komorki
       }
     }
     
-    void SetValue(bool i_isSet)
+    void SetValueFlag(bool i_isSet)
     {
       isSet = i_isSet;
+    }
+    
+    void SetValue(T _v)
+    {
+      isSet = true;
+      value = _v;
     }
     
   };
@@ -74,21 +74,18 @@ namespace komorki
 class IPixelDescriptorProvider
 {
 public:
-  virtual IPixelDescriptor* GetDescriptor(komorki::PixelPos x, komorki::PixelPos y) const = 0;
+  virtual PixelDescriptor* GetDescriptor(komorki::PixelPos x, komorki::PixelPos y) const = 0;
   virtual komorki::Vec2 GetSize() const = 0;
 
   struct UpdateResult
   {
     void* userData;
-    IPixelDescriptor* desc;
-    komorki::Vec2 source;
+    PixelDescriptor* desc;
     komorki::Optional<komorki::Action> action;
     komorki::Optional<komorki::Movement> movement;
     komorki::Optional<komorki::AddCreature> addCreature;
-    bool shouldDelete;
-    UpdateResult(IPixelDescriptor* idesc):
-      shouldDelete(false), desc(idesc), userData(idesc->userData)
-    {}
+    komorki::Optional<komorki::DeleteCreature> deleteCreature;
+    UpdateResult(CellDescriptor* desc);
   };
 
   virtual void Update(bool passUpdateResult, std::list<UpdateResult>&) = 0;

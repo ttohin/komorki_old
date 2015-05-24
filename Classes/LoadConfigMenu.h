@@ -13,6 +13,7 @@
 #include "CocosGUI.h"
 #include "PixelDescriptorProvider.h"
 #include "ListController.h"
+#include "ListView.h"
 
 class LoadConfigMenu : public ListController
 {
@@ -20,7 +21,8 @@ public:
   
   typedef std::function<void(void)> LoadConfigMenuCallback;
   typedef std::function<void(const std::string&)> LoadConfigCallback;
-  
+ 
+  LoadConfigMenu();
   void Init(const LoadConfigCallback& loadConfigCallback,
             const LoadConfigMenuCallback& cancelCallback);
 
@@ -35,8 +37,10 @@ public:
 private:
   
   void Cancel();
+  void OnLeftConfirmationButtonPressed();
   void RemoveConfig(const std::string& name);
   void LoadConfig(const std::string& name);
+  void SaveNewConfig();
   
   cocos2d::ui::Layout* CreateLoadConfigView(const std::string& name);
   void AddParameterViewForSection(const std::string& sectionName,
@@ -45,16 +49,13 @@ private:
   void addChildFromAnotherNode(cocos2d::Node* node);
   void insertWidgetFromAnotherNode(cocos2d::ui::ListView* listView, cocos2d::ui::Widget* widget);
   void ConfigureConfirmationPanel(cocos2d::ui::Layout* confirmationPanel);
+  cocos2d::ui::Layout* CreateNewSaveConfigView();
   
   cocos2d::Node* m_rootNode;
   cocos2d::ui::Layout* m_mainLayer;
-  cocos2d::ui::Layout* m_confirmationPanel;
-  cocos2d::ui::ListView* m_list;
   LoadConfigMenuCallback m_cancelCallback;
   LoadConfigCallback m_loadConfigCallback;
-  cocos2d::ui::Button* m_cancel;
   cocos2d::ui::Button* m_load;
-  cocos2d::ui::Text* m_title;
   bool m_configApplied;
   
   typedef std::function<void(int step)> ChangeValueFunction;

@@ -28,7 +28,7 @@ public:
   bool LoadConfig(const std::string& configName);
   ConfigPtr GetCurrentConfig();
   bool SetConfig(const ConfigPtr& config);
-  bool ResetConfig();
+  bool ResetPendingConfig();
   bool RemoveAllConfigs();
   bool SavePendingConfig();
   bool SavePendingConfig(const std::string& name);
@@ -43,6 +43,7 @@ public:
   void PendingConfigChanged();
   bool IsPendingConfigChanged();
   std::string GetPendingConfigName();
+  bool RequiredDoubleSize();
 private:
   
   struct Config

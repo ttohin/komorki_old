@@ -13,13 +13,15 @@
 #include "CocosGUI.h"
 #include "PixelDescriptorProvider.h"
 #include "ListController.h"
+#include "ListView.h"
 
 class SaveConfigMenu : public ListController
 {
 public:
   
   typedef std::function<void(void)> SaveConfigMenuCallback;
-  
+ 
+  SaveConfigMenu();
   void Init(const SaveConfigMenuCallback& savedCallback,
             const SaveConfigMenuCallback& cancelCallback);
 
@@ -35,28 +37,21 @@ public:
 private:
   
   void Cancel();
+  void OnLeftConfirmationButtonPressed();
   void SaveConfig(const std::string& name);
   void RemoveConfig(const std::string& name);
   void SaveNewConfig();
   
   cocos2d::ui::Layout* CreateLoadConfigView(const std::string& name);
   cocos2d::ui::Layout* CreateNewSaveConfigView();
-  void AddParameterViewForSection(const std::string& sectionName,
-                                  komorki::PixelDescriptorProvider::Config::CellConfig* config,
-                                  cocos2d::ui::ListView* list);
   void addChildFromAnotherNode(cocos2d::Node* node);
   void insertWidgetFromAnotherNode(cocos2d::ui::ListView* listView, cocos2d::ui::Widget* widget);
-  void ConfigureConfirmationPanel(cocos2d::ui::Layout* confirmationPanel);
   
   cocos2d::Node* m_rootNode;
   cocos2d::ui::Layout* m_mainLayer;
-  cocos2d::ui::Layout* m_confirmationPanel;
-  cocos2d::ui::ListView* m_list;
   SaveConfigMenuCallback m_savedCallback;
   SaveConfigMenuCallback m_cancelCallback;
-  cocos2d::ui::Button* m_cancel;
   cocos2d::ui::Button* m_load;
-  cocos2d::ui::Text* m_title;
   bool m_configApplied;
   
   typedef std::function<void(int step)> ChangeValueFunction;

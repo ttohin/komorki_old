@@ -12,6 +12,7 @@
 #include "cocos2d.h"
 #include "PixelDescriptorProvider.h"
 #include "b2Utilites.h"
+#include "CellDescriptor.h"
 
 #define CREATURE_LINE_START 0
 #define CREATURE_LINE_END 4
@@ -21,14 +22,13 @@
 #define GROWND_LINE CREATURE_LINE_END
 #define DEAD_CEEL_LINE (GROWND_LINE + 1)
 
+#define RECREATE_EACH_UPDATE 0
 #define ANIMATED 1
-#define ANIMATE_DEAD_CELLS 1
-#define PMP_ENABLE_LOGGING 0
+#define PMP_ENABLE_LOGGING 1
 #define PMP_DEBUG_FRAMES 0
 #define PMP_PULL_SIZE 32
-#define PMP_MAX_NUMBER_OF_CHILDREN 2000
 
-#define RANDOM_OFFSET cRandEps(0.f, kTileFrameSize*0.1f)
+#define RANDOM_OFFSET 0.f//cRandEps(0.f, kTileFrameSize*0.1f)
 #define RANDOM_OFFSET_VECTOR Vec2(RANDOM_OFFSET, RANDOM_OFFSET)
 
 static unsigned long long NumberOfUpdates = 0;
@@ -68,16 +68,30 @@ public:
     m_pullSize = PMP_PULL_SIZE;
   }
   
-  Rect OffsetForType(komorki::IPixelDescriptor* d)
+  Rect OffsetForType(komorki::PixelDescriptor* pd)
   {
-    komorki::IPixelDescriptor::Type t = d->GetType();
-    if(t == komorki::IPixelDescriptor::CreatureType)
+    komorki::PixelDescriptor::Type t = pd->m_type;
+    if(t == komorki::PixelDescriptor::CreatureType)
     {
+      auto d = pd->m_cellDescriptor;
+      assert(d);
       int index = cRandABInt(0, 4);
-      int line = (CREATURE_LINE_START + d->m_character)%CREATURE_LINE_END;
+      
+      if (d->m_character == komorki::eCellTypeBigBlue)
+      {
+        return Rect(index*kTileFrameSize*2, 6*kTileFrameSize, kTileFrameSize*2, kTileFrameSize*2);
+      }
+      
+      int line = 0;
+      if (d->m_character == komorki::eCellTypeGreen) line = 0;
+      else if (d->m_character == komorki::eCellTypeSalad) line = 1;
+      else if (d->m_character == komorki::eCellTypeHunter) line = 2;
+      else if (d->m_character == komorki::eCellTypeImprovedSalad) line = 3;
+      else assert(0);
+      
       return Rect(index*kTileFrameSize, line*kTileFrameSize, kTileFrameSize, kTileFrameSize);
     }
-    if(t == komorki::IPixelDescriptor::TerrainType)
+    if(t == komorki::PixelDescriptor::TerrainType)
     {
       return Rect(cRandABInt(GROWND_START, GROWND_END)*kTileFrameSize, GROWND_LINE*kTileFrameSize, kTileFrameSize, kTileFrameSize);
     }
@@ -118,38 +132,40 @@ public:
     }
   }
   
-  Sprite* spriteForDescriptor(komorki::IPixelDescriptor* pixelD)
+  Sprite* spriteForDescriptor(komorki::PixelDescriptor* pixelD)
   {
-    if (pixelD->GetType() == komorki::IPixelDescriptor::Empty)
+    if (pixelD->m_type == komorki::PixelDescriptor::Empty)
     {
       return nullptr;
     }
     
-    PixelDescriptorContext* context;
-    pixelD->userData = static_cast<void*>(new PixelDescriptorContext);
-    context = static_cast<PixelDescriptorContext *>(pixelD->userData);
+    if(pixelD->m_cellDescriptor != nullptr &&
+       pixelD->m_cellDescriptor->parent != pixelD)
+    {
+      return nullptr;
+    }
+    
+    PixelDescriptorContext* context = new PixelDescriptorContext();
     
     Rect r = OffsetForType(pixelD);
     auto s = CreateSprite();
     s->setTextureRect(r);
     s->setScale(kSpriteScale);
-    if (pixelD->GetType() == komorki::IPixelDescriptor::CreatureType)
+    if (pixelD->m_type == komorki::PixelDescriptor::CreatureType)
     {
+      assert(pixelD->m_cellDescriptor);
+      assert(pixelD->m_cellDescriptor->userData == nullptr);
+     
+#if RECREATE_EACH_UPDATE == 0
+      pixelD->m_cellDescriptor->userData = context;
+#endif
       s->setOpacity(180);
     }
+    else
+    {
+    }
+    s->setAnchorPoint({0, 0});
     context->sprite = s;
-    
-    return s;
-  }
-  
-  Sprite* spriteDeadCell()
-  {
-    Rect r = Rect(0, DEAD_CEEL_LINE*kTileFrameSize, kTileFrameSize, kTileFrameSize);
-    auto s = CreateSprite();
-    s->setTextureRect(r);
-    s->setScale(kSpriteScale);
-    s->setOpacity(180);
-    s->setLocalZOrder(-1);
     
     return s;
   }
@@ -176,8 +192,9 @@ public:
     return result;
   }
 
-  void PreUpdate(const std::list<komorki::IPixelDescriptorProvider::UpdateResult>& updateResult)
+  void PreUpdate(const std::list<komorki::PixelDescriptorProvider::UpdateResult>& updateResult)
   {
+#if RECREATE_EACH_UPDATE == 0
     for (auto context : m_upcomingDescriptors)
     {
       auto source = context->sprite;
@@ -189,36 +206,37 @@ public:
     }
     
     m_upcomingDescriptors.clear();
-
+#endif
   }
   
-  void PostUpdate(const std::list<komorki::IPixelDescriptorProvider::UpdateResult>& updateResult)
+  void PostUpdate(const std::list<komorki::PixelDescriptorProvider::UpdateResult>& updateResult)
   {
+#if RECREATE_EACH_UPDATE == 0
     for (auto u : updateResult)
     {
       Vec2 destinationPos(0,0);
-      Vec2 initialPos = Vec2(u.source.x, u.source.y);
+      Vec2 initialPos = Vec2(u.desc->x, u.desc->y);
       
       auto m = u.movement;
       auto a = u.action;
       
-      if (u.shouldDelete || a == true)
+      if (u.deleteCreature == true || a == true)
         continue;
       
       if(u.addCreature == true)
       {
-        destinationPos = Vec2(u.addCreature.value.to.x, u.addCreature.value.to.y);
+        destinationPos = Vec2(u.addCreature.value.destinationDesc->x, u.addCreature.value.destinationDesc->y);
       }
       
       if (m == true) {
-        destinationPos = Vec2(m.value.destination.x, m.value.destination.y);
+        destinationPos = Vec2(m.value.destinationDesc->x, m.value.destinationDesc->y);
       }
       
       if(!IsInAABB(initialPos))
       {
         if(IsInAABB(destinationPos))
         {
-          komorki::IPixelDescriptor* newDescriptor = nullptr;
+          komorki::PixelDescriptor* newDescriptor = nullptr;
           
           if (m == true)
           {
@@ -229,7 +247,7 @@ public:
             newDescriptor = u.addCreature.value.destinationDesc;
           }
           
-          auto context = static_cast<PixelDescriptorContext*>(newDescriptor->userData);
+          auto context = static_cast<PixelDescriptorContext*>(newDescriptor->m_cellDescriptor->userData);
           context->i = destinationPos.x;
           context->j = destinationPos.y;
           
@@ -239,20 +257,22 @@ public:
         continue;
       }
     }
+#endif
   }
   
-  void Update(const std::list<komorki::IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime)
+  void Update(const std::list<komorki::PixelDescriptorProvider::UpdateResult>& updateResult, float updateTime)
   {
+#if RECREATE_EACH_UPDATE == 0
     for (auto u : updateResult)
     {
       std::string operationType;
       
-      komorki::PixelDescriptor* descriptor = static_cast<komorki::PixelDescriptor*>(u.desc);
+//      komorki::PixelDescriptor* descriptor = static_cast<komorki::PixelDescriptor*>(u.desc);
      
       Vec2 destinationPos(0,0);
-      Vec2 initialPos = Vec2(u.source.x, u.source.y);
+      Vec2 initialPos = Vec2(u.desc->x, u.desc->y);
+      komorki::Vec2 pos(u.desc->x, u.desc->y);
      
-      komorki::Vec2 pos = u.source;
       auto m = u.movement;
       auto a = u.action;
       
@@ -262,17 +282,17 @@ public:
         operationType = "action";
       else if (u.addCreature == true)
         operationType = "addCreature";
-      else if (u.shouldDelete == true)
+      else if (u.deleteCreature == true)
         operationType = "delete";
       
       if(u.addCreature == true)
       {
-        destinationPos = Vec2(u.addCreature.value.to.x, u.addCreature.value.to.y);
+        destinationPos = Vec2(u.addCreature.value.destinationDesc->x, u.addCreature.value.destinationDesc->y);
       }
       
       if(m == true)
       {
-        destinationPos = Vec2(m.value.destination.x, m.value.destination.y);
+        destinationPos = Vec2(m.value.destinationDesc->x, m.value.destinationDesc->y);
       }
       
       if(!IsInAABB(initialPos))
@@ -287,23 +307,10 @@ public:
         {
           source = context->sprite;
         }
-        
-        if(PMP_ENABLE_LOGGING)
-        {
-          log("c[0x%08llx] s[0x%08llx] d[0x%08llx] [%d:%d][%d:%d] %s [%d:%d]->[%d:%d] [id:%d] type:%d",
-              (unsigned long long)context, (unsigned long long)source, (unsigned long long)descriptor,
-              m_a1, m_a2, m_b1, m_b2, operationType.c_str(),
-              (int)initialPos.x, (int)initialPos.y, (int)destinationPos.x, (int)destinationPos.y, descriptor->m_id, descriptor->GetType());
-        }
       }
       
-      if (u.shouldDelete)
+      if (u.deleteCreature == true)
       {
-        if (descriptor->userData == context)
-        {
-          descriptor->userData = nullptr;
-        }
-        
         if(context == nullptr)
         {
           continue;
@@ -314,23 +321,6 @@ public:
         RemoveSprite(source);
         
         delete context;
-        
-        if (_children.size() < PMP_MAX_NUMBER_OF_CHILDREN && ANIMATED && ANIMATE_DEAD_CELLS)
-        {
-          auto deadCellSprite = spriteDeadCell();
-          
-          Vec2 offset = RANDOM_OFFSET_VECTOR;
-          deadCellSprite->setPosition(spriteVector(pos, offset));
-          
-          auto fade = FadeTo::create(10, 0);
-          auto removeSelf = CallFunc::create([this, deadCellSprite]()
-          {
-            this->RemoveSprite(deadCellSprite);
-          });
-          
-          deadCellSprite->runAction(Sequence::createWithTwoActions(fade, removeSelf));
-        }
-        
         continue;
       }
       
@@ -340,7 +330,7 @@ public:
         auto s = spriteForDescriptor(newDescriptor);
 
         Vec2 offset = RANDOM_OFFSET_VECTOR;
-        auto context = static_cast<PixelDescriptorContext*>(newDescriptor->userData);
+        auto context = static_cast<PixelDescriptorContext*>(newDescriptor->m_cellDescriptor->userData);
         context->offset = offset;
         
         if (ANIMATED)
@@ -349,12 +339,12 @@ public:
         }
         else
         {
-          s->setPosition(spriteVector(u.addCreature.value.to, offset));
+          s->setPosition(spriteVector(komorki::Vec2(newDescriptor->x, newDescriptor->y), offset));
         }
         
         if (ANIMATED)
         {
-          auto moveTo = MoveTo::create(updateTime*0.9, spriteVector(u.addCreature.value.to, offset));
+          auto moveTo = MoveTo::create(updateTime*0.9, spriteVector(komorki::Vec2(newDescriptor->x, newDescriptor->y), offset));
           s->runAction(moveTo);
         }
         
@@ -366,27 +356,22 @@ public:
         auto source = context->sprite;
        
         Vec2 offset = RANDOM_OFFSET_VECTOR;
+        komorki::Vec2 dest(m.value.destinationDesc->x, m.value.destinationDesc->y);
         
         if (ANIMATED)
         {
+          source->stopAllActions();
           source->setPosition(spriteVector(pos, context->offset));
-          auto moveTo = MoveTo::create(updateTime*0.9, spriteVector(m.value.destination, offset));
+          auto moveTo = MoveTo::create(updateTime*0.9, spriteVector(dest, offset));
           source->runAction(moveTo);
         }
         else
         {
-          source->setPosition(spriteVector(m.value.destination, offset));
+          source->setPosition(spriteVector(dest, offset));
         }
         
         source->setScale(kSpriteScale);
         context->offset = offset;
-      
-        m.value.destinationDesc->userData = context;
-        if(descriptor->userData == context)
-        {
-          descriptor->userData = nullptr;
-        }
-        
       }
       else if (a == true)
       {
@@ -400,7 +385,7 @@ public:
         context->offset = offset;
       
         source->stopAllActions();
-        auto destination = spriteVector(a.value.source, Vec2(kSpritePosition/2*a.value.delta.x,
+        auto destination = spriteVector(pos, Vec2(kSpritePosition/2*a.value.delta.x,
                                                              kSpritePosition/2*a.value.delta.y) + RANDOM_OFFSET_VECTOR);
         auto m1 = MoveTo::create(updateTime*0.3, destination);
         auto s1 = ScaleTo::create(updateTime*0.3, kSpriteScale * 1.5);
@@ -411,6 +396,9 @@ public:
         source->runAction(Sequence::createWithTwoActions(spawn1, spawn2));
       } // else if (a == true)
     }
+#else
+  Reset();
+#endif
   }
   
   bool init()
@@ -420,6 +408,7 @@ public:
       return false;
     }
     
+    getTexture()->setAliasTexParameters();
     Reset();
     
     return true;

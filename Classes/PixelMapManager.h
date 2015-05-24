@@ -6,6 +6,8 @@
 #include "PixelMapPartial.hpp"
 #include "Statistic.hpp"
 #include "AsyncPixelManager.h"
+#include "PixelMapBackground.h"
+#include "PixelDebugView.h"
 
 class PixelMapManager
 {
@@ -53,6 +55,8 @@ protected:
   komorki::PixelDescriptorProvider m_provider;
   komorki::PixelDescriptorProvider::Config m_config;
   std::vector<std::shared_ptr<PixelMapPartial> > m_maps;
+  std::vector<std::shared_ptr<PixelMapBackground> > m_mapBg;
+  std::vector<std::shared_ptr<PixelDebugView> > m_mapDebugView;
   Sprite* m_bg;
   
   std::shared_ptr<komorki::AsyncPixelManager> m_manager;

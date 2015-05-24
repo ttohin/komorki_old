@@ -32,6 +32,9 @@ public:
       int armor;
       int lifeTime;
       float percentOfMutations;
+      CellType danger;
+      CellType food;
+      CellType friends;
     };
     
     int terrainSize;
@@ -43,11 +46,13 @@ public:
     float percentOfGreen;
     float percentOfSalad;
     float percentOfCyan;
+    float percentOfBlue;
     
     CellConfig orange;
     CellConfig green;
     CellConfig salad;
     CellConfig cyan;
+    CellConfig blue;
     
     Config::CellConfig* ConfigForCell(CellType type);
     
@@ -60,21 +65,17 @@ public:
   void Init();
   void InitWithConfig(Config* config);
   
-  virtual IPixelDescriptor* GetDescriptor(komorki::PixelPos x, komorki::PixelPos y) const;
+  virtual PixelDescriptor* GetDescriptor(komorki::PixelPos x, komorki::PixelPos y) const;
   virtual komorki::Vec2 GetSize() const;
   virtual void Update(bool passUpdateResult, std::list<UpdateResult>& result);
   virtual ~PixelDescriptorProvider () {};
-  void ProcessMutation(PixelDescriptor* source, PixelDescriptor* destination);
-  void ProcessImprovedSalad(PixelDescriptor* pd, komorki::Vec2 pos, komorki::Optional<komorki::Movement>& movement, komorki::Optional<komorki::Action>& action);
-  void ProcessSalad(PixelDescriptor* pd, komorki::Vec2 pos, komorki::Optional<komorki::Movement>& movement, komorki::Optional<komorki::Action>& action);
-  void ProcessGreenCreature(PixelDescriptor* pd, komorki::Vec2 pos, komorki::Optional<komorki::Movement>& movement, komorki::Optional<komorki::Action>& action);
-  void ProcessHunterCreature(PixelDescriptor* pd, komorki::Vec2 pos, komorki::Optional<komorki::Movement>& movement, komorki::Optional<komorki::Action>& action);
+  CellDescriptor* ProcessMutation(CellDescriptor* source);
   void KillAllCells();
   void KillCellAtPostiion(const Vec2& pos);
   void ProccessTransaction(bool passUpdateResult, std::list<UpdateResult>& result);
   bool CheckBounds(int x, int y);
   void SetCreatureType(const Vec2& pos, CellType type);
-  PixelPtr CreateCell(CellType type);
+  PixelPtr CreateCell(CellType type,  const komorki::Vec2& pos);
   
   std::map<int, int> m_population;
   Config* m_config;
@@ -82,9 +83,8 @@ public:
 private:
   int CountTypeAroundPosition(komorki::Vec2 pos, int character);
   PixelMap m_map;
-  std::vector<std::vector<IPixelDescriptor::Type> > m_typeMap;
-  
-  
+  unsigned int m_updateId;
+  std::vector<std::vector<PixelDescriptor::Type> > m_typeMap;
 };
   
 }

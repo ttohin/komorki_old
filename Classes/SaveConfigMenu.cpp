@@ -15,21 +15,43 @@ using namespace cocostudio;
 
 namespace
 {
-  const float kMargin = 2.0;
-  const float kPanelSize = 40.0;
-  float kPanelWidth = 600;
+  const float kDefaultMargin = 2.0;
+  const float kDefaultPanelSize = 40.0;
+  const float kDefaultPanelWidth = 600;
+  const float kDefaultTitleFontSize = 18;
+  const float kDefaultValueFontSize = 12;
+  float kMargin = kDefaultMargin;
+  float kPanelSize = kDefaultPanelSize;
+  float kPanelWidth = kDefaultPanelWidth;
+}
+
+SaveConfigMenu::SaveConfigMenu()
+: m_mainLayer(nullptr)
+, m_cancelCallback(nullptr)
+, m_savedCallback(nullptr)
+{
+  
 }
 
 void SaveConfigMenu::Init(const SaveConfigMenuCallback& savedCallback,
                           const SaveConfigMenuCallback& cancelCallback)
 {
-  m_mainLayer = nullptr;
   m_cancelCallback = cancelCallback;
   m_savedCallback = savedCallback;
 }
 
 void SaveConfigMenu::ShowInView(cocos2d::Node* root)
 {
+  if(komorki::ConfigManager::GetInstance()->RequiredDoubleSize())
+  {
+    kPanelSize = kDefaultPanelSize * 2;
+    kPanelWidth = kDefaultPanelWidth * 2;
+    kMargin = kDefaultMargin * 2;
+  }
+  
+  Size size = Director::getInstance()->getVisibleSize();
+  kPanelWidth = std::min(kPanelWidth, size.width);
+  
   if (m_mainLayer)
   {
     m_mainLayer->removeFromParentAndCleanup(true);
@@ -45,12 +67,18 @@ void SaveConfigMenu::ShowInView(cocos2d::Node* root)
   addChild(m_mainLayer);
   root->addChild(this, 99999);
   
-  Size size = Director::getInstance()->getVisibleSize();
-  
-  m_list = (ui::ListView*)m_mainLayer->getChildByName("ListView");
+  m_list = komorki::ListView::create();
+  m_list->setBackGroundColorType(ui::Layout::BackGroundColorType::SOLID);
+  m_list->setBackGroundColor(Color3B::BLACK);
+  m_list->setClippingEnabled(false);
+  m_list->setBounceEnabled(true);
+  m_list->setBackGroundColorOpacity((unsigned char)(0.4 * 255));
   m_list->setAnchorPoint({0.5, 0});
+  m_mainLayer->addChild(m_list);
+
   m_confirmationPanel = (ui::Layout*)m_mainLayer->getChildByName("ConfirmationPanel");
   m_confirmationPanel->setAnchorPoint({0, 1});
+  addChildFromAnotherNode(m_confirmationPanel);
   
   insertWidgetFromAnotherNode(m_list, CreateNewSaveConfigView());
   
@@ -59,11 +87,10 @@ void SaveConfigMenu::ShowInView(cocos2d::Node* root)
     insertWidgetFromAnotherNode(m_list, CreateLoadConfigView(configName));
   }
   
-  ConfigureConfirmationPanel(m_confirmationPanel);
+  ListController::ConfigureConfirmationPanel();
+  m_title->setString("Save config as");
   
   Resize(size);
-  
-  SetListView(m_list);
 }
 
 void SaveConfigMenu::Hide()
@@ -81,12 +108,7 @@ void SaveConfigMenu::Resize(const cocos2d::Size& size)
   m_list->setContentSize({kPanelWidth, size.height - kPanelSize});
   m_list->setPosition({size.width/2.f, 0});
   
-  m_confirmationPanel->setContentSize({size.width, kPanelSize});
-  m_confirmationPanel->setPosition({0, size.height});
-  
-  m_cancel->setPosition({size.width/2.f - kPanelWidth/2.f + kMargin, kMargin});
-  
-  m_title->setPosition({size.width/2.f, kPanelSize/2.f});
+  ListController::Resize(size);
 }
 
 void SaveConfigMenu::OnKeyRelease(cocos2d::EventKeyboard::KeyCode keyCode, Event* event)
@@ -133,6 +155,11 @@ void SaveConfigMenu::Cancel()
   m_cancelCallback();
 }
 
+void SaveConfigMenu::OnLeftConfirmationButtonPressed()
+{
+  m_cancelCallback();
+}
+
 void SaveConfigMenu::addChildFromAnotherNode(Node* node)
 {
   node->retain();
@@ -151,6 +178,7 @@ ui::Layout* SaveConfigMenu::CreateLoadConfigView(const std::string& name)
   
   auto label = result->getChildByName<ui::Text*>("Label");
   label->setString(name);
+  label->setTextVerticalAlignment(TextVAlignment::CENTER);
   
   auto loadButton = result->getChildByName<ui::Button*>("Load");
   loadButton->setTitleText("Save");
@@ -175,27 +203,37 @@ ui::Layout* SaveConfigMenu::CreateLoadConfigView(const std::string& name)
                                         }
                                       });
   
+  bool doubleSize = komorki::ConfigManager::GetInstance()->RequiredDoubleSize();
+  if (doubleSize) label->setFontSize(kDefaultTitleFontSize * 2);
+  if (doubleSize) loadButton->setContentSize(loadButton->getContentSize() * 2.0);
+  if (doubleSize) loadButton->setTitleFontSize(kDefaultValueFontSize * 2);
+  if (doubleSize) removeButton->setContentSize(removeButton->getContentSize() * 2.0);
+  if (doubleSize) removeButton->setTitleFontSize(kDefaultValueFontSize * 2);
+  
+  float leftOffset = 0;
+  label->setPosition({leftOffset+ kMargin, 0});
+  
+  loadButton->setAnchorPoint({1, 0});
+  loadButton->setPosition({kPanelWidth - kMargin, kMargin});
+  
+  float rightOffset = kMargin + loadButton->getContentSize().width + kMargin;
+  
+  removeButton->setAnchorPoint({1, 0});
+  removeButton->setPosition({kPanelWidth - rightOffset, kMargin});
+  rightOffset += removeButton->getContentSize().width + kMargin;
+  
+  label->setContentSize({kPanelWidth - rightOffset, kPanelSize});
+  
   return result;
 }
 
 cocos2d::ui::Layout* SaveConfigMenu::CreateNewSaveConfigView()
 {
-  auto result = CSLoader::createNode("LoadConfigView.csb")->getChildByName<ui::Layout*>("LoadConfigView");
-  result->retain();
-  result->removeFromParent();
-  result->autorelease();
-  result->setContentSize({kPanelWidth, kPanelSize});
-  
-  auto label = result->getChildByName<ui::Text*>("Label");
-  label->setString("New config");
- 
-
+  auto result = CreateLoadConfigView("New config");
   auto removeButton = result->getChildByName<ui::Button*>("Remove");
   removeButton->setVisible(false);
   
   auto loadButton = result->getChildByName<ui::Button*>("Load");
-  loadButton->setAnchorPoint({1,0});
-  loadButton->setPosition({kPanelWidth - kMargin, kMargin});
   loadButton->setTitleText("Create");
   loadButton->addTouchEventListener([this](Ref*,ui::Widget::TouchEventType type)
                                     {
@@ -215,23 +253,5 @@ void SaveConfigMenu::insertWidgetFromAnotherNode(ui::ListView* listView, ui::Wid
   widget->release();
 }
 
-void SaveConfigMenu::ConfigureConfirmationPanel(ui::Layout* confirmationPanel)
-{
-  addChildFromAnotherNode(confirmationPanel);
-
-  auto label = confirmationPanel->getChildByName<ui::Text*>("Label");
-  label->setAnchorPoint({0.5, 0.5});
-  label->setString("Save config as...");
-  m_title = label;
-  
-  m_cancel = confirmationPanel->getChildByName<ui::Button*>("Cancel");
-  m_cancel->addTouchEventListener([this](Ref*,ui::Widget::TouchEventType type)
-                                  {
-                                    if (type == ui::Widget::TouchEventType::ENDED)
-                                    {
-                                      m_cancelCallback();
-                                    }
-                                  });
-}
 
 

@@ -78,6 +78,7 @@ private:
   Vec2 m_mapPos;
   Vec2 m_moveDirection;
   float m_updateTime;
+  bool m_pause;
   bool m_stopManager;
   bool m_restartManagerFromOptionMenu;
   void ZoomIn();

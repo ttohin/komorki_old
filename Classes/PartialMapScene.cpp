@@ -4,7 +4,7 @@
 #include "UIButton.h"
 #include "ConfigManager.h"
 
-static const float kUpdateTime = 0.2;
+static const float kUpdateTime = 0.4;
 
 static float kMaxMapScale= 3.0;
 static float kMinMapScale = 0.1;
@@ -60,6 +60,7 @@ bool PartialMapScene::init()
   m_eraseBrush = false;
   m_stopManager = false;
   m_updateTime = kUpdateTime;
+  m_pause = false;
   
   m_brush = Sprite::create("cursor.png");
   addChild(m_brush, 2);
@@ -421,6 +422,7 @@ void PartialMapScene::SetCurrentMenu(const std::shared_ptr<IFullScreenMenu> menu
   m_currenMenu = menu;
   
   m_currenMenu->ShowInView(this);
+  m_pause = true;
 }
 
 void PartialMapScene::Exit()
@@ -430,6 +432,7 @@ void PartialMapScene::Exit()
 
 void PartialMapScene::ShowMainScreen()
 {
+  m_pause = false;
   m_currenMenu->Hide();
   m_currenMenu = nullptr;
   m_optionsMenu = nullptr;
@@ -540,10 +543,9 @@ void PartialMapScene::visit(cocos2d::Renderer *renderer, const cocos2d::Mat4 &pa
 
 void PartialMapScene::timerForUpdate(float dt)
 {
-  if(!m_mapManager->IsAvailable())
-  {
-    return;
-  }
+  if (m_pause) return;
+  
+  if(!m_mapManager->IsAvailable()) return;
   
   if (m_restartManagerFromOptionMenu)
   {

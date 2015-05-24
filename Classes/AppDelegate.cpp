@@ -36,6 +36,8 @@ bool AppDelegate::applicationDidFinishLaunching()
     glview->setFrameSize(glViewSize.width, glViewSize.height);
   }
   
+  director->setDisplayStats(false);
+  
   director->setAnimationInterval(1.0 / 60);
   auto scene = PartialMapScene::createScene();
   director->runWithScene(scene);

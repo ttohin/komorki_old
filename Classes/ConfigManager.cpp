@@ -19,6 +19,8 @@ using namespace komorki;
 
 namespace
 {
+  const char* kConfigSuffix = ".kmrk.json";
+  
   bool ReadCellConfig(const rapidjson::Value& root, const std::string& key, PixelDescriptorProvider::Config::CellConfig& cellConfig)
   {
     const rapidjson::Value& cellConfigValue = DICTOOL->getSubDictionary_json(root, key.c_str());
@@ -169,19 +171,20 @@ ConfigManager::ConfigNamesList ConfigManager::GetConfigs()
       if (!file.is_dir)
       {
         log("file in [%s][%s]",configDir.c_str(), fileName.c_str());
-        size_t pos = fileName.find_last_of(".json");
+        size_t pos = fileName.rfind(kConfigSuffix);
         if (pos != std::string::npos)
         {
+          std::string configName = fileName.substr(0, pos);
           ConfigPtr configPtr = ReadConfig(fileName);
           if (configPtr)
           {
-            Config config {configPtr, fileName};
+            Config config {configPtr, configName};
             m_configList.push_back(config);
-            configNames.push_back(fileName);
+            configNames.push_back(configName);
             
             int number = 0;
             char buffer[256];
-            int result = std::sscanf(fileName.c_str(), "%d_%s.json", &number, buffer);
+            int result = std::sscanf(fileName.c_str(), (std::string("%d_%s") + kConfigSuffix).c_str(), &number, buffer);
             if (result != 0)
             {
               m_nextConfigNumber = std::max(number + 1, m_nextConfigNumber);
@@ -254,7 +257,7 @@ void ConfigManager::PendingConfigChanged()
 
 bool ConfigManager::LoadConfig(const std::string& configName)
 {
-  ConfigPtr config = ReadConfig(configName);
+  ConfigPtr config = ReadConfig(configName + kConfigSuffix);
   if (config)
   {
     *m_pendingConfig.config.get() = *config.get();
@@ -277,12 +280,21 @@ bool ConfigManager::SetConfig(const ConfigPtr& config)
   return true;
 }
 
-bool ConfigManager::ResetConfig()
+bool ConfigManager::ResetPendingConfig()
 {
   PixelDescriptorProvider::Config defaultConfig;
-  if (m_currentConfig.config)
+  
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+  if (Application::getInstance()->getTargetPlatform() == Application::Platform::OS_IPHONE ||
+      Application::getInstance()->getTargetPlatform() == Application::Platform::OS_ANDROID)
   {
-    *m_currentConfig.config.get() = defaultConfig;
+    std::swap(defaultConfig.mapWidth, defaultConfig.mapHeight);
+  }
+#endif
+  
+  if (m_pendingConfig.config)
+  {
+    *m_pendingConfig.config.get() = defaultConfig;
     return true;
   }
   
@@ -301,9 +313,10 @@ bool ConfigManager::SavePendingConfig()
     m_configChanged = false;
     
     std::string configDir = GetConfigDir();
-    if (!WriteConfigToFile(*(m_pendingConfig.config.get()), configDir + m_pendingConfig.name))
+    std::string configFileName = configDir + m_pendingConfig.name + kConfigSuffix;
+    if (!WriteConfigToFile(*(m_pendingConfig.config.get()), configFileName))
     {
-      log("Could not write config to file [%s]", m_pendingConfig.name.c_str());
+      log("Could not write config to file [%s]", configFileName.c_str());
       return false;
     }
     
@@ -316,11 +329,12 @@ bool ConfigManager::SavePendingConfig()
 bool ConfigManager::SavePendingConfig(const std::string& name)
 {
   std::string configDir = GetConfigDir();
+  std::string configFileName = configDir + name + kConfigSuffix;
   m_configChanged = false;
   
-  if (!WriteConfigToFile(*(m_pendingConfig.config.get()), configDir + name))
+  if (!WriteConfigToFile(*(m_pendingConfig.config.get()), configFileName))
   {
-    log("Could not write config to file [%s]", name.c_str());
+    log("Could not write config to file [%s]", configFileName.c_str());
     return false;
   }
   
@@ -339,8 +353,7 @@ bool ConfigManager::SavePendingConfigToNewFile()
   int sec = t.tv_sec % 60;
   
   std::string newConfigName = std::to_string(m_nextConfigNumber++) + "_" +
-  std::to_string(hour) + "_" + std::to_string(minute) + "_" + std::to_string(sec) +
-  ".json";
+  std::to_string(hour) + "_" + std::to_string(minute) + "_" + std::to_string(sec);
   
   SavePendingConfig(newConfigName);
   
@@ -349,7 +362,7 @@ bool ConfigManager::SavePendingConfigToNewFile()
 
 bool ConfigManager::RemoveConfig(const std::string& name)
 {
-  std::string filePath = GetConfigDir() + name;
+  std::string filePath = GetConfigDir() + name + kConfigSuffix;
   FileUtils::getInstance()->removeFile(filePath);
   
   if (m_pendingConfig.name.compare(name) == 0)
@@ -362,14 +375,23 @@ bool ConfigManager::RemoveConfig(const std::string& name)
 
 bool ConfigManager::CreateNewConfig()
 {
-  m_currentConfig.config = std::make_shared<PixelDescriptorProvider::Config>();
-  m_currentConfig.name = std::string();
+  CreatePendingConfig();
+  ApplyPendingConfig();
   return true;
 }
 
 bool ConfigManager::CreatePendingConfig()
 {
   m_pendingConfig.config = std::make_shared<PixelDescriptorProvider::Config>();
+  
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+  if (Application::getInstance()->getTargetPlatform() == Application::Platform::OS_IPHONE ||
+      Application::getInstance()->getTargetPlatform() == Application::Platform::OS_ANDROID)
+  {
+    std::swap(m_pendingConfig.config->mapWidth, m_pendingConfig.config->mapHeight);
+  }
+#endif
+  
   if (m_currentConfig.config)
   {
     *m_pendingConfig.config.get() = *m_currentConfig.config.get();
@@ -429,5 +451,15 @@ std::string ConfigManager::GetPendingConfigName()
 bool ConfigManager::IsPendingConfigChanged()
 {
   return m_configChanged;
+}
+
+bool ConfigManager::RequiredDoubleSize()
+{
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+  auto glview = Director::getInstance()->getOpenGLView();
+  return glview->isRetinaDisplay();
+#else
+  return false;
+#endif
 }
 

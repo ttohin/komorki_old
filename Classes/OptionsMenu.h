@@ -20,7 +20,8 @@ class OptionsMenu : public ListController
 public:
   
   typedef std::function<void(void)> OptionsMenuCallback;
-  
+ 
+  OptionsMenu();
   void Init(const OptionsMenuCallback& confirmCallback,
             const OptionsMenuCallback& cancelCallback,
             const OptionsMenuCallback& saveAsCallback,
@@ -39,10 +40,15 @@ private:
   void ResetToDefaults();
   void Confirm();
   void Cancel();
+  void OnLeftConfirmationButtonPressed();
+  void OnRightConfirmationButtonPressed();
   
   cocos2d::ui::Layout* CreateParameterView(const std::string& name,
+                                           int digitTimit,
                                            std::function<int(int step)> proccessStep,
                                            std::function<void(cocos2d::ui::Text* label, int value)> changeLabel,
+                                           std::function<void(cocos2d::ui::Text* valueText, const std::string& stringValue)>,
+                                           std::function<void(const std::string& stringValue)>,
                                            const std::string& textureName = std::string());
   void AddParameterView(const std::string& text, int* value, int minValue, int maxValue,
                         const std::string& textureName = std::string());
@@ -53,26 +59,27 @@ private:
   void insertWidgetFromAnotherNode(cocos2d::ui::ListView* listView, cocos2d::ui::Widget* widget);
   void ConfigureConfirmationPanel(cocos2d::ui::Layout* confirmationPanel);
   void ConfigureControlPanel(cocos2d::ui::Layout* controlPanel);
-  void UpdateTitle();
+  void UpdateView();
   void ConfigChanged();
+  void addChildFromAnotherNode(Node* node);
   
   cocos2d::Node* m_rootNode;
   cocos2d::ui::Layout* m_mainLayer;
-  cocos2d::ui::Layout* m_confirmationPanel;
   cocos2d::ui::Layout* m_controlPanel;
-  cocos2d::ui::ListView* m_list;
   OptionsMenuCallback m_cancelCallback;
   OptionsMenuCallback m_confirmCallback;
   OptionsMenuCallback m_saveAsCallback;
   OptionsMenuCallback m_loadCallback;
-  cocos2d::ui::Button* m_ok;
-  cocos2d::ui::Button* m_cancel;
   cocos2d::ui::Button* m_load;
   cocos2d::ui::Button* m_save;
   cocos2d::ui::Button* m_saveAs;
   cocos2d::ui::Button* m_reset;
-  cocos2d::ui::Text* m_title;
+  cocos2d::ui::TextField* m_hiddenTextField;
+  cocos2d::ui::Text* m_editingTitle;
+  cocos2d::ui::Layout* m_editingTitleBg;
   float m_scroolDirection;
+  std::function<void()> m_cancelEditing;
+  std::function<void()> m_applyEditing;
   
   typedef std::function<void(int step)> ChangeValueFunction;
   std::list<ChangeValueFunction> m_updateValueList;

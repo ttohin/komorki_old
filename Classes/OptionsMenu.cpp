@@ -15,9 +15,26 @@ using namespace cocostudio;
 
 namespace
 {
-  const float kMargin = 2.0;
-  const float kPanelSize = 40.0;
-  float kPanelWidth = 600;
+  const float kDefaultMargin = 2.0;
+  const float kDefaultPanelSize = 40.0;
+  const float kDefaultPanelWidth = 600;
+  const float kDefaultTitleFontSize = 18;
+  const float kDefaultValueFontSize = 12;
+  float kMargin = kDefaultMargin;
+  float kPanelSize = kDefaultPanelSize;
+  float kPanelWidth = kDefaultPanelWidth;
+}
+
+OptionsMenu::OptionsMenu()
+: m_cancelEditing(nullptr)
+, m_confirmCallback(nullptr)
+, m_save(nullptr)
+, m_saveAs(nullptr)
+, m_loadCallback(nullptr)
+, m_hiddenTextField(nullptr)
+, m_applyEditing(nullptr)
+{
+  
 }
 
 void OptionsMenu::Init(const OptionsMenuCallback& confirmCallback,
@@ -27,6 +44,8 @@ void OptionsMenu::Init(const OptionsMenuCallback& confirmCallback,
 {
   m_scroolDirection = 0.0;
   m_mainLayer = nullptr;
+  m_editingTitleBg = nullptr;
+  m_editingTitle = nullptr;
   m_confirmCallback = confirmCallback;
   m_cancelCallback = cancelCallback;
   m_saveAsCallback = saveAsCallback;
@@ -35,7 +54,16 @@ void OptionsMenu::Init(const OptionsMenuCallback& confirmCallback,
 
 void OptionsMenu::ShowInView(cocos2d::Node* root)
 {
+  if(komorki::ConfigManager::GetInstance()->RequiredDoubleSize())
+  {
+    kPanelSize = kDefaultPanelSize * 2;
+    kPanelWidth = kDefaultPanelWidth * 2;
+    kMargin = kDefaultMargin * 2;
+  }
+  
   Size size = Director::getInstance()->getVisibleSize();
+  kPanelWidth = std::min(kPanelWidth, size.width);
+  
   if (m_mainLayer)
   {
     root->addChild(this);
@@ -43,8 +71,7 @@ void OptionsMenu::ShowInView(cocos2d::Node* root)
     for (auto f : m_updateValueList) {
       f(0);
     }
-    m_save->setBright(komorki::ConfigManager::GetInstance()->CanSaveConfig());
-    UpdateTitle();
+    UpdateView();
     return;
   }
   
@@ -56,8 +83,15 @@ void OptionsMenu::ShowInView(cocos2d::Node* root)
   addChild(m_mainLayer);
   root->addChild(this, 99999);
   
-  m_list = (ui::ListView*)m_mainLayer->getChildByName("ListView");
+  m_list = komorki::ListView::create();
+  m_list->setBackGroundColorType(ui::Layout::BackGroundColorType::SOLID);
+  m_list->setBackGroundColor(Color3B::BLACK);
+  m_list->setClippingEnabled(false);
+  m_list->setBounceEnabled(true);
+  m_list->setBackGroundColorOpacity((unsigned char)(0.4 * 255));
   m_list->setAnchorPoint({0.5, 0});
+  m_mainLayer->addChild(m_list);
+  
   m_controlPanel = (ui::Layout*)m_mainLayer->getChildByName("ControlPanel");
   m_confirmationPanel = (ui::Layout*)m_mainLayer->getChildByName("ConfirmationPanel");
   
@@ -79,22 +113,45 @@ void OptionsMenu::ShowInView(cocos2d::Node* root)
   AddParameterViewForSection("orange", &currentConfig->orange);
   AddParameterViewForSection("salad", &currentConfig->salad);
   AddParameterViewForSection("cyan", &currentConfig->cyan);
+ 
+  addChildFromAnotherNode(m_confirmationPanel);
   
-  ConfigureConfirmationPanel(m_confirmationPanel);
+  ListController::ConfigureConfirmationPanel();
   ConfigureControlPanel(m_controlPanel);
   
+  bool doubleSize = komorki::ConfigManager::GetInstance()->RequiredDoubleSize();
+  if (doubleSize) m_load->setContentSize(m_load->getContentSize() * 2);
+  if (doubleSize) m_save->setContentSize(m_save->getContentSize() * 2);
+  if (doubleSize) m_saveAs->setContentSize(m_saveAs->getContentSize() * 2);
+  if (doubleSize) m_reset->setContentSize(m_reset->getContentSize() * 2);
+  if (doubleSize) m_load->setTitleFontSize(kDefaultValueFontSize * 2);
+  if (doubleSize) m_save->setTitleFontSize(kDefaultValueFontSize * 2);
+  if (doubleSize) m_saveAs->setTitleFontSize(kDefaultValueFontSize * 2);
+  if (doubleSize) m_reset->setTitleFontSize(kDefaultValueFontSize * 2);
+  
   m_save->setBright(komorki::ConfigManager::GetInstance()->CanSaveConfig());
-  UpdateTitle();
+  UpdateView();
   
   Resize(size);
  
-  SetListView(m_list);
-  
   this->schedule(CC_SCHEDULE_SELECTOR(OptionsMenu::ScrollToPosition), 0, 0, 0.01);
 }
 
 void OptionsMenu::Hide()
 {
+  if (m_hiddenTextField)
+  {
+    auto glView = Director::getInstance()->getOpenGLView();
+    if (glView)
+    {
+#if (CC_TARGET_PLATFORM != CC_PLATFORM_WP8 && CC_TARGET_PLATFORM != CC_PLATFORM_WINRT)
+      glView->setIMEKeyboardState(false);
+#endif
+    }
+    
+    m_applyEditing();
+  }
+  
   this->removeFromParentAndCleanup(true);
   ListController::Hide();
 }
@@ -106,32 +163,28 @@ OptionsMenu::~OptionsMenu()
 
 void OptionsMenu::Resize(const cocos2d::Size& size)
 {
+  ListController::Resize(size);
+  
   kPanelWidth = std::min(kPanelWidth, size.width);
+  
   m_mainLayer->setContentSize(size);
-  
-  m_list->setContentSize({kPanelWidth, size.height - kPanelSize - kPanelSize});
-  m_list->setPosition({size.width/2.f, kPanelSize});
-  
-  m_confirmationPanel->setContentSize({size.width, kPanelSize});
-  m_confirmationPanel->setPosition({0, size.height - kPanelSize});
   
   m_controlPanel->setContentSize({size.width, kPanelSize});
   m_controlPanel->setPosition({0, kPanelSize});
   
-  float offset = m_load->getPosition().x;
-  m_load->setPosition({size.width/2.f - kPanelWidth/2.f + kMargin, kMargin});
-  offset -= m_load->getPosition().x;
-  m_save->setPosition({m_save->getPosition().x - offset, kMargin});
-  m_saveAs->setPosition({m_saveAs->getPosition().x - offset, kMargin});
-  m_reset->setPosition({m_reset->getPosition().x - offset, kMargin});
+  m_list->setContentSize({kPanelWidth, size.height - kPanelSize - kPanelSize});
+  m_list->setPosition({size.width/2.f, kPanelSize});
   
-  m_cancel->setPosition({size.width/2.f - kPanelWidth/2.f + kMargin, kMargin});
-  m_ok->setPosition({size.width/2.f + kPanelWidth/2.f - kMargin - m_ok->getContentSize().width, kMargin});
-  
-  m_title->setPosition({size.width/2.f, kPanelSize/2.f});
-  m_title->setContentSize({kPanelWidth - m_ok->getContentSize().width - m_cancel->getContentSize().width, kPanelSize});
+  float leftOffset = size.width/2.f - kPanelWidth/2.f + kMargin;
+  m_load->setPosition({leftOffset, kMargin});
+  leftOffset += m_load->getContentSize().width + kMargin;
+  m_save->setPosition({leftOffset, kMargin});
+  leftOffset += m_save->getContentSize().width + kMargin;
+  m_saveAs->setPosition({leftOffset, kMargin});
+  leftOffset += m_saveAs->getContentSize().width + kMargin;
+  m_reset->setPosition({leftOffset, kMargin});
+  leftOffset += m_reset->getContentSize().width + kMargin;
 }
-
 
 void OptionsMenu::OnKeyRelease(cocos2d::EventKeyboard::KeyCode keyCode, Event* event)
 {
@@ -141,7 +194,17 @@ void OptionsMenu::OnKeyRelease(cocos2d::EventKeyboard::KeyCode keyCode, Event* e
   }
   else if(keyCode == EventKeyboard::KeyCode::KEY_ESCAPE)
   {
+    if(m_cancelEditing != nullptr)
+    {
+      m_cancelEditing();
+      return;
+    }
+    
     m_cancelCallback();
+  }
+  else if(keyCode == EventKeyboard::KeyCode::KEY_KP_ENTER)
+  {
+    if (m_hiddenTextField != nullptr) m_hiddenTextField->setDetachWithIME(true);
   }
   else
   {
@@ -151,7 +214,7 @@ void OptionsMenu::OnKeyRelease(cocos2d::EventKeyboard::KeyCode keyCode, Event* e
 
 void OptionsMenu::ResetToDefaults()
 {
-  *komorki::ConfigManager::GetInstance()->GetPendingConfig().get() = komorki::PixelDescriptorProvider::Config();
+  komorki::ConfigManager::GetInstance()->ResetPendingConfig();
   for (auto f : m_updateValueList) {
     f(0);
   }
@@ -168,23 +231,111 @@ void OptionsMenu::Cancel()
   m_cancelCallback();
 }
 
+void OptionsMenu::OnLeftConfirmationButtonPressed()
+{
+  Cancel();
+}
+
+void OptionsMenu::OnRightConfirmationButtonPressed()
+{
+  Confirm();
+}
+
 ui::Layout* OptionsMenu::CreateParameterView(const std::string& name,
+                                             int digitTimit,
                                              std::function<int(int step)> proccessStep,
                                              std::function<void(ui::Text* label, int value)> changeLabel,
+                                             std::function<void(cocos2d::ui::Text* valueText, const std::string& stringValue)> changeLabelString,
+                                             std::function<void(const std::string& stringValue)> chnageValueString,
                                              const std::string& textureName)
 {
+  bool doubleSize = komorki::ConfigManager::GetInstance()->RequiredDoubleSize();
+  
   auto result = CSLoader::createNode("ParameterView.csb")->getChildByName<ui::Layout*>("ParameterView");
   result->retain();
   result->removeFromParent();
   result->autorelease();
-  
   result->setContentSize({kPanelWidth, kPanelSize});
   
   auto label = result->getChildByName<ui::Text*>("Label");
   label->setString(name);
+  if (doubleSize) label->setFontSize(kDefaultTitleFontSize * 1.5);
   
   auto valueText = result->getChildByName<ui::Text*>("Value");
+  if (doubleSize) valueText->setFontSize(kDefaultValueFontSize * 2);
+  auto valueBg = result->getChildByName<ui::Layout*>("ValueBg");
+  auto valueEditField = result->getChildByName<ui::TextField*>("TextField");
+//  valueEditField->setVisible(true);
+  addChildFromAnotherNode(valueEditField);
+  valueEditField->setMaxLength(digitTimit);
   
+  auto cancelEditing = [valueEditField, valueText, changeLabel, proccessStep]()
+  {
+    changeLabel(valueText, proccessStep(0));
+    valueEditField->setString("");
+    valueEditField->setDetachWithIME(true);
+  };
+  
+  auto applyValue = [chnageValueString, changeLabel, valueEditField, valueText, proccessStep]()
+  {
+    chnageValueString(valueEditField->getString());
+    changeLabel(valueText, proccessStep(0));
+  };
+  
+  valueEditField->addEventListener([this, cancelEditing, applyValue, changeLabelString, valueText, valueBg, valueEditField](Ref*, ui::TextField::EventType type )
+                                   {
+                                     if (type == ui::TextField::EventType::INSERT_TEXT ||
+                                         type == ui::TextField::EventType::DELETE_BACKWARD)
+                                     {
+                                       std::string s = valueEditField->getString();
+                                       size_t initialLenght = s.length();
+                                       s.erase(std::remove_if(s.begin(), s.end(), [initialLenght](char c) {
+                                         if (initialLenght == 1)
+                                         {
+                                           return !::isdigit(c) && c != '-';
+                                         }
+                                         
+                                         return !::isdigit(c);
+                                       }), s.end());
+                                       
+                                       valueEditField->setString(s);
+                                       
+                                       changeLabelString(valueText, s);
+                                     }
+                                     
+                                     if (type == ui::TextField::EventType::ATTACH_WITH_IME)
+                                     {
+                                       m_applyEditing = applyValue;
+                                       m_cancelEditing = cancelEditing;
+                                       m_hiddenTextField = valueEditField;
+                                       auto fadeIn = FadeIn::create(0.4);
+                                       auto fadeOut = FadeOut::create(0.4);
+                                       valueBg->runAction(RepeatForever::create(Sequence::createWithTwoActions(fadeOut, fadeIn)));
+                                     }
+                                     if (type == ui::TextField::EventType::DETACH_WITH_IME)
+                                     {
+                                       applyValue();
+                                       valueBg->stopAllActions();
+                                       valueBg->setOpacity(255);
+
+                                       if (m_hiddenTextField == valueEditField)
+                                       {
+                                         m_hiddenTextField = nullptr;
+                                       }
+                                     }
+                                   });
+  
+  valueText->addTouchEventListener([valueBg, valueText, valueEditField, this](Ref*,ui::Widget::TouchEventType type)
+  {
+    valueBg->stopAllActions();
+    valueBg->setOpacity(255);
+    m_editingTitle = valueText;
+    m_editingTitleBg = valueBg;
+    
+    valueEditField->attachWithIME();
+    valueEditField->setString("");
+  });
+
   auto plusButton = result->getChildByName<ui::Button*>("Plus");
   
   auto changeValue = [valueText, proccessStep, changeLabel](int step)
@@ -215,20 +366,16 @@ ui::Layout* OptionsMenu::CreateParameterView(const std::string& name,
                                       {
                                         if (type == ui::Widget::TouchEventType::BEGAN)
                                         {
+                                          if (m_list->isScrolling()) return;
+                                          
                                           increaseValueCallback(0.0);
                                           this->m_mainLayer->schedule(increaseValueCallback, 0.1, kRepeatForever, 0.3, "increase");
                                           this->m_mainLayer->schedule(increasePlusValueCallback, 0.05, kRepeatForever, 4.0, "increase++");
                                         }
                                       }
                                     });
-  
-  float plusButtonOriginalOffset = plusButton->getPosition().x;
-  plusButton->setPosition({kPanelWidth - plusButton->getContentSize().width - kMargin, kMargin});
-  float offset = plusButton->getPosition().x - plusButtonOriginalOffset;
-  
+
   auto minusButton = result->getChildByName<ui::Button*>("Minus");
-  minusButton->setPosition({offset + minusButton->getPosition().x - kMargin, kMargin});
-  valueText->setPosition({offset + valueText->getPosition().x - kMargin, valueText->getPosition().y});
   
   auto decreaseValueCallback = [changeValue](float)
   {
@@ -251,6 +398,8 @@ ui::Layout* OptionsMenu::CreateParameterView(const std::string& name,
                                        {
                                          if (type == ui::Widget::TouchEventType::BEGAN)
                                          {
+                                           if (m_list->isScrolling()) return;
+                                           
                                            decreaseValueCallback(0.0);
                                            this->m_mainLayer->schedule(decreaseValueCallback, 0.1, kRepeatForever, 0.3, "increase");
                                            this->m_mainLayer->schedule(decreasePlusValueCallback, 0.05, kRepeatForever, 4.0, "increase++");
@@ -258,18 +407,42 @@ ui::Layout* OptionsMenu::CreateParameterView(const std::string& name,
                                        }
                                      });
  
-  float leftOffset = 0;
+  float leftOffset = kMargin;
   if (!textureName.empty())
   {
     auto icon = ui::ImageView::create(textureName+ ".png");
-    icon->setContentSize({40, 40});
+    icon->setContentSize({kPanelSize, kPanelSize});
+    if (doubleSize) icon->setScale(2.0);
     icon->setAnchorPoint({0, 0});
     result->addChild(icon, 999);
-    leftOffset = 40;
+    leftOffset += kPanelSize;
   }
+ 
+  label->setTextVerticalAlignment(TextVAlignment::CENTER);
+  label->setPosition({leftOffset, 0});
+ 
+  plusButton->setAnchorPoint({1, 0});
+  plusButton->setPosition({kPanelWidth - kMargin, kMargin});
+  plusButton->setContentSize({kPanelSize, kPanelSize});
+ 
+  float rightOffset = kMargin + plusButton->getContentSize().width + kMargin;
+
+  if (doubleSize) valueText->setContentSize(valueText->getContentSize() * 2.0);
+  if (doubleSize) valueBg->setContentSize(valueBg->getContentSize() * 2.0);
   
-  label->setPosition({leftOffset+ kMargin, 0});
-  label->setContentSize({kPanelWidth - kMargin, kPanelSize});
+  valueBg->setAnchorPoint({0.5, 0.5});
+  valueBg->setPosition({kPanelWidth - valueBg->getContentSize().width/2.f - rightOffset, kPanelSize/2.f});
+  
+  valueText->setPosition(valueBg->getPosition());
+  valueText->setAnchorPoint({0.5, 0.5});
+ 
+  rightOffset += valueBg->getContentSize().width + kMargin;
+  
+  minusButton->setAnchorPoint({1, 0});
+  minusButton->setPosition({kPanelWidth - rightOffset, kMargin});
+  minusButton->setContentSize({kPanelSize, kPanelSize});
+  rightOffset += minusButton->getContentSize().width + kMargin;
+  label->setContentSize({kPanelWidth - rightOffset - leftOffset, kPanelSize});
   
   m_updateValueList.push_back(changeValue);
   
@@ -283,7 +456,7 @@ void OptionsMenu::AddParameterView(const std::string& text, int* value, int minV
     valueText->setString(std::to_string(value));
   };
   
-  auto changeIntValue = [this](int* value, int minValue, int maxValue, int step)
+  auto changeIntValue = [this, value, minValue, maxValue](int step)
   {
     if (*value + step > maxValue || *value + step < minValue)
       return *value;
@@ -296,10 +469,39 @@ void OptionsMenu::AddParameterView(const std::string& text, int* value, int minV
     *value += step;
     return *value;
   };
+
+  auto applyStringValue = [this, value, minValue, maxValue](const std::string& stringValue)
+  {
+    if (stringValue.empty()) {
+      return ;
+    }
+    
+    int intValue = std::stoi(stringValue);
+    int prevValue = *value;
+    if (intValue > maxValue)
+      intValue = maxValue;
+    
+    if (intValue < minValue)
+      intValue = minValue;
+  
+    *value = intValue;
+    if (prevValue != *value)
+    {
+      this->ConfigChanged();
+    }
+  };
+
+  auto changeTextValueWithString = [](ui::Text* valueText, const std::string& stringValue)
+  {
+    valueText->setString(stringValue);
+  };
   
   m_list->pushBackCustomItem(CreateParameterView(text,
-                                                 std::bind(changeIntValue, value, minValue, maxValue, std::placeholders::_1),
+                                                 5,
+                                                 changeIntValue,
                                                  changeTextValue,
+                                                 changeTextValueWithString,
+                                                 applyStringValue,
                                                  textureName));
 }
 
@@ -327,9 +529,39 @@ void OptionsMenu::AddParameterView(const std::string& text, float* value, int mi
     return intValue;
   };
   
+  
+  auto applyStringValue = [this, value, minValue, maxValue](const std::string& stringValue)
+  {
+    if (stringValue.empty()) {
+      return;
+    }
+    
+    int intValue = std::stoi(stringValue);
+    int prevValue = *value * 100.0;
+    if (intValue > maxValue)
+      intValue = maxValue;
+    
+    if (intValue < minValue)
+      intValue = minValue;
+  
+    if (prevValue != intValue)
+    {
+      *value = intValue/100.f;
+      this->ConfigChanged();
+    }
+  };
+  
+  auto changeTextValueWithString = [](ui::Text* valueText, const std::string& stringValue)
+  {
+    valueText->setString(stringValue + "%");
+  };
+  
   m_list->pushBackCustomItem(CreateParameterView(text,
+                                                 3,
                                                  std::bind(changeFloatValue, value, minValue, maxValue, std::placeholders::_1),
                                                  changeFloatTextValue,
+                                                 changeTextValueWithString,
+                                                 applyStringValue,
                                                  textureName));
 }
 
@@ -355,41 +587,19 @@ void OptionsMenu::insertWidgetFromAnotherNode(ui::ListView* listView, ui::Widget
   widget->release();
 }
 
-void OptionsMenu::ConfigureConfirmationPanel(ui::Layout* confirmationPanel)
-{
-  m_ok = confirmationPanel->getChildByName<ui::Button*>("Ok");
-  m_ok->addTouchEventListener([this](Ref*,ui::Widget::TouchEventType type)
-                              {
-                                if (type == ui::Widget::TouchEventType::ENDED)
-                                {
-                                  m_confirmCallback();
-                                }
-                              });
-  
-  m_cancel = confirmationPanel->getChildByName<ui::Button*>("Cancel");
-  m_cancel->addTouchEventListener([this](Ref*,ui::Widget::TouchEventType type)
-                                  {
-                                    if (type == ui::Widget::TouchEventType::ENDED)
-                                    {
-                                      m_cancelCallback();
-                                    }
-                                  });
-  
-  auto label = confirmationPanel->getChildByName<ui::Text*>("Label");
-  label->setAnchorPoint({0.5, 0.5});
-  label->setString("Options");
-  m_title = label;
-}
-
 void OptionsMenu::ConfigureControlPanel(ui::Layout* controlPanel)
 {
+  controlPanel->retain();
+  controlPanel->removeFromParent();
+  m_mainLayer->addChild(controlPanel);
+  controlPanel->release();
   m_save = controlPanel->getChildByName<ui::Button*>("Save");
   m_save->addTouchEventListener([this](Ref*,ui::Widget::TouchEventType type)
                               {
                                 if (type == ui::Widget::TouchEventType::ENDED)
                                 {
                                   komorki::ConfigManager::GetInstance()->SavePendingConfig();
-                                  this->ConfigChanged();
+                                  this->UpdateView();
                                 }
                               });
   
@@ -419,7 +629,7 @@ void OptionsMenu::ConfigureControlPanel(ui::Layout* controlPanel)
                                 });
 }
 
-void OptionsMenu::UpdateTitle()
+void OptionsMenu::UpdateView()
 {
   auto configManager = komorki::ConfigManager::GetInstance();
   std::string configName = configManager->GetPendingConfigName();
@@ -434,15 +644,22 @@ void OptionsMenu::UpdateTitle()
   }
   title += "]";
   m_title->setString(title);
+  m_save->setBright(komorki::ConfigManager::GetInstance()->CanSaveConfig());
 }
 
 void OptionsMenu::ConfigChanged()
 {
   komorki::ConfigManager::GetInstance()->PendingConfigChanged();
-  m_save->setBright(komorki::ConfigManager::GetInstance()->CanSaveConfig());
-  UpdateTitle();
+  UpdateView();
 }
 
+void OptionsMenu::addChildFromAnotherNode(Node* node)
+{
+  node->retain();
+  node->removeFromParent();
+  m_mainLayer->addChild( node );
+  node->release();
+}
 
 
 

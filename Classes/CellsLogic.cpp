@@ -8,6 +8,8 @@
 
 #include "CellsLogic.h"
 #include "b2Utilites.h"
+#include "PixelDescriptor.h"
+#include "CellDescriptor.h"
 
 namespace komorki
 {
@@ -22,7 +24,7 @@ bool CheckBounds(int x, int y)
 }
 
 //**************************************************************************************************
-int CountTypeAroundPosition(komorki::Vec2 pos, const PixelDescriptorProvider::PixelMap& map, int character)
+int CountTypeAroundPosition(komorki::Vec2 pos, const PixelDescriptorProvider::PixelMap& map, const CellType& character)
 {
   int counter = 0;
   for (int i = -1; i <= 1; ++i)
@@ -38,7 +40,8 @@ int CountTypeAroundPosition(komorki::Vec2 pos, const PixelDescriptorProvider::Pi
         continue;
       
       auto targetPd = map[dx][dy].get();
-      if(targetPd->GetType() == IPixelDescriptor::CreatureType && targetPd->m_character == character)
+      if(targetPd->m_type == PixelDescriptor::CreatureType &&
+         (targetPd->m_cellDescriptor->m_character & character))
         counter += 1;
     }
   }
@@ -47,9 +50,8 @@ int CountTypeAroundPosition(komorki::Vec2 pos, const PixelDescriptorProvider::Pi
 }
 
 //**************************************************************************************************
-void Attack(PixelDescriptor* me,
-            PixelDescriptor* food,
-            Vec2 pos,
+void Attack(CellDescriptor* me,
+            CellDescriptor* food,
             Vec2 delta,
             PixelDescriptorProvider::Config::CellConfig* config,
             Optional<Action>& action)
@@ -62,85 +64,28 @@ void Attack(PixelDescriptor* me,
   myInput.m_health = config->healthPerAttack;
   me->nextTurnTransaction.push_back(myInput);
   
-  action.SetValue(true);
-  action.value.source = pos;
+  action.SetValueFlag(true);
   action.value.delta = delta;
 }
   
 //**************************************************************************************************
-void ProcessHunterCreature(PixelDescriptor* pd,
+void ProcessHunterCreature(CellDescriptor* pd,
                            Vec2 pos,
                            PixelDescriptorProvider::Config::CellConfig* config,
                            const PixelDescriptorProvider::PixelMap& map, // ugly hack
                            Optional<Movement>& movement,
                            Optional<Action>& action)
 {
-  const int xStart = rand()%2 == 0 ? 1 : -1;
-  const int yStart = rand()%2 == 0 ? 1 : -1;
   
-  Vec2 otherHunterOffset;
-  
-  for (int i = xStart; i != -2*xStart; i += -xStart)
-  {
-    for (int j = yStart; j != -2*yStart; j += -yStart)
-    {
-      int dx = pos.x + i;
-      int dy = pos.y + j;
-      if(!CheckBounds(dx, dy))
-        continue;
-      
-      auto targetPd = map[dx][dy].get();
-      if(targetPd->GetType() == IPixelDescriptor::CreatureType)
-      {
-        if (targetPd->m_id == pd->m_id)
-          continue;
-        
-        if (targetPd->m_character == eCellTypeHunter)
-        {
-          otherHunterOffset = Vec2(i, j);
-          continue;
-        }
-        
-        if (targetPd->m_character == eCellTypeGreen)
-        {
-          Attack(pd, targetPd, pos, Vec2(i, j), config, action);
-          return;
-        }
-      }
-    }
-  }
-  
-  auto dest = Vec2(pos.x - otherHunterOffset.x, pos.y - otherHunterOffset.y);
-  if(map[dest.x][dest.y]->GetType() == IPixelDescriptor::Empty)
-  {
-    movement.SetValue(true);
-    movement.value.source = pos;
-    movement.value.destination = dest;
-    return;
-  }
-  
-  auto id = (int)roundf(CCRANDOM_MINUS1_1());
-  auto jd = (int)roundf(CCRANDOM_MINUS1_1());
-  
-  if(!CheckBounds(pos.x + id, pos.y + jd))
-    return;
-  
-  dest = Vec2(pos.x + id, pos.y + jd);
-  if(map[dest.x][dest.y]->GetType() != IPixelDescriptor::Empty)
-    return;
-  
-  movement.SetValue(true);
-  movement.value.source = pos;
-  movement.value.destination = dest;
 }
   
 //**************************************************************************************************
-void ProcessSalad(PixelDescriptor* pd,
-                  Vec2 pos,
-                  PixelDescriptorProvider::Config::CellConfig* config,
-                  const PixelDescriptorProvider::PixelMap& map, // ugly hack
-                  Optional<Movement>& movement,
-                  Optional<Action>& action)
+void ProcessBigBlue(CellDescriptor* pd,
+                    Vec2 pos,
+                    PixelDescriptorProvider::Config::CellConfig* config,
+                    const PixelDescriptorProvider::PixelMap& map, // ugly hack
+                    Optional<Movement>& movement,
+                    Optional<Action>& action)
 {
   if (pd->m_sleepCounter != 0)
   {
@@ -152,90 +97,129 @@ void ProcessSalad(PixelDescriptor* pd,
     pd->m_sleepCounter = pd->m_sleepTime;
   }
   
+  static std::vector<PixelDescriptor*> food;
+  food.clear();
+  food.reserve(20);
   
-  std::vector<komorki::Vec2> emptyBlocks;
+  static std::vector<PixelDescriptor*> empty;
+  empty.clear();
+  empty.reserve(20);
   
-  const int xStart = rand()%2 == 0 ? 1 : -1;
-  const int yStart = rand()%2 == 0 ? 1 : -1;
+  static std::vector<PixelDescriptor*> enemies;
+  enemies.clear();
+  enemies.reserve(20);
   
-  for (int di = xStart; di != -2*xStart; di += -xStart)
-  {
-    for (int dj = yStart; dj != -2*yStart; dj += -yStart)
+  pd->AroundRandom([pd](PixelDescriptor* targetPd, bool& stop) {
+    if(targetPd->m_type == PixelDescriptor::CreatureType)
     {
-      if (di == 0 && dj == 0)
-        continue;
+      if (targetPd->m_cellDescriptor == pd)
+        return;
       
-      int dx = pos.x + di;
-      int dy = pos.y + dj;
-      if(!CheckBounds(dx, dy))
-        continue;
+      Vec2 offset;
+      offset.x = pd->parent->x > targetPd->x ? -1 : pd->parent->x < targetPd->x ? 1 : 0;
+      offset.y = pd->parent->y > targetPd->y ? -1 : pd->parent->y < targetPd->y ? 1 : 0;
       
-      auto targetPd = map[dx][dy].get();
-      if(targetPd->GetType() == IPixelDescriptor::Empty)
-        emptyBlocks.push_back(Vec2(dx, dy));
+      if (targetPd->m_cellDescriptor->m_character & pd->m_foodMask)
+      {
+        food.push_back(targetPd);
+      }
+      if (targetPd->m_cellDescriptor->m_character & pd->m_dangerMask)
+      {
+        enemies.push_back(targetPd);
+      }
     }
+  });
+  
+  if (food.size() >= 5 || enemies.size() > 0)
+  {
+    for (auto enemy : food)
+    {
+      Transaction enemyInput;
+      enemyInput.m_armor = -config->attack;
+      enemy->m_cellDescriptor->nextTurnTransaction.push_back(enemyInput);
+      
+      Transaction myInput;
+      myInput.m_health = config->healthPerAttack;
+      pd->nextTurnTransaction.push_back(myInput);
+    }
+    
+    action.SetValueFlag(true);
+    action.value.delta = {0, 0};
+    return;
   }
   
-  if (emptyBlocks.empty())
-    return;
+  pd->parent->AroundRandom([pd](PixelDescriptor* targetPd, bool& stop){
+    if (pd->TestSpace(targetPd))
+    {
+      empty.push_back(targetPd);
+    }
+  });
   
-  int destIndex = cRandABInt(0, emptyBlocks.size());
-  
-  movement.SetValue(true);
-  movement.value.source = pos;
-  movement.value.destination = emptyBlocks[destIndex];
+  if (empty.size() != 0)
+  {
+    pd->Move(empty[0]);
+    movement.SetValueFlag(true);
+    movement.value.destinationDesc = empty[0];
+  }
 }
 
 //**************************************************************************************************
-void ProcessImprovedSalad(PixelDescriptor* pd,
+void ProcessImprovedSalad(CellDescriptor* pd,
                           Vec2 pos,
                           PixelDescriptorProvider::Config::CellConfig* config,
                           const PixelDescriptorProvider::PixelMap& map, // ugly hack
                           Optional<Movement>& movement,
                           Optional<Action>& action)
 {
-  int improvedSaladCount = 0;
+  int friendsCount = 0;
   
-  const int xStart = rand()%2 == 0 ? 1 : -1;
-  const int yStart = rand()%2 == 0 ? 1 : -1;
-  
-  for (int di = xStart; di != -2*xStart; di += -xStart)
-  {
-    for (int dj = yStart; dj != -2*yStart; dj += -yStart)
+  PixelDescriptor* frientPd = nullptr;
+  PixelDescriptor* emptyBlock = nullptr;
+  pd->AroundRandom([pd, &movement, &frientPd, &emptyBlock, &action, &friendsCount, config](PixelDescriptor* targetPd, bool& stop) {
+    if(targetPd->m_type == PixelDescriptor::CreatureType)
     {
-      if (di == 0 && dj == 0)
-        continue;
+      if (targetPd->m_cellDescriptor == pd)
+        return;
       
-      int dx = pos.x + di;
-      int dy = pos.y + dj;
-      if(!CheckBounds(dx, dy))
-        continue;
-      
-      auto targetPd = map[dx][dy].get();
-      if(targetPd->GetType() == IPixelDescriptor::CreatureType)
+      Vec2 offset;
+      offset.x = pd->parent->x > targetPd->x ? -1 : pd->parent->x < targetPd->x ? 1 : 0;
+      offset.y = pd->parent->y > targetPd->y ? -1 : pd->parent->y < targetPd->y ? 1 : 0;
+      if (targetPd->m_cellDescriptor->m_character & pd->m_dangerMask)
       {
-        if (targetPd->m_id == pd->m_id)
-          continue;
+        PixelDescriptor* newPos = pd->parent->Offset(-offset.x, -offset.y);
         
-        if (targetPd->m_character == eCellTypeGreen)
+        if (pd->TestSpace(newPos))
         {
-          auto dest = Vec2(pos.x - di, pos.y - dj);
-          if(map[dest.x][dest.y]->GetType() != IPixelDescriptor::Empty)
-            continue;
-          
-          movement.SetValue(true);
-          movement.value.source = pos;
-          movement.value.destination = dest;
-          return;
+          pd->Move(newPos);
+          movement.SetValueFlag(true);
+          movement.value.destinationDesc = newPos;
         }
         
-        if (targetPd->m_character == eCellTypeImprovedSalad)
-        {
-          ++improvedSaladCount;
-        }
+        stop = true;
+        return;
+      }
+      
+      if (targetPd->m_cellDescriptor->m_character & pd->m_foodMask)
+      {
+        Attack(pd, targetPd->m_cellDescriptor, offset, config, action);
+        stop = true;
+        return;
+      }
+      
+      if (targetPd->m_cellDescriptor->m_character & pd->m_friendMask)
+      {
+        friendsCount += 1;
+        frientPd = targetPd;
       }
     }
-  }
+    else if (emptyBlock == nullptr)
+    {
+      if (pd->TestSpace(targetPd))
+        emptyBlock = targetPd;
+    }
+  });
+  
+  if (action.isSet || movement.isSet) return;
   
   if (pd->m_sleepCounter != 0)
   {
@@ -247,7 +231,7 @@ void ProcessImprovedSalad(PixelDescriptor* pd,
     pd->m_sleepCounter = pd->m_sleepTime;
   }
   
-  if (improvedSaladCount >= 2)
+  if (friendsCount >= 2)
   {
     pd->m_sleepCounter = pd->m_sleepTime = 10;
     return;
@@ -255,24 +239,16 @@ void ProcessImprovedSalad(PixelDescriptor* pd,
   
   pd->m_sleepCounter = pd->m_sleepTime = 0;
   
-  auto id = (int)roundf(CCRANDOM_MINUS1_1());
-  auto jd = (int)roundf(CCRANDOM_MINUS1_1());
-  
-  if(!CheckBounds(pos.x + id, pos.y + jd))
-    return;
-  
-  auto dest = Vec2(pos.x + id, pos.y + jd);
-  if(map[dest.x][dest.y]->GetType() != IPixelDescriptor::Empty)
-    return;
-  
-  movement.SetValue(true);
-  movement.value.source = pos;
-  movement.value.destination = dest;
-
+  if (emptyBlock != nullptr)
+  {
+    pd->Move(emptyBlock);
+    movement.SetValueFlag(true);
+    movement.value.destinationDesc = emptyBlock;
+  }
 }
   
   //**************************************************************************************************
-//  void ProcessImprovedSalad(PixelDescriptor* pd,
+//  void ProcessImprovedSalad(CellDescriptor* pd,
 //                            Vec2 pos,
 //                            const PixelDescriptorProvider::PixelMap& map, // ugly hack
 //                            Optional<Movement>& movement,
@@ -311,7 +287,7 @@ void ProcessImprovedSalad(PixelDescriptor* pd,
 //          continue;
 //        
 //        auto targetPd = map[dx][dy].get();
-//        if(targetPd->GetType() != IPixelDescriptor::Empty)
+//        if(targetPd->m_type != PixelDescriptor::Empty)
 //          continue;
 //        
 //        komorki::Vec2 p = Vec2(dx, dy);
@@ -332,14 +308,14 @@ void ProcessImprovedSalad(PixelDescriptor* pd,
 //    int saladCount = CountTypeAroundPosition(pos, map, eCellTypeImprovedSalad);
 //    if (saladCount <= 2 &&  maxPos != pos && saladCountMax > saladCount)
 //    {
-//      movement.SetValue(true);
+//      movement.SetValueFlag(true);
 //      movement.value.source = pos;
 //      movement.value.destination = maxPos;
 //      
 //    }
 //    else if (saladCount > 2 && minPos != pos)
 //    {
-//      movement.SetValue(true);
+//      movement.SetValueFlag(true);
 //      movement.value.source = pos;
 //      movement.value.destination = minPos;
 //    }
@@ -352,23 +328,25 @@ void ProcessImprovedSalad(PixelDescriptor* pd,
 //        return;
 //      
 //      auto dest = Vec2(pos.x + id, pos.y + jd);
-//      if(map[dest.x][dest.y]->GetType() != IPixelDescriptor::Empty)
+//      if(map[dest.x][dest.y]->m_type != PixelDescriptor::Empty)
 //        return;
 //      
-//      movement.SetValue(true);
+//      movement.SetValueFlag(true);
 //      movement.value.source = pos;
 //      movement.value.destination = dest;
 //    }
 //  }
 
 //**************************************************************************************************
-void ProcessGreenCell(PixelDescriptor* pd,
+void ProcessGreenCell(CellDescriptor* pd,
                       Vec2 pos,
                       PixelDescriptorProvider::Config::CellConfig* config,
                       const PixelDescriptorProvider::PixelMap& map, // ugly hack
                       Optional<Movement>& movement,
                       Optional<Action>& action)
 {
+  static int repeatStepNumber = 3;
+  
   if (pd->m_sleepCounter != 0)
   {
     pd->m_sleepCounter -= 1;
@@ -379,90 +357,113 @@ void ProcessGreenCell(PixelDescriptor* pd,
     pd->m_sleepCounter = pd->m_sleepTime;
   }
   
-  for (int i = -1; i <= 1; ++i)
-  {
-    for (int j = -1; j <= 1; ++j)
+  PixelDescriptor* frientPd = nullptr;
+  pd->AroundRandom([pd, &movement, &frientPd, &action, config](PixelDescriptor* targetPd, bool& stop) {
+    if(targetPd && targetPd->m_type == PixelDescriptor::CreatureType)
     {
-      int dx = pos.x + i;
-      int dy = pos.y + j;
-      if(!CheckBounds(dx, dy))
-        continue;
+      if (targetPd->m_cellDescriptor == pd)
+        return;
       
-      auto targetPd = map[dx][dy].get();
-      if(targetPd->GetType() == IPixelDescriptor::CreatureType)
+      Vec2 offset;
+      offset.x = pd->parent->x > targetPd->x ? -1 : pd->parent->x < targetPd->x ? 1 : 0;
+      offset.y = pd->parent->y > targetPd->y ? -1 : pd->parent->y < targetPd->y ? 1 : 0;
+      if (targetPd->m_cellDescriptor->m_character & pd->m_dangerMask)
       {
-        if (targetPd->m_id == pd->m_id)
-          continue;
-        
-        if (targetPd->m_character == eCellTypeHunter)
+        PixelDescriptor* newPos = pd->parent->Offset(-offset.x, -offset.y);
+        if (pd->TestSpace(newPos))
         {
-          auto dest = Vec2(pos.x - i, pos.y - j);
-          if(map[dest.x][dest.y]->GetType() != IPixelDescriptor::Empty)
-            continue;
-          
-          movement.SetValue(true);
-          movement.value.source = pos;
-          movement.value.destination = dest;
-          return;
+          pd->m_m1 = -offset.x;
+          pd->m_m2 = -offset.y;
+          pd->m_m3 = cRandABInt(1, repeatStepNumber);
+          pd->Move(newPos);
+          movement.SetValueFlag(true);
+          movement.value.destinationDesc = newPos;
         }
         
-        if (targetPd->m_character == eCellTypeSalad ||
-            targetPd->m_character == eCellTypeImprovedSalad)
-        {
-          Attack(pd, targetPd, pos, Vec2(i, j), config, action);
-          return;
-        }
+        stop = true;
+        return;
       }
+      
+      if (targetPd->m_cellDescriptor->m_character & pd->m_foodMask)
+      {
+        Attack(pd, targetPd->m_cellDescriptor, offset, config, action);
+        stop = true;
+        return;
+      }
+      
+      if (targetPd->m_cellDescriptor->m_character & pd->m_friendMask)
+      {
+        frientPd = targetPd;
+      }
+    }
+  });
+  
+  if (action.isSet || movement.isSet) return;
+
+  if (frientPd != nullptr)
+  {
+    Vec2 offset;
+    offset.x = pd->parent->x > frientPd->x ? 1 : pd->parent->x < frientPd->x ? -1 : 0;
+    offset.y = pd->parent->y > frientPd->y ? 1 : pd->parent->y < frientPd->y ? -1 : 0;
+    PixelDescriptor* newPos = pd->parent->Offset(offset.x, offset.y);
+    
+    if (pd->TestSpace(newPos))
+    {
+      pd->m_m1 = offset.x;
+      pd->m_m2 = offset.y;
+      pd->m_m3 = cRandABInt(1, repeatStepNumber);
+      pd->Move(newPos);
+      movement.SetValueFlag(true);
+      movement.value.destinationDesc = newPos;
+      return;
     }
   }
   
-  for (int i = -1; i <= 1; ++i)
+  PixelDescriptor* emptyBlock = nullptr;
+  if (pd->m_m3 != 0)
   {
-    for (int j = -1; j <= 1; ++j)
+    PixelDescriptor* newPos = pd->parent->Offset(pd->m_m1, pd->m_m2);
+    if (pd->TestSpace(newPos))
     {
-      int dx = pos.x + i;
-      int dy = pos.y + j;
-      if(!CheckBounds(dx, dy))
-        continue;
-      
-      auto targetPd = map[dx][dy].get();
-      if(targetPd->GetType() == IPixelDescriptor::CreatureType)
-      {
-        if (targetPd->m_id == pd->m_id)
-          continue;
-        
-        if (targetPd->m_character == eCellTypeGreen)
-        {
-          auto dest = Vec2(pos.x - i, pos.y - j);
-          if(map[dest.x][dest.y]->GetType() != IPixelDescriptor::Empty)
-            continue;
-          
-          movement.SetValue(true);
-          movement.value.source = pos;
-          movement.value.destination = dest;
-          return;
-        }
-      }
+      emptyBlock = newPos;
+      pd->m_m3 -= 1;
+    }
+    else
+    {
+      pd->m_m3 = 0;
     }
   }
   
-  auto id = (int)roundf(CCRANDOM_MINUS1_1());
-  auto jd = (int)roundf(CCRANDOM_MINUS1_1());
-  
-  if(!CheckBounds(pos.x + id, pos.y + jd))
-    return;
-  
-  auto dest = Vec2(pos.x + id, pos.y + jd);
-  if(map[dest.x][dest.y]->GetType() != IPixelDescriptor::Empty)
-    return;
-  
-  movement.SetValue(true);
-  movement.value.source = pos;
-  movement.value.destination = dest;
+  if (emptyBlock == nullptr)
+  {
+    pd->parent->AroundRandom([pd, &emptyBlock](PixelDescriptor* targetPd, bool& stop){
+      if (pd->TestSpace(targetPd))
+      {
+        emptyBlock = targetPd;
+        stop = true;
+      }
+    });
+    
+    if (pd->m_m3 == 0 && emptyBlock != nullptr)
+    {
+      pd->m_m3 = cRandABInt(1, repeatStepNumber);
+    }
+  }
+
+  if (emptyBlock != nullptr)
+  {
+    Vec2 offset;
+    assert(pd->parent->Offset(emptyBlock, offset));
+    pd->m_m1 = offset.x;
+    pd->m_m2 = offset.y;
+    pd->Move(emptyBlock);
+    movement.SetValueFlag(true);
+    movement.value.destinationDesc = emptyBlock;
+  }
 }
 
 //**************************************************************************************************
-void ProcessCell(PixelDescriptor* d,
+void ProcessCell(CellDescriptor* d,
                  Vec2 pos,
                  PixelDescriptorProvider::Config* config,
                  const PixelDescriptorProvider::PixelMap& map, // ugly hack
@@ -481,15 +482,19 @@ void ProcessCell(PixelDescriptor* d,
   }
   else if (d->m_character == eCellTypeHunter)
   {
-    ProcessHunterCreature(d, pos, cellConfig, map, m, a);
+    ProcessGreenCell(d, pos, cellConfig, map, m, a);
   }
   else if (d->m_character == eCellTypeSalad)
   {
-    ProcessSalad(d, pos, cellConfig, map, m, a);
+    ProcessGreenCell(d, pos, cellConfig, map, m, a);
   }
   else if (d->m_character == eCellTypeImprovedSalad)
   {
     ProcessImprovedSalad(d, pos, cellConfig, map, m, a);
+  }
+  else if (d->m_character == eCellTypeBigBlue)
+  {
+    ProcessBigBlue(d, pos, cellConfig, map, m, a);
   }
 }
 
