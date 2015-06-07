@@ -2,6 +2,7 @@
 #define PIXELDESCRIPTOR_H
 
 #include "Common.h"
+#include "PhysicalDescriptor.h"
 
 namespace komorki
 {
@@ -42,6 +43,7 @@ public:
   PixelDescriptor** directions[8];
   CellDescriptor* m_cellDescriptor;
   Type m_type;
+  PhysicalDescriptor m_physicalDesc;
   int x;
   int y;
  

@@ -3,11 +3,9 @@
 
 #include "cocos2d.h"
 #include "PixelDescriptorProvider.h"
-#include "PixelMapPartial.hpp"
 #include "Statistic.hpp"
 #include "AsyncPixelManager.h"
-#include "PixelMapBackground.h"
-#include "PixelDebugView.h"
+#include "PartialMap.h"
 
 class PixelMapManager
 {
@@ -17,10 +15,10 @@ public:
   void CreateMap(cocos2d::Node* superView);
   
   cocos2d::Size GetTotalMapSize() const;
-  bool HightlightCellOnCursorPos(Vec2 cursorPosition, komorki::CellType type);
+  bool HightlightCellOnCursorPos(cocos2d::Vec2 cursorPosition, komorki::CellType type);
   void StopHightlighting();
-  bool AddCreatureAtPosition(Vec2 cursorPosition, komorki::CellType type);
-  void RemoveCreatureAtPostion(Vec2 cursorPosition);
+  bool AddCreatureAtPosition(cocos2d::Vec2 cursorPosition, komorki::CellType type);
+  void RemoveCreatureAtPostion(cocos2d::Vec2 cursorPosition);
   void CleanMap();
   void Reset();
 
@@ -44,20 +42,18 @@ protected:
     komorki::Vec2 pos;
   };
   
-  komorki::Vec2 PixelPosFromCursorPosition(Vec2 cursorPosition) const;
+  komorki::Vec2 PixelPosFromCursorPosition(cocos2d::Vec2 cursorPosition) const;
   void CleanUserData();
   void Update(float updateTime, float& outUpdateTime);
 
   int m_mapSegmentSize;
   
-  Node* m_superView;
+  cocos2d::Node* m_superView;
   
   komorki::PixelDescriptorProvider m_provider;
   komorki::PixelDescriptorProvider::Config m_config;
-  std::vector<std::shared_ptr<PixelMapPartial> > m_maps;
-  std::vector<std::shared_ptr<PixelMapBackground> > m_mapBg;
-  std::vector<std::shared_ptr<PixelDebugView> > m_mapDebugView;
-  Sprite* m_bg;
+  std::vector<std::shared_ptr<komorki::ui::PartialMap> > m_maps;
+  cocos2d::Sprite* m_bg;
   
   std::shared_ptr<komorki::AsyncPixelManager> m_manager;
   std::list<EditMapOperation> m_operationQueue;

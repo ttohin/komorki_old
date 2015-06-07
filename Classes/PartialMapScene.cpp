@@ -353,6 +353,24 @@ bool PartialMapScene::init()
   m_speedToolbar->setPosition(Vec2(origin.x + visibleSize.width,
                                    origin.y));
   
+  // shaider programm
+  auto p = GLProgram::createWithFilenames("generic.vsh", "game.glsl");
+  
+  m_renderTexture = RenderTexture::create(visibleSize.width, visibleSize.height);
+  addChild(m_renderTexture);
+  
+  m_rendTexSprite = Sprite::create();
+  m_rendTexSprite->setTexture(m_renderTexture->getSprite()->getTexture());
+  m_rendTexSprite->setTextureRect(Rect(0, 0,
+                                       m_rendTexSprite->getTexture()->getContentSize().width,
+                                       m_rendTexSprite->getTexture()->getContentSize().height));
+  m_rendTexSprite->setPosition(Point::ZERO);
+  m_rendTexSprite->setAnchorPoint(Point::ZERO);
+  m_rendTexSprite->setFlippedY(true);
+  addChild(m_rendTexSprite);
+  
+  m_rendTexSprite->setGLProgram(p);
+  
   return true;
 }
 
@@ -539,6 +557,16 @@ void PartialMapScene::visit(cocos2d::Renderer *renderer, const cocos2d::Mat4 &pa
   }
   
   Layer::visit(renderer, parentTransform, parentFlags);
+  
+//  m_renderTexture->beginWithClear(0, 0, 0, 0);
+//  for (auto child : getChildren())
+//  {
+//    if (child != m_renderTexture && child != m_rendTexSprite)
+//      child->visit(renderer, parentTransform, parentFlags);
+//  }
+//  m_renderTexture->end();
+//  
+//  m_rendTexSprite->visit(renderer, parentTransform, parentFlags);
 }
 
 void PartialMapScene::timerForUpdate(float dt)

@@ -12,6 +12,7 @@
 #include "SaveConfigMenu.h"
 #include "IFullScreenMenu.h"
 
+
 class PartialMapScene : public cocos2d::Layer, cocos2d::TextFieldDelegate
 {
 public:
@@ -19,7 +20,10 @@ public:
   virtual bool init();
   CREATE_FUNC(PartialMapScene);
   
+  virtual ~PartialMapScene(){}
+  
 private:
+  
   enum BrushMode
   {
     eBrushModeGreen,
@@ -50,33 +54,35 @@ private:
   bool m_eraseBrush;
   
   PixelMapManager* m_mapManager;
-  Node* m_rootNode;
-  Sprite* m_bg;
-  Sprite* m_brush;
-  Sprite* m_cross;
-  Sprite* m_microscope;
-  ui::Button* m_green;
-  ui::Button* m_hunter;
-  ui::Button* m_salad;
-  ui::Button* m_improvedSalad;
-  ui::Button* m_eraseButton;
-  ui::Button* m_brushButton;
-  ui::Button* m_speed1Button;
-  ui::Button* m_speed2Button;
-  ui::Button* m_speed10Button;
-  ui::Button* m_menuButton;
-  Node* m_toolbarNode;
-  Node* m_cellsSelectoToolbar;
-  Node* m_speedToolbar;
+  cocos2d::Node* m_rootNode;
+  cocos2d::Sprite* m_bg;
+  cocos2d::Sprite* m_brush;
+  cocos2d::Sprite* m_cross;
+  cocos2d::Sprite* m_microscope;
+  cocos2d::ui::Button* m_green;
+  cocos2d::ui::Button* m_hunter;
+  cocos2d::ui::Button* m_salad;
+  cocos2d::ui::Button* m_improvedSalad;
+  cocos2d::ui::Button* m_eraseButton;
+  cocos2d::ui::Button* m_brushButton;
+  cocos2d::ui::Button* m_speed1Button;
+  cocos2d::ui::Button* m_speed2Button;
+  cocos2d::ui::Button* m_speed10Button;
+  cocos2d::ui::Button* m_menuButton;
+  cocos2d::Node* m_toolbarNode;
+  cocos2d::Node* m_cellsSelectoToolbar;
+  cocos2d::Node* m_speedToolbar;
   std::shared_ptr<OptionsMenu> m_optionsMenu;
   std::shared_ptr<MainMenu> m_mainMenu;
   std::shared_ptr<LoadConfigMenu> m_loadConfigMenu;
   std::shared_ptr<SaveConfigMenu> m_saveConfigMenu;
   std::shared_ptr<IFullScreenMenu> m_currenMenu;
+  cocos2d::RenderTexture* m_renderTexture;
+  cocos2d::Sprite* m_rendTexSprite;
   
   float m_mapScale;
-  Vec2 m_mapPos;
-  Vec2 m_moveDirection;
+  cocos2d::Vec2 m_mapPos;
+  cocos2d::Vec2 m_moveDirection;
   float m_updateTime;
   bool m_pause;
   bool m_stopManager;
@@ -84,7 +90,7 @@ private:
   void ZoomIn();
   void ZoomOut();
   void Zoom(float direction);
-  void Move(const Vec2& direction, float animationDuration = 0.0f);
+  void Move(const cocos2d::Vec2& direction, float animationDuration = 0.0f);
   
   void timerForUpdate(float dt);
   void timerForMove(float dt);
@@ -114,8 +120,8 @@ private:
   void SetSpeed(Speed speed);
   komorki::CellType GetCurretnCellType();
   
-  float AspectToFill(const Size& source, const Size& target);
-  float AspectToFit(const Size& source, const Size& target);
+  float AspectToFill(const cocos2d::Size& source, const cocos2d::Size& target);
+  float AspectToFit(const cocos2d::Size& source, const cocos2d::Size& target);
   
   std::shared_ptr<komorki::PixelDescriptorProvider::Config> m_config;
   

@@ -1,8 +1,11 @@
 #include "PixelMapManager.h"
+#include "UIConfig.h"
 
 #define PMM_ENABLE_LOGGING 0
 static const float spriteSize = 32;
 static const unsigned int kMapSegmentSize = 50;
+
+USING_NS_CC;
 
 PixelMapManager::PixelMapManager(komorki::PixelDescriptorProvider::Config* config)
 : m_mapSegmentSize(kMapSegmentSize)
@@ -18,22 +21,7 @@ PixelMapManager::~PixelMapManager()
   m_manager = nullptr;
   
   CleanUserData();
-  
-  for (auto map : m_maps)
-  {
-    map->removeFromParentAndCleanup(true);
-  }
-  
-  for (auto map : m_mapBg)
-  {
-    map->removeFromParentAndCleanup(true);
-  }
-  
-  for (auto map : m_mapDebugView)
-  {
-    map->removeFromParentAndCleanup(true);
-  }
-  
+
   m_bg->removeFromParentAndCleanup(true);
 }
 
@@ -47,7 +35,7 @@ void PixelMapManager::CleanUserData()
       auto pixelD = m_provider.GetDescriptor(i, j);
       if (pixelD->m_cellDescriptor && pixelD->m_cellDescriptor->userData != nullptr)
       {
-        delete static_cast<PixelMapPartial::PixelDescriptorContext*>(pixelD->m_cellDescriptor->userData);
+        delete static_cast<komorki::ui::PartialMap::Context*>(pixelD->m_cellDescriptor->userData);
         pixelD->m_cellDescriptor->userData = nullptr;
       }
     }
@@ -86,31 +74,12 @@ void PixelMapManager::CreateMap(cocos2d::Node* superView)
         continue;
       }
       
-      m_maps.emplace_back(std::make_shared<PixelMapPartial>(i*m_mapSegmentSize, j*m_mapSegmentSize, width, height, &m_provider));
-      m_mapBg.emplace_back(std::make_shared<PixelMapBackground>(i*m_mapSegmentSize, j*m_mapSegmentSize, width, height));
-      m_mapDebugView.emplace_back(std::make_shared<PixelDebugView>(i*m_mapSegmentSize, j*m_mapSegmentSize, width, height, &m_provider));
+      auto map = std::make_shared<komorki::ui::PartialMap>();
+      map->Init(i*m_mapSegmentSize, j*m_mapSegmentSize, width, height, &m_provider, superView,
+                Vec2(i*m_mapSegmentSize*spriteSize, j*m_mapSegmentSize*spriteSize));
+      m_maps.push_back(map);
+      
     }
-  }
-  
-  for (auto map : m_mapBg)
-  {
-    map->init();
-    map->setPosition(Vec2(map->m_a1*spriteSize, map->m_b1*spriteSize));
-    m_superView->addChild(map.get());
-  }
- 
-  for (auto map : m_maps)
-  {
-    map->init();
-    map->setPosition(Vec2(map->m_a1*spriteSize, map->m_b1*spriteSize));
-    m_superView->addChild(map.get());
-  }
-  
-  for (auto map : m_mapDebugView)
-  {
-    map->init();
-    map->setPosition(Vec2(map->m_a1*spriteSize, map->m_b1*spriteSize));
-    m_superView->addChild(map.get());
   }
 }
 
@@ -225,7 +194,7 @@ void PixelMapManager::Update(float updateTime, float& outUpdateTime)
   {
     log("update %d", updateNumber++);
   }
- 
+  
   const std::list<komorki::PixelDescriptorProvider::UpdateResult>& result = m_manager->GetUpdateResult();
 
   if (PMM_ENABLE_LOGGING)
@@ -263,27 +232,22 @@ void PixelMapManager::Update(float updateTime, float& outUpdateTime)
     }
   }
   
+
+  
   for (auto map : m_maps)
   {
-    map->PreUpdate(result);
+    map->PreUpdate(result, updateTime);
   }
   for (auto map : m_maps)
-  {
-    map->Update(result, updateTime);
-  }
-  for (auto map : m_maps)
-  {
-    map->PostUpdate(result);
-  }
-  for (auto map : m_mapBg)
-  {
-    map->Update(result, updateTime);
-  }
-  for (auto map : m_mapDebugView)
   {
     map->Update(result, updateTime);
   }
   
+  for (auto map : m_maps)
+  {
+    map->PostUpdate(result, updateTime);
+  }
+
   gettimeofday(&tv, NULL);
   elapsed = (tv.tv_sec - start_tv.tv_sec) + (tv.tv_usec - start_tv.tv_usec) / 1000000.0;
   
