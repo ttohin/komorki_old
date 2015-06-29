@@ -30,6 +30,39 @@ PartialMap::~PartialMap()
   m_background->removeFromParentAndCleanup(true);
   m_lightOverlay->removeFromParentAndCleanup(true);
   m_debugView->removeFromParentAndCleanup(true);
+  m_glow->removeFromParentAndCleanup(true);
+  
+  for (auto cell : m_outgoingCells)
+  {
+    if (cell->userData == nullptr) {
+      continue;
+    }
+    
+    assert(cell->userData != nullptr);
+    auto context = static_cast<Context*>(cell->userData);
+    if (context->sprite->getParent() == m_cellMap.get())
+    {
+      cell->userData = nullptr;
+      m_cellMap->Delete(context);
+      m_glow->Delete(context);
+      delete context;
+    }
+  }
+  
+  m_outgoingCells.clear();
+  
+  for (int i = m_a1; i < m_a2; ++i)
+  {
+    for (int j = m_b1; j < m_b2; ++j)
+    {
+      auto pd = m_provider->GetDescriptor(i, j);
+      if (pd->m_cellDescriptor && pd->m_cellDescriptor->userData != nullptr)
+      {
+        delete static_cast<komorki::ui::PartialMap::Context*>(pd->m_cellDescriptor->userData);
+        pd->m_cellDescriptor->userData = nullptr;
+      }
+    }
+  }
 }
   
 bool PartialMap::Init(int a, int b, int width, int height,
@@ -82,7 +115,7 @@ bool PartialMap::Init(int a, int b, int width, int height,
   return true;
 }
   
-void PartialMap::PreUpdate(const std::list<IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime)
+void PartialMap::PreUpdate1(const std::list<IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime)
 {
   for (auto context : m_upcomingContexts)
   {
@@ -91,6 +124,24 @@ void PartialMap::PreUpdate(const std::list<IPixelDescriptorProvider::UpdateResul
   }
   
   m_upcomingContexts.clear();
+}
+  
+void PartialMap::PreUpdate2(const std::list<IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime)
+{
+  for (auto cell : m_outgoingCells)
+  {
+    assert(cell->userData != nullptr);
+    auto context = static_cast<Context*>(cell->userData);
+    if (context->sprite->getParent() == m_cellMap.get())
+    {
+      cell->userData = nullptr;
+      m_cellMap->Delete(context);
+      m_glow->Delete(context);
+      delete context;
+    }
+  }
+  
+  m_outgoingCells.clear();
 }
   
 void PartialMap::PostUpdate(const std::list<IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime)
@@ -115,31 +166,27 @@ void PartialMap::PostUpdate(const std::list<IPixelDescriptorProvider::UpdateResu
       destinationPos = Vec2(m.value.destinationDesc->x, m.value.destinationDesc->y);
     }
     
+    komorki::PixelDescriptor* newDescriptor = nullptr;
+    
+    if (m == true)
+    {
+      newDescriptor = m.value.destinationDesc;
+    }
+    else if (u.addCreature == true)
+    {
+      newDescriptor = u.addCreature.value.destinationDesc;
+    }
+    
+    auto context = static_cast<Context*>(newDescriptor->m_cellDescriptor->userData);
+    
     if(!IsInAABB(initialPos))
     {
       if(IsInAABB(destinationPos))
       {
-        komorki::PixelDescriptor* newDescriptor = nullptr;
-        
-        if (m == true)
-        {
-          newDescriptor = m.value.destinationDesc;
-        }
-        else if (u.addCreature == true)
-        {
-          newDescriptor = u.addCreature.value.destinationDesc;
-        }
-        
-        auto context = static_cast<Context*>(newDescriptor->m_cellDescriptor->userData);
         if (context == nullptr)
         {
           context = CreateCell(newDescriptor);
-          
-          komorki::Vec2 dest(m.value.destinationDesc->x, m.value.destinationDesc->y);
-          komorki::Vec2 pos(u.desc->x, u.desc->y);
-          
-          Move(pos, dest, context);
-          
+          Move(initialPos, destinationPos, context);
           continue;
         }
         
@@ -147,8 +194,13 @@ void PartialMap::PostUpdate(const std::list<IPixelDescriptorProvider::UpdateResu
         
         m_upcomingContexts.push_back(context);
       }
-      
-      continue;
+    }
+    
+    if (IsInAABB(initialPos) && !IsInAABB(destinationPos))
+    {
+      assert(context);
+      assert(newDescriptor->m_cellDescriptor);
+      m_outgoingCells.push_back(newDescriptor->m_cellDescriptor);
     }
   }
   
@@ -242,6 +294,21 @@ void PartialMap::Update(const std::list<IPixelDescriptorProvider::UpdateResult>&
   void PartialMap::Reset()
   {
     m_cellMap->Reset();
+  }
+ 
+  void PartialMap::Transfrorm(const cocos2d::Vec2& pos, float scale)
+  {
+    m_cellMap->setPosition(pos);
+    m_background->setPosition(pos);
+    m_debugView->setPosition(pos);
+    m_lightOverlay->setPosition(pos);
+    m_glow->setPosition(pos);
+    
+    m_cellMap->setScale(scale);
+    m_background->setScale(scale);
+    m_debugView->setScale(scale);
+    m_lightOverlay->setScale(scale);
+    m_glow->setScale(scale);
   }
   
   void PartialMap::InitPixel(PixelDescriptor* pd)

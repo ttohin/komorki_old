@@ -4,6 +4,7 @@
 #include "CellsLogic.h"
 #include "CellShapes.h"
 #include "CellDescriptor.h"
+#include "Map.h"
 
 #define COLLECT_POPULATION_METRICS 0
 
@@ -100,8 +101,8 @@ PixelDescriptorProvider::Config::Config()
 //  this->percentOfBlue = 0.2;
   
   this->terrainSize = 8;
-  this->mapWidth = 300;
-  this->mapHeight = 200;
+  this->mapWidth = 500;
+  this->mapHeight = 500;
   
   this->green.health = 301;
   this->green.sleepTime = 2;
@@ -317,39 +318,25 @@ void PixelDescriptorProvider::Init()
     }
   }
   
-  for (int i = 0; i < m_config->mapWidth; ++i)
-  {
-    int numberOfTerrains = cRandABInt(1, m_config->terrainSize);
-    for (int j = 0; j < numberOfTerrains; ++j)
-    {
-      m_map[i][m_config->mapHeight - j - 1]->m_type = (PixelDescriptor::TerrainType);
-    }
-  }
-  for (int i = 0; i < m_config->mapHeight; ++i)
-  {
-    int numberOfTerrains = cRandABInt(1, m_config->terrainSize);
-    for (int j = 0; j < numberOfTerrains; ++j)
-    {
-      m_map[m_config->mapWidth - j - 1][i]->m_type = (PixelDescriptor::TerrainType);
-    }
-  }
-  for (int i = 0; i < m_config->mapHeight; ++i)
-  {
-    int numberOfTerrains = cRandABInt(1, m_config->terrainSize);
-    for (int j = 0; j < numberOfTerrains; ++j)
-    {
-      m_map[j][i]->m_type = (PixelDescriptor::TerrainType);
-    }
-  }
-  for (int i = 0; i < m_config->mapWidth; ++i)
-  {
-    int numberOfTerrains = cRandABInt(1, m_config->terrainSize);
-    for (int j = 0; j < numberOfTerrains; ++j)
-    {
-      m_map[i][j]->m_type = (PixelDescriptor::TerrainType);
-    }
-  }
+  Map map;
+  map.Apply(this);
   
+  for (int i = 0; i < m_config->mapWidth; ++i)
+  {
+    m_map[i][0]->m_type = (PixelDescriptor::TerrainType);
+  }
+  for (int i = 0; i < m_config->mapWidth; ++i)
+  {
+    m_map[i][m_config->mapHeight - 1]->m_type = (PixelDescriptor::TerrainType);
+  }
+  for (int i = 0; i < m_config->mapHeight; ++i)
+  {
+    m_map[0][i]->m_type = (PixelDescriptor::TerrainType);
+  }
+  for (int i = 0; i < m_config->mapHeight; ++i)
+  {
+    m_map[m_config->mapWidth - 1][i]->m_type = (PixelDescriptor::TerrainType);
+  }
 
   for (int i = 0; i < m_config->mapWidth; ++i)
   {
@@ -419,6 +406,16 @@ PixelDescriptorProvider::Config::CellConfig* PixelDescriptorProvider::Config::Co
 
 PixelDescriptor* PixelDescriptorProvider::GetDescriptor(PixelPos x, PixelPos y) const
 {
+  if (x < 0 || x >= m_config->mapWidth)
+  {
+    return nullptr;
+  }
+  
+  if (y < 0 || y >= m_config->mapHeight)
+  {
+    return nullptr;
+  }
+  
   return m_map[x][y].get();
 }
 

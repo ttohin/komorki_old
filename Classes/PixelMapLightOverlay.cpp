@@ -106,6 +106,8 @@ namespace komorki
           return false;
         }
         getTexture()->setAliasTexParameters();
+       
+        return true;
         
 //        setBlendFunc(BlendFunc::ADDITIVE);
         

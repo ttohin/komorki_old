@@ -11,6 +11,9 @@ PixelMapManager::PixelMapManager(komorki::PixelDescriptorProvider::Config* confi
 : m_mapSegmentSize(kMapSegmentSize)
 {
   m_provider.InitWithConfig(config);
+ 
+
+  
   m_manager = std::make_shared<komorki::AsyncPixelManager>(&m_provider);
   m_lastUpdateId = 0;
 }
@@ -232,12 +235,10 @@ void PixelMapManager::Update(float updateTime, float& outUpdateTime)
     }
   }
   
-
-  
-  for (auto map : m_maps)
-  {
-    map->PreUpdate(result, updateTime);
-  }
+//  for (auto map : m_maps)
+//  {
+//    map->PreUpdate(result, updateTime);
+//  }
   for (auto map : m_maps)
   {
     map->Update(result, updateTime);

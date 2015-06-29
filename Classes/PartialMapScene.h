@@ -11,7 +11,7 @@
 #include "LoadConfigMenu.h"
 #include "SaveConfigMenu.h"
 #include "IFullScreenMenu.h"
-
+#include "Viewport.h"
 
 class PartialMapScene : public cocos2d::Layer, cocos2d::TextFieldDelegate
 {
@@ -53,7 +53,8 @@ private:
   Speed m_prevSpeed;
   bool m_eraseBrush;
   
-  PixelMapManager* m_mapManager;
+//  PixelMapManager* m_mapManager;
+  komorki::ui::Viewport* m_viewport;
   cocos2d::Node* m_rootNode;
   cocos2d::Sprite* m_bg;
   cocos2d::Sprite* m_brush;
@@ -79,6 +80,7 @@ private:
   std::shared_ptr<IFullScreenMenu> m_currenMenu;
   cocos2d::RenderTexture* m_renderTexture;
   cocos2d::Sprite* m_rendTexSprite;
+  cocos2d::Sprite* m_debugView;
   
   float m_mapScale;
   cocos2d::Vec2 m_mapPos;
@@ -93,6 +95,7 @@ private:
   void Move(const cocos2d::Vec2& direction, float animationDuration = 0.0f);
   
   void timerForUpdate(float dt);
+  void timerForViewportUpdate(float dt);
   void timerForMove(float dt);
   void CreateMap();
   

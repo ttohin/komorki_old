@@ -65,7 +65,7 @@ namespace komorki
         m_lastUpdateDuration = 0.0;
         
         m_updateResult.clear();
-        
+       
         if (m_nuberOfUpdates == 1)
         {
           m_provider->Update(true, m_updateResult);

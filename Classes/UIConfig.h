@@ -18,6 +18,8 @@ namespace komorki
     extern const float kTileFrameSize;
     extern const int kSpritePosition;
     extern const double kSpriteScale;
+    extern const float kViewportMargin;
+    extern const int kSegmentSize;
   }
 }
 

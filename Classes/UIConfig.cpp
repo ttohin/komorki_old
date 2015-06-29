@@ -15,5 +15,7 @@ namespace komorki
     const float kTileFrameSize = 32.f;
     const int kSpritePosition = 32;
     const double kSpriteScale = kSpritePosition/kTileFrameSize;
+    const float kViewportMargin = 00.f;
+    const int kSegmentSize = 50;
   }
 }

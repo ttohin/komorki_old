@@ -23,9 +23,10 @@ namespace komorki
     PixelPos y;
     Vec2():x(0),y(0){}
     Vec2(PixelPos _x, PixelPos _y):x(_x),y(_y){}
-    Vec2& operator=(const Vec2& pos) {x = pos.x; y = pos.y; return *this; }
-    bool operator==(const Vec2& pos) {return x == pos.x && y == pos.y;}
-    bool operator!=(const Vec2& pos) {return !(*this==pos);}
+    Vec2& operator=(const Vec2& pos)  {x = pos.x; y = pos.y; return *this; }
+    bool operator==(const Vec2& pos) const {return x == pos.x && y == pos.y;}
+    bool operator!=(const Vec2& pos) const {return !(*this==pos);}
+    Vec2 operator-(const Vec2& pos) const {return Vec2(x - pos.x, y - pos.y);}
   };
 }
 

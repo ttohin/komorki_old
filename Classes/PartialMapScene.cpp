@@ -21,6 +21,8 @@ static float kButtonSize = 40.f;
 static const float kMoveTimer = 0.2;
 #endif
 
+static float kViewportUpdateTime = 0.1;
+
 USING_NS_CC;
 using namespace cocostudio;
 
@@ -35,8 +37,13 @@ Scene* PartialMapScene::createScene()
 void PartialMapScene::CreateMap()
 {
   auto config = komorki::ConfigManager::GetInstance()->GetCurrentConfig();
-  m_mapManager = new PixelMapManager(config.get());
-  m_mapManager->CreateMap(m_rootNode);
+
+  Size visibleSize = Director::getInstance()->getVisibleSize();
+  m_viewport = new komorki::ui::Viewport(m_rootNode, config.get(), visibleSize);
+  
+  m_mapScale = 0.1;
+  m_mapPos = cocos2d::Vec2::ZERO;
+  
 }
 
 bool PartialMapScene::init()
@@ -80,17 +87,10 @@ bool PartialMapScene::init()
   komorki::ConfigManager::GetInstance()->CreateNewConfig();
   CreateMap();
   
-  Size mapSize = m_mapManager->GetTotalMapSize();
-  m_mapScale = MAX(AspectToFit(mapSize, visibleSize), kMinMapScale);
-  mapSize = mapSize * m_mapScale;
-  m_mapPos = Vec2((visibleSize.width - mapSize.width)/2.0,
-                  (visibleSize.height - mapSize.height)/2.0);
-  m_rootNode->setScale(m_mapScale);
-  m_rootNode->setPosition(m_mapPos);
-
   SetBackgroundPosition();
 
   schedule(schedule_selector(PartialMapScene::timerForUpdate), m_updateTime, kRepeatForever, m_updateTime);
+  schedule(schedule_selector(PartialMapScene::timerForViewportUpdate), kViewportUpdateTime, kRepeatForever, kViewportUpdateTime);
 
 #if CC_TARGET_PLATFORM != CC_PLATFORM_IOS
   auto touchListener = EventListenerTouchOneByOne::create();
@@ -100,17 +100,20 @@ bool PartialMapScene::init()
   {
     if (m_touchMode == eTouchModeMove)
     {
+//      m_mapPos = m_mapPos - touch->getDelta();
       this->Move(touch->getDelta());
     }
     else if (m_touchMode == eTouchModeBrush)
     {
       if (m_eraseBrush)
       {
-        m_mapManager->RemoveCreatureAtPostion(touch->getLocation());
+        #warning don't forget
+//        m_mapManager->RemoveCreatureAtPostion(touch->getLocation());
       }
       else
       {
-        m_mapManager->AddCreatureAtPosition(touch->getLocation(), this->GetCurretnCellType());
+        #warning don't forget
+//        m_mapManager->AddCreatureAtPosition(touch->getLocation(), this->GetCurretnCellType());
       }
     }
   };
@@ -126,12 +129,18 @@ bool PartialMapScene::init()
     {
       if (m_eraseBrush)
       {
-        m_mapManager->RemoveCreatureAtPostion(touch->getLocation());
+        #warning don't forget
+//        m_mapManager->RemoveCreatureAtPostion(touch->getLocation());
       }
       else
       {
-        m_mapManager->AddCreatureAtPosition(touch->getLocation(), this->GetCurretnCellType());
+        #warning don't forget
+//        m_mapManager->AddCreatureAtPosition(touch->getLocation(), this->GetCurretnCellType());
       }
+    }
+    else if (m_touchMode == eTouchModeMove)
+    {
+      this->m_viewport->Calculate();
     }
   };
   
@@ -144,7 +153,7 @@ bool PartialMapScene::init()
     {
       if (m_touchMode == eTouchModeMove)
       {
-        this->Move(touches[0]->getDelta());
+        m_mapPos = m_rootNode->getPosition() + touches[0]->getDelta();
       }
       else if (m_touchMode == eTouchModeBrush)
       {
@@ -185,35 +194,21 @@ bool PartialMapScene::init()
       return;
     }
     
+    
     EventMouse* mouseEvent = dynamic_cast<EventMouse*>(event);
     float scrollY = mouseEvent->getScrollY();
     
     if (scrollY > 0)
-      scrollY = 0.01;
+      scrollY = 0.02;
     else
-      scrollY = -0.01;
+      scrollY = -0.02;
     
-    if(m_mapScale - scrollY <= kMinMapScale)
-      return;
-    if (m_mapScale - scrollY >= kMaxMapScale)
-      return;
-    
-    m_mapScale -= scrollY;
-    
-    float scaleRatio = m_mapScale/m_rootNode->getScale();
-    
-    m_rootNode->setScale(m_mapScale);
+//    m_rootNode->setScale(m_mapScale);
 
     float cursorX = mouseEvent->getCursorX();
     float cursorY = mouseEvent->getCursorY();
     
-    float newX = cursorX - scaleRatio * (cursorX - m_mapPos.x);
-    float newY = cursorY - scaleRatio * (cursorY - m_mapPos.y);
-    
-    m_mapPos = Point(newX, newY);
-    m_rootNode->setPosition(m_mapPos);
-    
-    SetBackgroundPosition();
+    m_viewport->Zoom({cursorX, cursorY}, scrollY);
   };
   
   mouseListener->onMouseMove = [this](Event* event) {
@@ -226,8 +221,9 @@ bool PartialMapScene::init()
                                 mouseEvent->getCursorY()));
       if(m_eraseBrush == false)
       {
-        m_mapManager->HightlightCellOnCursorPos(Vec2(mouseEvent->getCursorX(),
-                                                     mouseEvent->getCursorY()), this->GetCurretnCellType());
+        #warning don't forget
+//        m_mapManager->HightlightCellOnCursorPos(Vec2(mouseEvent->getCursorX(),
+//                                                     mouseEvent->getCursorY()), this->GetCurretnCellType());
       }
     }
   };
@@ -479,6 +475,9 @@ void PartialMapScene::CancelOptionSelection()
 
 void PartialMapScene::SetBackgroundPosition(float animationDuration)
 {
+#warning don't forget
+  return;
+  
   float scaleRatio = (m_mapScale - kMinMapScale)/(kMaxMapScale - kMinMapScale);
   float bgScale = scaleRatio * (kMaxBgScale - kMinBgScale) + kMinBgScale;
   
@@ -491,7 +490,7 @@ void PartialMapScene::SetBackgroundPosition(float animationDuration)
   
   Vec2 centralPos = Vec2(visibleSize.width/2.f, visibleSize.height/2.f);
   
-  Size mapSize = m_mapManager->GetTotalMapSize();
+  Size mapSize = m_viewport->GetTotalMapSize();
   Vec2 positionOffset = m_mapPos + Vec2(m_mapScale*mapSize.width/2.f,
                                         m_mapScale*mapSize.height/2.f) - Vec2(visibleSize.width/2.f,
                                                                               visibleSize.height/2.f);
@@ -573,11 +572,11 @@ void PartialMapScene::timerForUpdate(float dt)
 {
   if (m_pause) return;
   
-  if(!m_mapManager->IsAvailable()) return;
+  if(!m_viewport->IsAvailable()) return;
   
   if (m_restartManagerFromOptionMenu)
   {
-    delete m_mapManager;
+    delete m_viewport;
     
     komorki::ConfigManager::GetInstance()->ApplyPendingConfig();
     
@@ -588,7 +587,7 @@ void PartialMapScene::timerForUpdate(float dt)
   
   if (m_stopManager)
   {
-    delete m_mapManager;
+    delete m_viewport;
     CreateMap();
     m_stopManager = false;
     return;
@@ -598,12 +597,12 @@ void PartialMapScene::timerForUpdate(float dt)
   {
     if (m_prevSpeed == eSpeedWarp)
     {
-      m_mapManager->Reset();
+      m_viewport->Reset();
     }
     
     float updateTime = m_speed == eSpeedNormal ? m_updateTime : m_updateTime * 0.5;
     float updateTimeEstimated = updateTime;
-    m_mapManager->UpdateAsync(updateTimeEstimated);
+    m_viewport->UpdateAsync(updateTimeEstimated);
     
     if (updateTimeEstimated - updateTime > 2)
     {
@@ -614,11 +613,16 @@ void PartialMapScene::timerForUpdate(float dt)
   else if (m_speed == eSpeedMax)
   {
     float updateTimeEstimated = m_updateTime;
-    m_mapManager->UpdateAsync(updateTimeEstimated);
+    m_viewport->UpdateAsync(updateTimeEstimated);
     schedule(schedule_selector(PartialMapScene::timerForUpdate), 0, kRepeatForever, 0);
   }
   
   m_prevSpeed = m_speed;
+}
+
+void PartialMapScene::timerForViewportUpdate(float dt)
+{
+//  m_viewport->Calculate();
 }
 
 void PartialMapScene::timerForMove(float dt)
@@ -637,6 +641,9 @@ void PartialMapScene::timerForMove(float dt)
 
 void PartialMapScene::Zoom(float direction)
 {
+#warning don't forget
+  return;
+  
   if(m_mapScale + direction <= 0.1)
     return;
   if (m_mapScale + direction >= 3.0)
@@ -673,17 +680,15 @@ void PartialMapScene::ZoomOut()
 
 void PartialMapScene::Move(const Vec2& direction, float animationDuration)
 {
-  m_mapPos = m_rootNode->getPosition() + direction;
-  
   if (animationDuration == 0.0f)
   {
-    m_rootNode->setPosition(m_mapPos);
-    SetBackgroundPosition(0.0f);
+    m_viewport->Move(direction);
+//    SetBackgroundPosition(0.0f);
   }
   else
   {
-    m_rootNode->runAction(MoveTo::create(animationDuration, m_mapPos));
-    SetBackgroundPosition(animationDuration);
+    m_viewport->Move(direction);
+//    SetBackgroundPosition(animationDuration);
   }
 }
 
@@ -751,7 +756,7 @@ void PartialMapScene::CreateToolBar()
   cleanAllButton->addTouchEventListener([this](Ref*,ui::Widget::TouchEventType controlEvent)
                                         {
                                           if (controlEvent == ui::Widget::TouchEventType::ENDED)
-                                            m_mapManager->CleanMap();
+                                            m_viewport->CleanMap();
                                         });
   m_toolbarNode->addChild(cleanAllButton);
   cleanAllButton->setPosition(Vec2(-kButtonSize/2.f, -kButtonSize/2.f -2*kButtonSize));
@@ -847,7 +852,7 @@ void PartialMapScene::SetBrushEnabled(bool enabled)
     m_touchMode = eTouchModeMove;
   
   m_brush->setVisible(enabled);
-  m_mapManager->StopHightlighting();
+  m_viewport->StopHightlighting();
 }
 
 void PartialMapScene::SetDrawingMode(bool enabled)

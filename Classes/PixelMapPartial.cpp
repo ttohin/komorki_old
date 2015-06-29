@@ -228,7 +228,7 @@ namespace komorki
     void PixelMapPartial::Delete(PartialMap::Context* context)
     {
       assert(context->sprite);
-      context->sprite->stopAllActions();
+      assert(context->sprite->getParent() == this);
       RemoveSprite(context->sprite);
     }
    
@@ -262,14 +262,10 @@ namespace komorki
       s->setAnchorPoint({0, 0});
       s->setPosition(spriteVector(context->pos, context->offset));
       
-      auto scaleTo1 = ScaleTo::create(2, kSpriteScale*0.8);
-      auto mv1 = MoveBy::create(kSpriteScale*0.8, cocos2d::Vec2::ZERO);
-      auto scaleTo2 = ScaleTo::create(2, kSpriteScale*1.1);
-      auto mv2 = MoveBy::create(kSpriteScale*1.1, cocos2d::Vec2::ZERO);
-      auto s1 = Spawn::createWithTwoActions(scaleTo1, mv1);
-      auto s2 = Spawn::createWithTwoActions(scaleTo2, mv2);
+      auto s1 = ScaleTo::create(2, kSpriteScale*0.8);
+      auto s2 = ScaleTo::create(2, kSpriteScale*1.1);
       auto loop = RepeatForever::create(Sequence::createWithTwoActions(s1, s2));
-      loop->setTag(1);
+      loop->setTag(99);
       s->runAction(loop);
       
       context->sprite = s;
@@ -283,6 +279,13 @@ namespace komorki
       this->addChild(source);
       source->release();
       source->setPosition(spriteVector(context->pos, context->offset));
+      
+      source->stopAllActionsByTag(99);
+      auto s1 = ScaleTo::create(2, kSpriteScale*0.8);
+      auto s2 = ScaleTo::create(2, kSpriteScale*1.1);
+      auto loop = RepeatForever::create(Sequence::createWithTwoActions(s1, s2));
+      loop->setTag(99);
+      source->runAction(loop);
     }
     
     void PixelMapPartial::MoveCreature(PartialMap::Context* context, const Vec2& source, const Vec2& dest)
@@ -307,9 +310,6 @@ namespace komorki
       {
         s->setPosition(spriteVector(dest, randOffset));
       }
-      
-      s->setScale(kSpriteScale);
-      
     }
     
     void PixelMapPartial::Attack(PartialMap::Context* context, const Vec2& pos, const Vec2& direction)
@@ -318,7 +318,7 @@ namespace komorki
       auto offset = RandomVectorOffset();
       context->offset = offset;
       
-      source->stopAllActionsByTag(0);
+      source->stopAllActionsByTag(10);
       auto destination = spriteVector(pos, cocos2d::Vec2(kSpritePosition/2*direction.x,
                                                                   kSpritePosition/2*direction.y) + RandomVectorOffset());
       auto m1 = MoveTo::create(m_updateTime*0.3, destination);
@@ -328,7 +328,7 @@ namespace komorki
       auto spawn1 = cocos2d::Spawn::createWithTwoActions(m1, s1);
       auto spawn2 = cocos2d::Spawn::createWithTwoActions(m2, s2);
       auto seq = Sequence::createWithTwoActions(spawn1, spawn2);
-      seq->setTag(0);
+      seq->setTag(10);
       source->runAction(seq);
     }
   }

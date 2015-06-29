@@ -46,7 +46,8 @@ namespace komorki
       
       void Move(const Vec2& newPos);
       
-      void PreUpdate(const std::list<IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime);
+      void PreUpdate1(const std::list<IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime);
+      void PreUpdate2(const std::list<IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime);
       void PostUpdate(const std::list<IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime);
       void Update(const std::list<IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime);
       
@@ -54,6 +55,15 @@ namespace komorki
       void StopHightlighting();
       
       void Reset();
+      
+      void Transfrorm(const cocos2d::Vec2& pos, float scale);
+      
+      int m_a1;
+      int m_b1;
+      int m_width;
+      int m_height;
+      int m_a2;
+      int m_b2;
       
     private:
    
@@ -68,12 +78,7 @@ namespace komorki
       inline bool IsInAABB(const int& x, const int& y);
       inline Vec2 LocalVector(const komorki::Vec2& input) const;
       
-      int m_a1;
-      int m_b1;
-      int m_width;
-      int m_height;
-      int m_a2;
-      int m_b2;
+
       std::shared_ptr<PixelMapPartial> m_cellMap;
       std::shared_ptr<PixelDebugView> m_debugView;
       std::shared_ptr<PixelMapLightOverlay> m_lightOverlay;
@@ -81,6 +86,8 @@ namespace komorki
       std::shared_ptr<GlowMapOverlay> m_glow;
       PixelDescriptorProvider* m_provider;
       std::list<Context*> m_upcomingContexts;
+      std::list<CellDescriptor*> m_outgoingCells;
+      
     };
   }
 }
