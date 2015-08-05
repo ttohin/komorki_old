@@ -57,6 +57,7 @@ namespace komorki
       void Reset();
       
       void Transfrorm(const cocos2d::Vec2& pos, float scale);
+      void ChangeAABB(int a, int b, int width, int height);
       
       int m_a1;
       int m_b1;

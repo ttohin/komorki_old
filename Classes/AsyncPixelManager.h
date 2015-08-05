@@ -68,13 +68,13 @@ namespace komorki
        
         if (m_nuberOfUpdates == 1)
         {
-          m_provider->Update(true, m_updateResult);
+//          m_provider->Update(true, m_updateResult);
         }
         else
         {
           for (int i = 0; i < m_nuberOfUpdates; ++i)
           {
-            m_provider->Update(false, m_updateResult);
+//            m_provider->Update(false, m_updateResult);
           }
           
           assert(m_updateResult.size() == 0);

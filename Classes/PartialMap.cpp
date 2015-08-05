@@ -68,10 +68,7 @@ PartialMap::~PartialMap()
 bool PartialMap::Init(int a, int b, int width, int height,
                       PixelDescriptorProvider* provider, cocos2d::Node* superView, const cocos2d::Vec2& offset)
 {
-  m_a1 = a;
-  m_a2 = a + width;
-  m_b1 = b;
-  m_b2 = b + height;
+  ChangeAABB(a, b, width, height);
   m_width = width;
   m_height = height;
   m_provider = provider;
@@ -309,6 +306,14 @@ void PartialMap::Update(const std::list<IPixelDescriptorProvider::UpdateResult>&
     m_debugView->setScale(scale);
     m_lightOverlay->setScale(scale);
     m_glow->setScale(scale);
+  }
+ 
+  void PartialMap::ChangeAABB(int a, int b, int width, int height)
+  {
+    m_a1 = a;
+    m_a2 = a + width;
+    m_b1 = b;
+    m_b2 = b + height;
   }
   
   void PartialMap::InitPixel(PixelDescriptor* pd)

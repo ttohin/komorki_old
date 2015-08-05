@@ -25,6 +25,31 @@ namespace komorki
     class Viewport
     {
     public:
+      
+      struct Rect
+      {
+        Vec2 origin;
+        Vec2 size;
+        Rect Extract(const Rect& rect) const;
+        bool In(const Rect& rect) const;
+        
+        bool operator==(const Rect& rect) const;
+        bool operator!=(const Rect& rect) const;
+        PixelPos Top() const { return origin.y + size.y; }
+        PixelPos Right() const { return origin.x + size.x; }
+        PixelPos Bottom() const { return origin.y; }
+        void MoveBotton(const PixelPos& bottomOffset)
+        {
+          origin.y += bottomOffset;
+          size.y -= bottomOffset;
+        }
+        PixelPos Left() const { return origin.x; }
+        void MoveLeft(const PixelPos& leftOffset)
+        {
+          origin.x += leftOffset;
+          size.x -= leftOffset;
+        }
+      };
      
       void Move(const cocos2d::Vec2& ofset);
       void Zoom(const cocos2d::Vec2& point, float scaleOffset);
@@ -51,29 +76,23 @@ namespace komorki
       
     private:
       
-      struct Rect
-      {
-        Vec2 origin;
-        Vec2 size;
-        Rect Extract(const Rect& rect) const;
-        bool In(const Rect& rect) const;
-        
-        bool operator==(const Rect& rect) const;
-        bool operator!=(const Rect& rect) const;
-      };
-      
       void CreateMap(const cocos2d::Rect& viewSize, float scale);
       void CreatePixelMaps(const Rect& rect, const cocos2d::Vec2& offset, float scale);
       
       Rect PixelRect(const cocos2d::Rect& rect);
       Rect PixelRectInner(const cocos2d::Rect& rect);
       cocos2d::Rect CocosRect(const Rect& rect);
+      bool RemoveMapsOutsideOfRect(const Rect& rect);
+      bool SplitRectOnChunks(const Rect& rect, const Rect& existingRect, std::vector<Rect>& result) const;
+      bool CreatePartialMapsInRects(const std::vector<Rect>& rects, const cocos2d::Vec2& offset, float scale);
       
       Rect m_prevPos;
       Rect m_pos;
       Rect m_visibleRect;
+      float m_scale;
       cocos2d::Rect m_pixelWorldPos;
       cocos2d::Size m_originalSize;
+      cocos2d::Vec2 m_superViewOffset;
       
       int m_mapSegmentSize;
       
