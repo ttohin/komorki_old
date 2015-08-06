@@ -28,6 +28,7 @@ namespace komorki
     bool operator!=(const Vec2& pos) const {return !(*this==pos);}
     Vec2 operator-(const Vec2& pos) const {return Vec2(x - pos.x, y - pos.y);}
     Vec2 operator+(const Vec2& pos) const {return Vec2(x + pos.x, y + pos.y);}
+    Vec2 operator-() const {return Vec2(-x, -y);}
   };
 }
 

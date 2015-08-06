@@ -79,12 +79,13 @@ namespace komorki
       void CreateMap(const cocos2d::Rect& viewSize, float scale);
       void CreatePixelMaps(const Rect& rect, const cocos2d::Vec2& offset, float scale);
       
-      Rect PixelRect(const cocos2d::Rect& rect);
-      Rect PixelRectInner(const cocos2d::Rect& rect);
-      cocos2d::Rect CocosRect(const Rect& rect);
+      Rect PixelRect(const cocos2d::Rect& rect, float scale);
+      Rect PixelRectInner(const cocos2d::Rect& rect, float scale);
+      cocos2d::Rect CocosRect(const Rect& rect, float scale);
       bool RemoveMapsOutsideOfRect(const Rect& rect);
+      bool MoveMaps(const Vec2& offset, const cocos2d::Vec2& pointOffset, float scale);
       bool SplitRectOnChunks(const Rect& rect, const Rect& existingRect, std::vector<Rect>& result) const;
-      bool CreatePartialMapsInRects(const std::vector<Rect>& rects, const cocos2d::Vec2& offset, float scale);
+      bool CreatePartialMapsInRects(const std::vector<Rect>& rects, const Vec2& pixelOffset, const cocos2d::Vec2& offset, float scale);
       
       Rect m_prevPos;
       Rect m_pos;
