@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "cocos2d.h"
-#include "PixelMapManager.h"
 #include "UIButton.h"
 #include "OptionsMenu.h"
 #include "MainMenu.h"

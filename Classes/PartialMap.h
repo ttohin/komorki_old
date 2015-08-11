@@ -32,10 +32,23 @@ namespace komorki
       
       struct Context
       {
+        PartialMap* owner;
         cocos2d::Sprite* sprite;
         cocos2d::Sprite* glow;
         cocos2d::Vec2 offset;
         Vec2 pos;
+        
+        void BecomeOwner(PartialMap* _owner);
+        void Free(PartialMap* _owner);
+        void Destory(PartialMap* _owner);
+       
+        Context(PartialMap *_owner);
+       
+        std::string Description() const;
+        
+        
+      private:
+        ~Context();
       };
       
       PartialMap();
@@ -46,9 +59,9 @@ namespace komorki
       
       void Move(const Vec2& newPos);
       
-      void PreUpdate1(const std::list<IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime);
-      void PreUpdate2(const std::list<IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime);
-      void PostUpdate(const std::list<IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime);
+      void AdoptIncomingItems();
+      void DeleteOutgoingItems();
+      void HandleItemsOnBounds(const std::list<IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime);
       void Update(const std::list<IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime);
       
       void HightlightCellOnPos(int x, int y, komorki::CellType type);
@@ -58,6 +71,8 @@ namespace komorki
       
       void Transfrorm(const cocos2d::Vec2& pos, float scale);
       void ChangeAABB(int a, int b, int width, int height);
+      
+      std::string Description();
       
       int m_a1;
       int m_b1;

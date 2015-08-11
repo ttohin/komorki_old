@@ -58,8 +58,9 @@ public:
   CellType m_friendMask;
   void* userData;
   PixelDescriptor* parent;
-
+  
   std::vector<Transaction> nextTurnTransaction;
+  
 };
   
 } // namespace komorki;

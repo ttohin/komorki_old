@@ -54,7 +54,6 @@ namespace komorki
       void Move(const cocos2d::Vec2& ofset);
       void Zoom(const cocos2d::Vec2& point, float scaleOffset);
       void Calculate();
-      void PerformMove();
       
       Viewport(cocos2d::Node* superView, PixelDescriptorProvider::Config* config, const cocos2d::Size& originalSize);
       ~Viewport();
@@ -76,16 +75,24 @@ namespace komorki
       
     private:
       
+      typedef std::shared_ptr<PartialMap> PartialMapPtr;
+      typedef std::vector<PartialMapPtr> MapList;
+      
+      void PerformMove(MapList& mapsToCreate, MapList& mapsToRemove);
       void CreateMap(const cocos2d::Rect& viewSize, float scale);
       void CreatePixelMaps(const Rect& rect, const cocos2d::Vec2& offset, float scale);
       
       Rect PixelRect(const cocos2d::Rect& rect, float scale);
       Rect PixelRectInner(const cocos2d::Rect& rect, float scale);
       cocos2d::Rect CocosRect(const Rect& rect, float scale);
-      bool RemoveMapsOutsideOfRect(const Rect& rect);
+      bool RemoveMapsOutsideOfRect(const Rect& rect, MapList& toRemove);
       bool MoveMaps(const Vec2& offset, const cocos2d::Vec2& pointOffset, float scale);
       bool SplitRectOnChunks(const Rect& rect, const Rect& existingRect, std::vector<Rect>& result) const;
-      bool CreatePartialMapsInRects(const std::vector<Rect>& rects, const Vec2& pixelOffset, const cocos2d::Vec2& offset, float scale);
+      bool CreatePartialMapsInRects(const std::vector<Rect>& rects,
+                                    const Vec2& pixelOffset,
+                                    const cocos2d::Vec2& offset,
+                                    float scale,
+                                    MapList& maps);
       
       Rect m_prevPos;
       Rect m_pos;
@@ -101,10 +108,12 @@ namespace komorki
       
       bool m_performMove;
       float m_initialScale;
-      
+     
       std::shared_ptr<PixelDescriptorProvider> m_provider;
       std::shared_ptr<AsyncPixelManager> m_manager;
-      std::vector<std::shared_ptr<PartialMap> > m_maps;
+      MapList m_maps;
+      MapList m_mapsToRemove;
+      MapList m_mapsToCreate;
       unsigned char m_lastUpdateId;
       
     };

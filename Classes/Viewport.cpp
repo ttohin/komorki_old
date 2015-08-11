@@ -13,96 +13,6 @@
 
 using namespace komorki;
 
-void ui::Viewport::Move(const cocos2d::Vec2& offset)
-{
-  cocos2d::Vec2 newpos = m_superView->getPosition() + offset;
-  m_superView->setPosition(newpos);
-}
-
-void Zoom(const cocos2d::Vec2& base,
-          const cocos2d::Vec2& point,
-          const float& scale,
-          const float& scaleOffset,
-          cocos2d::Vec2& outBase,
-          float& outScale)
-{
-  float newScale = scale - scaleOffset;
-  float scaleRatio = newScale/scale;
-  
-  outScale = newScale;
-  
-  outBase.x = point.x  - scaleRatio * (point.x -  base.x);
-  outBase.y = point.y  - scaleRatio * (point.y - base.y);
-}
-
-void ui::Viewport::Zoom(const cocos2d::Vec2& point, float scaleOffset)
-{
-  cocos2d::Vec2 newSuperViewPos;
-  float newSuperViewScale;
-  ::Zoom(m_superView->getPosition(), point, m_superView->getScale(), scaleOffset, newSuperViewPos, newSuperViewScale);
-  m_superView->setPosition(newSuperViewPos);
-  m_superView->setScale(newSuperViewScale);
-}
-
-void ui::Viewport::Calculate()
-{
-  float pixelsScale = m_originalSize.width / m_pixelWorldPos.size.width;
-  float screenScale = 1.0 / m_superView->getScale();
- 
-  cocos2d::Rect rect;
-  rect.size = m_pixelWorldPos.size * screenScale;
-  rect.origin = m_pixelWorldPos.origin - m_superView->getPosition() * screenScale / pixelsScale;
-  
-  Rect pixelRect = PixelRectInner(rect, m_initialScale);
-  
-  if ( ! (screenScale > 0.5 && screenScale < 2.0) )
-  {
-    m_performMove = true;
-    return;
-  }
-  
-  if (pixelRect.In(m_pos) || m_pos.In(pixelRect))
-  {
-    return;
-  }
-  
-  m_performMove = true;
-}
-
-ui::Viewport::Viewport(cocos2d::Node* superView, PixelDescriptorProvider::Config* config, const cocos2d::Size& originalSize)
-{
-  assert(superView);
-  assert(config);
- 
-  m_originalSize = originalSize;
-  m_superView = superView;
-  m_performMove = false;
-  
-  m_initialScale = 0.2;
-  
-  m_pixelWorldPos.origin = {0, 0};
-  m_pixelWorldPos.size = originalSize;
-  
-  m_provider = std::make_shared<PixelDescriptorProvider>();
-  m_provider->InitWithConfig(config);
-  std::list<komorki::PixelDescriptorProvider::UpdateResult> result;
-  for (int i = 0; i < 100; i++)
-  {
-    m_provider->Update(false, result);
-  }
-  m_manager = std::make_shared<komorki::AsyncPixelManager>(m_provider.get());
-  m_lastUpdateId = 0;
-  
-  CreateMap();
-  
-  Test();
-}
-
-ui::Viewport::~Viewport()
-{
- assert(0);
-}
-
 komorki::PixelPos Ceil(const komorki::PixelPos& value, const komorki::PixelPos& precision)
 {
   double scaledValue = (double) value / precision;
@@ -161,6 +71,92 @@ ui::Viewport::Rect ExtendRectWithStep(const ui::Viewport::Rect& original, const 
   return result;
 }
 
+void ui::Viewport::Move(const cocos2d::Vec2& offset)
+{
+  cocos2d::Vec2 newpos = m_superView->getPosition() + offset;
+  m_superView->setPosition(newpos);
+}
+
+void Zoom(const cocos2d::Vec2& base,
+          const cocos2d::Vec2& point,
+          const float& scale,
+          const float& scaleOffset,
+          cocos2d::Vec2& outBase,
+          float& outScale)
+{
+  float newScale = scale - scaleOffset;
+  float scaleRatio = newScale/scale;
+  
+  outScale = newScale;
+  
+  outBase.x = point.x  - scaleRatio * (point.x -  base.x);
+  outBase.y = point.y  - scaleRatio * (point.y - base.y);
+}
+
+void ui::Viewport::Zoom(const cocos2d::Vec2& point, float scaleOffset)
+{
+  cocos2d::Vec2 newSuperViewPos;
+  float newSuperViewScale;
+  ::Zoom(m_superView->getPosition(), point, m_superView->getScale(), scaleOffset, newSuperViewPos, newSuperViewScale);
+  m_superView->setPosition(newSuperViewPos);
+  m_superView->setScale(newSuperViewScale);
+}
+
+void ui::Viewport::Calculate()
+{
+  float pixelsScale = m_originalSize.width / m_pixelWorldPos.size.width;
+  float screenScale = 1.0 / m_superView->getScale();
+ 
+  cocos2d::Rect rect;
+  rect.size = m_pixelWorldPos.size * screenScale;
+  rect.origin = m_pixelWorldPos.origin - m_superView->getPosition() * screenScale / pixelsScale;
+  
+  Rect pixelRect = PixelRectInner(rect, m_initialScale);
+  Rect innerPrevRect = ResizeByStep(m_pos, pixelRect, kSegmentSize);
+  Rect extendedRect = ExtendRectWithStep(innerPrevRect, pixelRect, kSegmentSize);
+  
+  if ( extendedRect != m_pos )
+  {
+    m_performMove = true;
+  }
+}
+
+ui::Viewport::Viewport(cocos2d::Node* superView, PixelDescriptorProvider::Config* config, const cocos2d::Size& originalSize)
+{
+  assert(superView);
+  assert(config);
+ 
+  m_originalSize = originalSize;
+  m_superView = superView;
+  m_performMove = false;
+  
+  m_initialScale = 0.2;
+  
+  m_pixelWorldPos.origin = {0, 0};
+  m_pixelWorldPos.size = originalSize;
+  
+  m_provider = std::make_shared<PixelDescriptorProvider>();
+  m_provider->InitWithConfig(config);
+  std::list<komorki::PixelDescriptorProvider::UpdateResult> result;
+  for (int i = 0; i < 100; i++)
+  {
+    m_provider->Update(false, result);
+  }
+  m_manager = std::make_shared<komorki::AsyncPixelManager>(m_provider.get());
+  m_lastUpdateId = 0;
+  
+  CreateMap();
+  
+  Test();
+}
+
+ui::Viewport::~Viewport()
+{
+ assert(0);
+}
+
+
+
 
 void ui::Viewport::Test()
 {
@@ -169,6 +165,14 @@ void ui::Viewport::Test()
     Rect r2 = {{-10,10}, {120,60}};
     Rect expected = {{0,20}, {100,40}};
     Rect r = ResizeByStep(r1, r2, 20);
+    assert(r == expected);
+  }
+  
+  {
+    Rect r1 = {{2,2}, {2,2}};
+    Rect r2 = {{0,0}, {10,10}};
+    Rect expected = {{2,2}, {2,2}};
+    Rect r = ResizeByStep(r1, r2, 10);
     assert(r == expected);
   }
   
@@ -347,11 +351,12 @@ void ui::Viewport::CreateMap()
   std::vector<Rect> mapRects;
   bool res = SplitRectOnChunks(pixelMapRect, {{0, 0}, {0, 0}}, mapRects);
   assert(res);
-  
+ 
   res = CreatePartialMapsInRects(mapRects,
                                  -pixelMapRect.origin,
                                  cocos2d::Vec2::ZERO,
-                                 pixelsScale);
+                                 pixelsScale,
+                                 m_maps);
   assert(res);
   
   m_prevPos = pixelMapRect;
@@ -511,6 +516,8 @@ void ui::Viewport::Update(float updateTime, float& outUpdateTime)
 {
   assert(m_lastUpdateId == m_manager->GetUpdateId());
   
+  cocos2d::log("Update %d", m_lastUpdateId);
+  
   outUpdateTime = 0;
   
   struct timeval tv;
@@ -556,40 +563,74 @@ void ui::Viewport::Update(float updateTime, float& outUpdateTime)
           operationType.c_str(), (int)initialPos.x, (int)initialPos.y, (int)destinationPos.x, (int)destinationPos.y, id, descriptor->m_type);
     }
   }
-  
+ 
   for (auto map : m_maps)
   {
-    map->PreUpdate1(result, updateTime);
+    map->AdoptIncomingItems();
   }
+  
+  MapList mapsToCreate;
+  MapList mapsToRemove;
+  if (m_performMove)
+  {
+    m_performMove = false;
+    PerformMove(mapsToCreate, mapsToRemove);
+  }
+  
+  for (const auto& map : m_maps)
+  {
+    cocos2d::log("map: %s", map->Description().c_str());
+  }
+  
+  for (const auto& map : mapsToRemove)
+  {
+    cocos2d::log("mapsToRemove: %s", map->Description().c_str());
+  }
+  
+  for (const auto& map : mapsToRemove)
+  {
+    cocos2d::log("mapsToCreate: %s", map->Description().c_str());
+  }
+
   for (auto map : m_maps)
   {
-    map->PreUpdate2(result, updateTime);
+    map->DeleteOutgoingItems();
   }
   for (auto map : m_maps)
   {
     map->Update(result, updateTime);
   }
-  
   for (auto map : m_maps)
   {
-    map->PostUpdate(result, updateTime);
+    map->HandleItemsOnBounds(result, updateTime);
   }
+ 
+  if (!mapsToCreate.empty())
+  {
+    m_maps.insert(m_maps.end(), mapsToCreate.begin(), mapsToCreate.end());
+  }
+  
+  m_mapsToRemove = mapsToRemove;
+  
+  if (!m_mapsToRemove.empty())
+  {
+    m_maps.erase(std::remove_if(m_maps.begin(), m_maps.end(), [&](const PartialMapPtr& map)
+                                {
+                                  return std::find(m_mapsToRemove.begin(), m_mapsToRemove.end(), map) != m_mapsToRemove.end();
+                                }), m_maps.end());
+    m_mapsToRemove.clear();
+  }
+  
+  
   
   gettimeofday(&tv, NULL);
   elapsed = (tv.tv_sec - start_tv.tv_sec) + (tv.tv_usec - start_tv.tv_usec) / 1000000.0;
   
   outUpdateTime += elapsed;
   
-  
-  if (m_performMove)
-  {
-    m_performMove = false;
-    PerformMove();
-    return;
-  }
 }
 
-void ui::Viewport::PerformMove()
+void ui::Viewport::PerformMove(MapList& mapsToCreate, MapList& mapsToRemove)
 {
   float pixelsScale = m_originalSize.width / m_pixelWorldPos.size.width;
   float screenScale = 1.0 / m_superView->getScale();
@@ -601,10 +642,7 @@ void ui::Viewport::PerformMove()
                                       m_pixelWorldPos.origin.y,
                                       m_pixelWorldPos.size.width,
                                       m_pixelWorldPos.size.height);
- 
-  PixelPos marginInPixels = std::ceil(kViewportMargin/(kSpritePosition * m_initialScale));
-  marginInPixels = std::max(marginInPixels, kSegmentSize);
-  
+
   Rect rect = PixelRectInner(observableRect, m_initialScale);
   Rect innerPrevRect = ResizeByStep(m_pos, rect, kSegmentSize);
   Rect extendedRect = ExtendRectWithStep(innerPrevRect, rect, kSegmentSize);
@@ -629,8 +667,8 @@ void ui::Viewport::PerformMove()
   m_superView->setPosition(offset);
   m_superViewOffset = offset;
   m_superView->setScale(1.f);
- 
-  bool res = RemoveMapsOutsideOfRect(extendedRect);
+
+  bool res = RemoveMapsOutsideOfRect(extendedRect, mapsToRemove);
   assert(res);
   res = MoveMaps(-extendedRect.origin, -cocos2d::Vec2(offsetFromRect.x, offsetFromRect.y) * pixelSize, pixelsScale);
   assert(res);
@@ -642,15 +680,18 @@ void ui::Viewport::PerformMove()
   res = CreatePartialMapsInRects(mapRects,
                                  -extendedRect.origin,
                                  -cocos2d::Vec2(offsetFromRect.x, offsetFromRect.y) * pixelSize,
-                                 pixelsScale);
+                                 pixelsScale,
+                                 mapsToCreate);
+  for (const auto& map : m_mapsToCreate)
+  {
+    cocos2d::log("new map: %s", map->Description().c_str());
+  }
   assert(res);
   
   m_prevPos = extendedRect;
   m_pos = extendedRect;
   m_visibleRect = rect;
 }
-
-
 
 ui::Viewport::Rect ui::Viewport::PixelRect(const cocos2d::Rect& rect, float scale)
 {
@@ -686,9 +727,9 @@ cocos2d::Rect ui::Viewport::CocosRect(const Rect& rect, float scale)
   return result;
 }
 
-bool ui::Viewport::RemoveMapsOutsideOfRect(const Rect& rect)
+bool ui::Viewport::RemoveMapsOutsideOfRect(const Rect& rect, MapList& toRemove)
 {
-  m_maps.erase(std::remove_if(m_maps.begin(), m_maps.end(), [&](const std::shared_ptr<PartialMap>& map)
+  for (const auto& map : m_maps)
   {
     Rect mapRect;
     mapRect.origin.x = map->m_a1;
@@ -699,13 +740,11 @@ bool ui::Viewport::RemoveMapsOutsideOfRect(const Rect& rect)
     Rect newMapRect = mapRect.Extract(rect);
     if (newMapRect.size.x == 0 || newMapRect.size.y == 0)
     {
-      return true;
+      toRemove.push_back(map);
     }
-    
-    return false;
-  }), m_maps.end());
+  }
   
-  return !m_maps.empty();
+  return true;
 }
 
 bool ui::Viewport::MoveMaps(const Vec2& offset, const cocos2d::Vec2& pointOffset, float scale)
@@ -763,7 +802,8 @@ bool ui::Viewport::SplitRectOnChunks(const Rect& rect, const Rect& existingRect,
 bool ui::Viewport::CreatePartialMapsInRects(const std::vector<Rect>& rects,
                                             const Vec2& pixelOffset,
                                             const cocos2d::Vec2& offset,
-                                            float scale)
+                                            float scale,
+                                            MapList& maps)
 {
   for (auto rect : rects)
   {
@@ -780,7 +820,7 @@ bool ui::Viewport::CreatePartialMapsInRects(const std::vector<Rect>& rects,
     offsetPoints += offset;
     map->Transfrorm(offsetPoints,
                     m_initialScale * scale);
-    m_maps.push_back(map);
+    maps.push_back(map);
   }
   
   return true;

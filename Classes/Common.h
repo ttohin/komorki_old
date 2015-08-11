@@ -29,6 +29,7 @@ namespace komorki
     Vec2 operator-(const Vec2& pos) const {return Vec2(x - pos.x, y - pos.y);}
     Vec2 operator+(const Vec2& pos) const {return Vec2(x + pos.x, y + pos.y);}
     Vec2 operator-() const {return Vec2(-x, -y);}
+    std::string Description()const { return std::to_string(x) + "," + std::to_string(y); }
   };
 }
 

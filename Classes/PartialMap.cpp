@@ -14,11 +14,60 @@
 #include "GlowMapOverlay.h"
 #include "PixelDescriptorProvider.h"
 #include "Utilities.h"
+#include <stdio.h>
+#include <sstream> //for std::stringstream
+#include <string>  //for std::string
 
 namespace komorki
 {
 namespace ui
 {
+  void PartialMap::Context::BecomeOwner(PartialMap* _owner)
+  {
+    cocos2d::log("%s, %s", __FUNCTION__, Description().c_str());
+    assert(owner == nullptr);
+    owner = _owner;
+  }
+  
+  void PartialMap::Context::Free(PartialMap* _owner)
+  {
+    cocos2d::log("%s, %s", __FUNCTION__, Description().c_str());
+    assert(owner == _owner);
+    owner = nullptr;
+    
+  }
+  
+  PartialMap::Context::Context(PartialMap *_owner)
+  : owner(_owner)
+  , sprite(nullptr)
+  , glow(nullptr)
+  {
+    cocos2d::log("%s, %s", __FUNCTION__, Description().c_str());
+  }
+  
+  std::string PartialMap::Context::Description() const
+  {
+    std::stringstream ss;
+    ss <<
+    static_cast<const void*>(this) <<
+    " ownwer " <<
+    static_cast<const void*>(owner) <<
+    " sprite: " <<
+    static_cast<const void*>(sprite);
+    return ss.str();
+  }
+  
+  void PartialMap::Context::Destory(PartialMap* _owner)
+  {
+    cocos2d::log("%s, %s", __FUNCTION__, Description().c_str());
+    assert(owner == _owner);
+    delete this;
+  }
+  
+PartialMap::Context::~Context()
+{
+  cocos2d::log("%s, %s", __FUNCTION__, Description().c_str());
+}
   
 PartialMap::PartialMap()
 {
@@ -26,6 +75,7 @@ PartialMap::PartialMap()
 
 PartialMap::~PartialMap()
 {
+  cocos2d::log("%s, %s", __FUNCTION__, Description().c_str());
   m_cellMap->removeFromParentAndCleanup(true);
   m_background->removeFromParentAndCleanup(true);
   m_lightOverlay->removeFromParentAndCleanup(true);
@@ -40,12 +90,17 @@ PartialMap::~PartialMap()
     
     assert(cell->userData != nullptr);
     auto context = static_cast<Context*>(cell->userData);
-    if (context->sprite->getParent() == m_cellMap.get())
+    if (context->owner == this || context->owner == nullptr)
     {
+      Vec2 pos (cell->parent->x, cell->parent->y);
+      cocos2d::log("%s, %s delete m_outgoingCells [%s]", __FUNCTION__, Description().c_str(), pos.Description().c_str());
       cell->userData = nullptr;
       m_cellMap->Delete(context);
       m_glow->Delete(context);
-      delete context;
+      if (context->owner == this)
+      {
+        context->Destory(this);
+      }
     }
   }
   
@@ -58,8 +113,15 @@ PartialMap::~PartialMap()
       auto pd = m_provider->GetDescriptor(i, j);
       if (pd->m_cellDescriptor && pd->m_cellDescriptor->userData != nullptr)
       {
-        delete static_cast<komorki::ui::PartialMap::Context*>(pd->m_cellDescriptor->userData);
-        pd->m_cellDescriptor->userData = nullptr;
+        auto context = static_cast<Context*>(pd->m_cellDescriptor->userData);
+        assert(context->owner);
+        if (context->owner == this)
+        {
+          Vec2 pos (pd->x, pd->y);
+          cocos2d::log("%s, %s delete all items [%s]", __FUNCTION__, Description().c_str(), pos.Description().c_str());
+          context->Destory(this);
+          pd->m_cellDescriptor->userData = nullptr;
+        }
       }
     }
   }
@@ -112,10 +174,12 @@ bool PartialMap::Init(int a, int b, int width, int height,
   return true;
 }
   
-void PartialMap::PreUpdate1(const std::list<IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime)
+void PartialMap::AdoptIncomingItems()
 {
   for (auto context : m_upcomingContexts)
   {
+    context->BecomeOwner(this);
+    
     m_cellMap->AdoptSprite(context);
     m_glow->AdoptSprite(context);
   }
@@ -123,25 +187,35 @@ void PartialMap::PreUpdate1(const std::list<IPixelDescriptorProvider::UpdateResu
   m_upcomingContexts.clear();
 }
   
-void PartialMap::PreUpdate2(const std::list<IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime)
+void PartialMap::DeleteOutgoingItems()
 {
+  cocos2d::log("%s, %s", __FUNCTION__, Description().c_str());
   for (auto cell : m_outgoingCells)
   {
-    assert(cell->userData != nullptr);
+    if (cell->userData == nullptr) {
+      continue;
+    }
+    
     auto context = static_cast<Context*>(cell->userData);
-    if (context->sprite->getParent() == m_cellMap.get())
+    // Remove only context that hasn't been adopted by other pratial maps
+    if (context->owner == this || context->owner == nullptr)
     {
+      Vec2 pos (cell->parent->x, cell->parent->y);
+      cocos2d::log("%s, %s delete m_outgoingCells [%s]", __FUNCTION__, Description().c_str(), pos.Description().c_str());
       cell->userData = nullptr;
       m_cellMap->Delete(context);
       m_glow->Delete(context);
-      delete context;
+      if (context->owner == this)
+      {
+        context->Destory(this);
+      }
     }
   }
   
   m_outgoingCells.clear();
 }
   
-void PartialMap::PostUpdate(const std::list<IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime)
+void PartialMap::HandleItemsOnBounds(const std::list<IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime)
 {
   for (auto u : updateResult)
   {
@@ -180,28 +254,43 @@ void PartialMap::PostUpdate(const std::list<IPixelDescriptorProvider::UpdateResu
     {
       if(IsInAABB(destinationPos))
       {
-        if (context == nullptr)
+        if (context == nullptr) // in coming item from outside of maps
         {
           context = CreateCell(newDescriptor);
           Move(initialPos, destinationPos, context);
-          continue;
+        }
+        else
+        {
+          context->BecomeOwner(this);
+          
+          m_cellMap->AdoptSprite(context);
+          m_glow->AdoptSprite(context);
+          
+          Move(initialPos, destinationPos, context);
         }
         
-        context->pos = LocalVector(destinationPos);
+        cocos2d::log("%s [%s] income: context:[%s][%s]->[%s]", __FUNCTION__,
+                     Description().c_str(),
+                     context->Description().c_str(),
+                     initialPos.Description().c_str(),
+                     destinationPos.Description().c_str());
         
-        m_upcomingContexts.push_back(context);
       }
     }
     
-    if (IsInAABB(initialPos) && !IsInAABB(destinationPos))
-    {
-      assert(context);
-      assert(newDescriptor->m_cellDescriptor);
-      m_outgoingCells.push_back(newDescriptor->m_cellDescriptor);
-    }
+//    if (IsInAABB(initialPos) && !IsInAABB(destinationPos))
+//    {
+//      assert(context);
+//      assert(newDescriptor->m_cellDescriptor);
+//      m_outgoingCells.push_back(newDescriptor->m_cellDescriptor);
+//      cocos2d::log("%s [%s] outgoing: [%s]->[%s]", __FUNCTION__,
+//                   Description().c_str(),
+//                   initialPos.Description().c_str(),
+//                   destinationPos.Description().c_str());
+//      context->Free(this);
+//    }
   }
   
-  m_cellMap->PostUpdate(updateResult, updateTime);
 }
 
 void PartialMap::Update(const std::list<IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime)
@@ -212,23 +301,17 @@ void PartialMap::Update(const std::list<IPixelDescriptorProvider::UpdateResult>&
   for (auto u : updateResult)
   {
     std::string operationType;
-
-    Vec2 destinationPos(0,0);
+    
     Vec2 initialPos = Vec2(u.desc->x, u.desc->y);
-    komorki::Vec2 pos(u.desc->x, u.desc->y);
+    if(!IsInAABB(initialPos))
+    {
+      continue;
+    }
     
     auto m = u.movement;
     auto a = u.action;
-    
-    if(u.movement == true)
-      operationType = "movement";
-    else if(u.action == true)
-      operationType = "action";
-    else if (u.addCreature == true)
-      operationType = "addCreature";
-    else if (u.deleteCreature == true)
-      operationType = "delete";
-    
+   
+    Vec2 destinationPos(0,0);
     if(u.addCreature == true)
     {
       destinationPos = Vec2(u.addCreature.value.destinationDesc->x, u.addCreature.value.destinationDesc->y);
@@ -239,11 +322,6 @@ void PartialMap::Update(const std::list<IPixelDescriptorProvider::UpdateResult>&
       destinationPos = Vec2(m.value.destinationDesc->x, m.value.destinationDesc->y);
     }
     
-    if(!IsInAABB(initialPos))
-    {
-      continue;
-    }
-    
     Context* context = static_cast<Context*>(u.userData);
     if (u.deleteCreature == true)
     {
@@ -252,8 +330,10 @@ void PartialMap::Update(const std::list<IPixelDescriptorProvider::UpdateResult>&
     else if (u.addCreature == true)
     {
       auto newDescriptor = u.addCreature.value.destinationDesc;
-      AddCreature(pos, newDescriptor);
-      continue;
+      if (IsInAABB(destinationPos))
+      {
+        AddCreature(initialPos, newDescriptor);
+      }
     }
     else if (m == true)
     {
@@ -262,17 +342,24 @@ void PartialMap::Update(const std::list<IPixelDescriptorProvider::UpdateResult>&
         context = CreateCell(m.value.destinationDesc);
       }
       
-      komorki::Vec2 dest(m.value.destinationDesc->x, m.value.destinationDesc->y);
-      Move(pos, dest, context);
+      if (!IsInAABB(destinationPos))
+      {
+        m_outgoingCells.push_back(m.value.destinationDesc->m_cellDescriptor);
+        cocos2d::log("%s [%s] outgoing: [%s]->[%s]", __FUNCTION__,
+                     Description().c_str(),
+                     initialPos.Description().c_str(),
+                     destinationPos.Description().c_str());
+        context->Free(this);
+      }
+      else
+      {
+        Move(initialPos, destinationPos, context);
+      }
     }
     else if (a == true)
     {
       assert(context);
-      Attack(context, pos, a.value.delta);
-    }
-    else
-    {
-      assert(0);
+      Attack(context, initialPos, a.value.delta);
     }
   }
   
@@ -316,13 +403,41 @@ void PartialMap::Update(const std::list<IPixelDescriptorProvider::UpdateResult>&
     m_b2 = b + height;
   }
   
+  std::string PartialMap::Description()
+  {
+    char buf[1024];
+    snprintf(buf, 1024 - 1, "%p x:[%d,%d]y:[%d,%d]", this, m_a1, m_a2, m_b1, m_b2);
+    return std::string(buf);
+  }
+  
   void PartialMap::InitPixel(PixelDescriptor* pd)
   {
     if (pd->m_type == PixelDescriptor::CreatureType)
     {
       if (pd->m_cellDescriptor->parent == pd)
       {
-        CreateCell(pd);
+        // We are creating map current cell is incomming
+        if (pd->m_cellDescriptor->userData != nullptr)
+        {
+          auto context = static_cast<Context*>(pd->m_cellDescriptor->userData);
+          cocos2d::log("%s adopting: %p from",
+                       Description().c_str(), pd->m_cellDescriptor->userData);
+          if (context->owner == nullptr)
+          {
+            context->BecomeOwner(this);
+            
+            m_cellMap->AdoptSprite(context);
+            m_glow->AdoptSprite(context);
+          }
+          else
+          {
+            m_upcomingContexts.push_back(context);
+          }
+        }
+        else
+        {
+          CreateCell(pd);
+        }
       }
     }
     else
@@ -333,7 +448,7 @@ void PartialMap::Update(const std::list<IPixelDescriptorProvider::UpdateResult>&
   
   void PartialMap::AddCreature(const Vec2& source, PixelDescriptor* dest)
   {
-    Context* context = new Context();
+    Context* context = new Context(this);
     context->pos = LocalVector(source);
     
     dest->m_cellDescriptor->userData = context;
@@ -346,7 +461,7 @@ void PartialMap::Update(const std::list<IPixelDescriptorProvider::UpdateResult>&
   
   PartialMap::Context* PartialMap::CreateCell(PixelDescriptor* dest)
   {
-    Context* context = new Context();
+    Context* context = new Context(this);
     context->pos = LocalVector(Vec2(dest->x, dest->y));
     assert(dest->m_cellDescriptor->userData == nullptr);
     dest->m_cellDescriptor->userData = context;
@@ -362,11 +477,15 @@ void PartialMap::Update(const std::list<IPixelDescriptorProvider::UpdateResult>&
     {
       return;
     }
-    
-    m_cellMap->Delete(context);
-    m_glow->Delete(context);
-    
-    delete context;
+  
+    assert(context->owner == this);
+    if (context->owner == this)
+    {
+      cocos2d::log("%s, %s [%s]", __FUNCTION__, Description().c_str(), context->Description().c_str());
+      m_cellMap->Delete(context);
+      m_glow->Delete(context);
+      context->Destory(this);
+    }
   }
   
   void PartialMap::Move(const Vec2& source, const Vec2& dest, Context* context)

@@ -33,9 +33,6 @@ public:
   cocos2d::Sprite* spriteForDescriptor(komorki::PixelDescriptor* pixelD);
   
   cocos2d::Vec2 spriteVector(const komorki::Vec2& vec, const cocos2d::Vec2& vector = cocos2d::Vec2());
-  void PreUpdate(const std::list<komorki::PixelDescriptorProvider::UpdateResult>& updateResult);
-  void PostUpdate(const std::list<komorki::PixelDescriptorProvider::UpdateResult>& updateResult, float updateTime);
-  void Update(const std::list<komorki::PixelDescriptorProvider::UpdateResult>& updateResult, float updateTime);
   bool init();
   void Reset();
   void HightlightCellOnPos(int x, int y, komorki::CellType type);

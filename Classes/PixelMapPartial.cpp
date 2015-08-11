@@ -126,19 +126,7 @@ namespace komorki
         auto result = cocos2d::Vec2(vec.x * kSpritePosition, vec.y * kSpritePosition) + vector;
         return result;
       }
-      
-      void PixelMapPartial::PreUpdate(const std::list<komorki::PixelDescriptorProvider::UpdateResult>& updateResult)
-      {
-      }
-      
-      void PixelMapPartial::PostUpdate(const std::list<komorki::PixelDescriptorProvider::UpdateResult>& updateResult, float updateTime)
-      {
-      }
-      
-      void PixelMapPartial::Update(const std::list<komorki::PixelDescriptorProvider::UpdateResult>& updateResult, float updateTime)
-      {
-      }
-      
+    
       bool PixelMapPartial::init()
       {
         if ( !SpriteBatchNode::initWithFile ("tile_32x32.png", 10))
