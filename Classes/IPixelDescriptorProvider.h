@@ -42,12 +42,12 @@ namespace komorki
     Optional():isSet(false) {}
     Optional(const T& v):value(v), isSet(true) {}
     
-    bool operator ==(bool b)
+    bool operator ==(bool b) const
     {
       return b == isSet;
     }
     
-    bool operator==(T v)
+    bool operator==(T v) const
     {
       if (isSet) {
         return value == v;

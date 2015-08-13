@@ -10,6 +10,14 @@
 #include "PartialMap.h"
 #include "AsyncPixelManager.h"
 #include "UIConfig.h"
+#include "b2Utilites.h"
+
+
+#ifdef DEBUG_VIEWPORT
+#define LOG_W(...) KOMORKI_LOG(__VA_ARGS__)
+#else
+#define LOG_W(...) {}
+#endif
 
 using namespace komorki;
 
@@ -19,9 +27,9 @@ komorki::PixelPos Ceil(const komorki::PixelPos& value, const komorki::PixelPos& 
   return std::ceil(scaledValue) * precision;
 }
 
-ui::Viewport::Rect ResizeByStep(const ui::Viewport::Rect& original, const ui::Viewport::Rect& destination, const PixelPos& step)
+Rect ResizeByStep(const Rect& original, const Rect& destination, const PixelPos& step)
 {
-  ui::Viewport::Rect result = original;
+  Rect result = original;
   if (original.Top() > destination.Top())
   {
     PixelPos offset = original.Top() - destination.Top();
@@ -45,9 +53,9 @@ ui::Viewport::Rect ResizeByStep(const ui::Viewport::Rect& original, const ui::Vi
   return result;
 }
 
-ui::Viewport::Rect ExtendRectWithStep(const ui::Viewport::Rect& original, const ui::Viewport::Rect& destination, const PixelPos& step)
+Rect ExtendRectWithStep(const Rect& original, const Rect& destination, const PixelPos& step)
 {
-  ui::Viewport::Rect result = original;
+  Rect result = original;
   if (original.Top() < destination.Top())
   {
     PixelPos offset = destination.Top() - original.Top();
@@ -497,7 +505,7 @@ void ui::Viewport::UpdateWarp(float& updateTime, unsigned int numberOfUpdates)
   
   float lastUpdateDuration = m_manager->GetLastUpdateTime();
   
-  for (auto map : m_maps)
+  for (const auto& map : m_maps)
   {
     map->Reset();
   }
@@ -516,7 +524,7 @@ void ui::Viewport::Update(float updateTime, float& outUpdateTime)
 {
   assert(m_lastUpdateId == m_manager->GetUpdateId());
   
-  cocos2d::log("Update %d", m_lastUpdateId);
+  LOG_W("Update %d", m_lastUpdateId);
   
   outUpdateTime = 0;
   
@@ -529,9 +537,8 @@ void ui::Viewport::Update(float updateTime, float& outUpdateTime)
   
   const std::list<komorki::PixelDescriptorProvider::UpdateResult>& result = m_manager->GetUpdateResult();
   
-  if (0)
-  {
-    for (auto u : result)
+#ifdef LOG_UPDATES
+    for (const auto& u : result)
     {
       std::string operationType;
       
@@ -559,50 +566,51 @@ void ui::Viewport::Update(float updateTime, float& outUpdateTime)
       if (m == true)
         destinationPos = Vec2(m.value.destinationDesc->x, m.value.destinationDesc->y);
       
-      cocos2d::log("%s [%d:%d]->[%d:%d] [id:%d] t:%d",
-          operationType.c_str(), (int)initialPos.x, (int)initialPos.y, (int)destinationPos.x, (int)destinationPos.y, id, descriptor->m_type);
+      LOG_W("%s [%s]->[%s] [id:%d] t:%d",
+          operationType.c_str(), initialPos.Description().c_str(), destinationPos.Description().c_str(), id, descriptor->m_type);
     }
-  }
+#endif
  
-  for (auto map : m_maps)
+  for (const auto& map : m_maps)
   {
     map->AdoptIncomingItems();
   }
   
+
+  
+  for (const auto& map : m_maps)
+  {
+    LOG_W("map: %s", map->Description().c_str());
+  }
+
+
+  for (const auto& map : m_maps)
+  {
+    map->Update(result, updateTime);
+  }
+  
   MapList mapsToCreate;
   MapList mapsToRemove;
+  
   if (m_performMove)
   {
     m_performMove = false;
     PerformMove(mapsToCreate, mapsToRemove);
   }
   
+  for (const auto& map : mapsToRemove)
+  {
+    LOG_W("mapsToRemove: %s", map->Description().c_str());
+  }
+  
+  for (const auto& map : mapsToRemove)
+  {
+    LOG_W("mapsToCreate: %s", map->Description().c_str());
+  }
+ 
   for (const auto& map : m_maps)
   {
-    cocos2d::log("map: %s", map->Description().c_str());
-  }
-  
-  for (const auto& map : mapsToRemove)
-  {
-    cocos2d::log("mapsToRemove: %s", map->Description().c_str());
-  }
-  
-  for (const auto& map : mapsToRemove)
-  {
-    cocos2d::log("mapsToCreate: %s", map->Description().c_str());
-  }
-
-  for (auto map : m_maps)
-  {
     map->DeleteOutgoingItems();
-  }
-  for (auto map : m_maps)
-  {
-    map->Update(result, updateTime);
-  }
-  for (auto map : m_maps)
-  {
-    map->HandleItemsOnBounds(result, updateTime);
   }
  
   if (!mapsToCreate.empty())
@@ -610,7 +618,7 @@ void ui::Viewport::Update(float updateTime, float& outUpdateTime)
     m_maps.insert(m_maps.end(), mapsToCreate.begin(), mapsToCreate.end());
   }
   
-  m_mapsToRemove = mapsToRemove;
+  m_mapsToRemove.swap(mapsToRemove);
   
   if (!m_mapsToRemove.empty())
   {
@@ -621,13 +629,37 @@ void ui::Viewport::Update(float updateTime, float& outUpdateTime)
     m_mapsToRemove.clear();
   }
   
-  
-  
   gettimeofday(&tv, NULL);
   elapsed = (tv.tv_sec - start_tv.tv_sec) + (tv.tv_usec - start_tv.tv_usec) / 1000000.0;
   
   outUpdateTime += elapsed;
   
+  HealthCheck();
+  
+}
+
+void ui::Viewport::HealthCheck()
+{
+  komorki::Vec2 size = m_provider->GetSize();
+  for (int i = 0; i < size.x; ++i)
+  {
+    for (int j = 0; j < size.y; ++j)
+    {
+      auto pd = m_provider->GetDescriptor(i, j);
+      if (pd->m_cellDescriptor && pd->m_cellDescriptor->parent == pd)
+      {
+        Vec2 point(i, j);
+        if (point.In(m_pos))
+        {
+          assert(pd->m_cellDescriptor->userData);
+        }
+        else
+        {
+          assert(!pd->m_cellDescriptor->userData);
+        }
+      }
+    }
+  }
 }
 
 void ui::Viewport::PerformMove(MapList& mapsToCreate, MapList& mapsToRemove)
@@ -684,7 +716,7 @@ void ui::Viewport::PerformMove(MapList& mapsToCreate, MapList& mapsToRemove)
                                  mapsToCreate);
   for (const auto& map : m_mapsToCreate)
   {
-    cocos2d::log("new map: %s", map->Description().c_str());
+    LOG_W("new map: %s", map->Description().c_str());
   }
   assert(res);
   
@@ -693,7 +725,7 @@ void ui::Viewport::PerformMove(MapList& mapsToCreate, MapList& mapsToRemove)
   m_visibleRect = rect;
 }
 
-ui::Viewport::Rect ui::Viewport::PixelRect(const cocos2d::Rect& rect, float scale)
+Rect ui::Viewport::PixelRect(const cocos2d::Rect& rect, float scale)
 {
   Rect result;
   
@@ -705,7 +737,7 @@ ui::Viewport::Rect ui::Viewport::PixelRect(const cocos2d::Rect& rect, float scal
   return result;
 }
 
-ui::Viewport::Rect ui::Viewport::PixelRectInner(const cocos2d::Rect& rect, float scale)
+Rect ui::Viewport::PixelRectInner(const cocos2d::Rect& rect, float scale)
 {
   Rect result;
   
@@ -826,126 +858,5 @@ bool ui::Viewport::CreatePartialMapsInRects(const std::vector<Rect>& rects,
   return true;
 }
 
-ui::Viewport::Rect ui::Viewport::Rect::Extract(const ui::Viewport::Rect &other) const
-{
-  Rect result;
-  result.origin.x = 0;
-  result.origin.y = 0;
-  result.size.x = 0;
-  result.size.y = 0;
-  
-  int offset = other.origin.x - origin.x;
-  if (offset >= 0)
-  {
-    if (origin.x + size.x >= other.origin.x)
-    {
-      result.origin.x = other.origin.x;
-      result.size.x = std::min(origin.x + size.x - other.origin.x, other.size.x);
-    }
-    else if (origin.x + size.x < other.origin.x)
-    {
-      result.origin.x = 0;
-      result.size.x = 0;
-    }
-    else
-    {
-      assert(0);
-    }
-  }
-  else if (offset < 0)
-  {
-    if (other.origin.x + other.size.x > origin.x)
-    {
-      result.origin.x = origin.x;
-      result.size.x = std::min(other.origin.x + other.size.x - origin.x, size.x);
-    }
-    else if (other.origin.x + other.size.x <= origin.x)
-    {
-      result.origin.x = 0;
-      result.size.x = 0;
-    }
-    else
-    {
-      assert(0);
-    }
-  }
-  else
-  {
-    assert(0);
-  }
-  
-  if (result.size.x == 0)
-  {
-    return result;
-  }
-  
-  offset = other.origin.y - origin.y;
-  if (offset >= 0)
-  {
-    if (origin.y + size.y >= other.origin.y)
-    {
-      result.origin.y = other.origin.y;
-      result.size.y = std::min(origin.y + size.y - other.origin.y, other.size.y);
-    }
-    else if (origin.y + size.y < other.origin.y)
-    {
-      result.origin.y = 0;
-      result.size.y = 0;
-    }
-    else
-    {
-      assert(0);
-    }
-  }
-  else if (offset < 0)
-  {
-    if (other.origin.y + other.size.y > origin.y)
-    {
-      result.origin.y = origin.y;
-      result.size.y = std::min(other.origin.y + other.size.y - origin.y, size.y);
-    }
-    else if (other.origin.y + other.size.y <= origin.y)
-    {
-      result.origin.y = 0;
-      result.size.y = 0;
-    }
-    else
-    {
-      assert(0);
-    }
-  }
-  else
-  {
-    assert(0);
-  }
-  
-  if (result.size.y == 0)
-  {
-    result.size.x = 0;
-    result.origin.x = 0;
-  }
-  
-  return result;
-}
 
-bool ui::Viewport::Rect::In(const Rect& other) const
-{
-  return origin.x >= other.origin.x
-  && origin.x + size.x <= other.origin.x + other.size.x
-  && origin.y >= other.origin.y
-  && origin.y + size.y <= other.origin.y + other.size.y;
-}
-
-bool ui::Viewport::Rect::operator==(const Rect& rect) const
-{
-  return origin.x == rect.origin.x &&
-  origin.y == rect.origin.y &&
-  size.x == rect.size.x &&
-  size.y == rect.size.y;
-}
-
-bool ui::Viewport::Rect::operator!=(const Rect& rect) const
-{
-  return !(*this == rect);
-}
 

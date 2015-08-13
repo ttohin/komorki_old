@@ -41,7 +41,7 @@ namespace komorki
         m_pullSize = PMP_PULL_SIZE;
       }
       
-      Rect PixelMapPartial::OffsetForType(komorki::PixelDescriptor* pd)
+      cocos2d::Rect PixelMapPartial::OffsetForType(komorki::PixelDescriptor* pd)
       {
         komorki::PixelDescriptor::Type t = pd->m_type;
         if(t == komorki::PixelDescriptor::CreatureType)
@@ -52,7 +52,7 @@ namespace komorki
           
           if (d->m_character == komorki::eCellTypeBigBlue)
           {
-            return Rect(index*kTileFrameSize*2, 6*kTileFrameSize, kTileFrameSize*2, kTileFrameSize*2);
+            return cocos2d::Rect(index*kTileFrameSize*2, 6*kTileFrameSize, kTileFrameSize*2, kTileFrameSize*2);
           }
           
           int line = 0;
@@ -62,14 +62,14 @@ namespace komorki
           else if (d->m_character == komorki::eCellTypeImprovedSalad) line = 3;
           else assert(0);
           
-          return Rect(index*kTileFrameSize, line*kTileFrameSize, kTileFrameSize, kTileFrameSize);
+          return cocos2d::Rect(index*kTileFrameSize, line*kTileFrameSize, kTileFrameSize, kTileFrameSize);
         }
         if(t == komorki::PixelDescriptor::TerrainType)
         {
-          return Rect(cRandABInt(GROWND_START, GROWND_END)*kTileFrameSize, GROWND_LINE*kTileFrameSize, kTileFrameSize, kTileFrameSize);
+          return cocos2d::Rect(cRandABInt(GROWND_START, GROWND_END)*kTileFrameSize, GROWND_LINE*kTileFrameSize, kTileFrameSize, kTileFrameSize);
         }
         
-        return Rect(9, 0, 1, 1);
+        return cocos2d::Rect(9, 0, 1, 1);
       }
       
       Sprite* PixelMapPartial::CreateSprite()
@@ -113,7 +113,7 @@ namespace komorki
           return nullptr;
         }
         
-        Rect r = OffsetForType(pixelD);
+        cocos2d::Rect r = OffsetForType(pixelD);
         auto s = CreateSprite();
         s->setTextureRect(r);
         s->setScale(kSpriteScale);
@@ -190,7 +190,7 @@ namespace komorki
         
         int index = 0;
         int line = (CREATURE_LINE_START + type)%CREATURE_LINE_END;
-        auto r = Rect(index*kTileFrameSize, line*kTileFrameSize, kTileFrameSize, kTileFrameSize);
+        auto r = cocos2d::Rect(index*kTileFrameSize, line*kTileFrameSize, kTileFrameSize, kTileFrameSize);
         
         s->setTextureRect(r);
         s->setScale(kSpriteScale);
@@ -242,7 +242,7 @@ namespace komorki
     
     void PixelMapPartial::AddCreature(CellDescriptor* cd, PartialMap::Context* context)
     {
-      Rect r = OffsetForType(cd->parent);
+      cocos2d::Rect r = OffsetForType(cd->parent);
       auto s = CreateSprite();
       s->setTextureRect(r);
       s->setScale(kSpriteScale);

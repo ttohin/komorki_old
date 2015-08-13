@@ -65,7 +65,7 @@ namespace komorki
         assert(value >= 0);
         assert(value < 32);
         
-        Rect r = Rect(value, 2, 1, 1);
+        cocos2d::Rect r = cocos2d::Rect(value, 2, 1, 1);
         auto s = CreateSprite();
         s->setTextureRect(r);
         s->setScale(kSpriteScale);

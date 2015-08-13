@@ -14,6 +14,7 @@
 #include "b2Utilites.h"
 #include "PixelMapPartial.h"
 #include "CellDescriptor.h"
+#include "Common.h"
 
 namespace komorki
 {

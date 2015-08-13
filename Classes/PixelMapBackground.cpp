@@ -75,7 +75,7 @@ USING_NS_CC;
   
   Sprite* PixelMapBackground::spriteDeadCell(komorki::CellDescriptor* cd)
   {
-    Rect r = Rect(0, DEAD_CEEL_LINE*kTileFrameSize, kTileFrameSize, kTileFrameSize);
+    cocos2d::Rect r = cocos2d::Rect(0, DEAD_CEEL_LINE*kTileFrameSize, kTileFrameSize, kTileFrameSize);
     auto s = CreateSprite();
     s->setTextureRect(r);
     s->setScale(kSpriteScale);

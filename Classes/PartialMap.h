@@ -84,7 +84,7 @@ namespace komorki
     private:
    
       void InitPixel(PixelDescriptor* pd);
-      void AddCreature(const Vec2& source, PixelDescriptor* dest);
+      PartialMap::Context* AddCreature(const Vec2& source, PixelDescriptor* dest);
       PartialMap::Context* CreateCell(PixelDescriptor* dest);
       void Delete(Context* context);
       void Move(const Vec2& source, const Vec2& dest, Context* context);

@@ -71,7 +71,7 @@ namespace ui
   
   Sprite* PixelDebugView::ColorSprite(int i)
   {
-    Rect r = Rect(8 + i, 0, 1, 1);
+    cocos2d::Rect r = cocos2d::Rect(8 + i, 0, 1, 1);
     auto s = CreateSprite();
     s->setTextureRect(r);
     s->setScale(kSpriteScale);
@@ -85,7 +85,7 @@ namespace ui
   
   Sprite* PixelDebugView::HealthSprite(komorki::PixelDescriptor* pixelD)
   {
-    Rect r = Rect(1, 1, 1, 1);
+    cocos2d::Rect r = cocos2d::Rect(1, 1, 1, 1);
     auto s = CreateSprite();
     s->setTextureRect(r);
     s->setScale(kSpriteScale);

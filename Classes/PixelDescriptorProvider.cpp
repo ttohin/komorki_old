@@ -472,6 +472,10 @@ void PixelDescriptorProvider::ProccessTransaction(bool passUpdateResult, std::li
           r.deleteCreature.value.cellDescriptor = std::shared_ptr<CellDescriptor>(d);
           result.push_back(r);
         }
+        else
+        {
+          delete d;
+        }
         
         continue;
       }
@@ -487,6 +491,7 @@ void PixelDescriptorProvider::ProccessTransaction(bool passUpdateResult, std::li
           if (passUpdateResult)
           {
             UpdateResult r(d);
+            r.userData = nullptr;
             
             r.addCreature.SetValueFlag(true);
             r.addCreature.value.destinationDesc = destinationDesc->parent;

@@ -52,7 +52,7 @@ namespace komorki
       return result;
     }
     
-    Rect GlowMapOverlay::OffsetForType(komorki::CellDescriptor* d)
+    cocos2d::Rect GlowMapOverlay::OffsetForType(komorki::CellDescriptor* d)
     {
       int index = 0;
       if (d->m_character == komorki::eCellTypeSalad) index = 2;
@@ -60,7 +60,7 @@ namespace komorki
       else if (d->m_character == komorki::eCellTypeImprovedSalad) index = 0;
       else assert(0);
       
-      return Rect(index*160, 0, 160, 160);
+      return cocos2d::Rect(index*160, 0, 160, 160);
     }
     
     Sprite* GlowMapOverlay::CreateSprite()
@@ -108,7 +108,7 @@ namespace komorki
     {
       if (IsGlowCell(cd))
       {
-        Rect r = OffsetForType(cd);
+        cocos2d::Rect r = OffsetForType(cd);
         auto s = CreateSprite();
         s->setTextureRect(r);
         
