@@ -386,6 +386,7 @@ void PartialMap::Update(const std::list<IPixelDescriptorProvider::UpdateResult>&
           if (context->owner == nullptr)
           {
             context->BecomeOwner(this);
+            context->pos = initialPos;
             
             m_cellMap->AdoptSprite(context);
             m_glow->AdoptSprite(context);

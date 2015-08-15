@@ -106,7 +106,7 @@ PixelDescriptorProvider::Config::Config()
   
   this->green.health = 301;
   this->green.sleepTime = 2;
-  this->green.attack = 14;
+  this->green.attack = 18;
   this->green.passiveHealthChunkMin = -1;
   this->green.passiveHealthChunkMax = -1;
   this->green.armor = 10;
@@ -145,7 +145,7 @@ PixelDescriptorProvider::Config::Config()
   
   this->cyan.health = 301;
   this->cyan.sleepTime = 0;
-  this->cyan.attack = 3;
+  this->cyan.attack = 6;
   this->cyan.passiveHealthChunkMin = -10;
   this->cyan.passiveHealthChunkMax = 14;
   this->cyan.armor = 30;

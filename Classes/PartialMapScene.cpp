@@ -79,7 +79,14 @@ bool PartialMapScene::init()
   Size winSize = Director::getInstance()->getWinSize();
   
   m_bg = Sprite::create("background.png");
+  m_bg->setAnchorPoint({0, 0});
   addChild(m_bg, -999);
+  
+  float bgAspect = 1.0;
+  {
+    bgAspect = AspectToFill(m_bg->getContentSize(), visibleSize);
+  }
+  m_bg->setScale(bgAspect);
   
   m_rootNode = Node::create();
   addChild(m_rootNode);
@@ -140,7 +147,7 @@ bool PartialMapScene::init()
     }
     else if (m_touchMode == eTouchModeMove)
     {
-      this->m_viewport->Calculate();
+//      this->m_viewport->Calculate();
     }
   };
   
@@ -202,8 +209,6 @@ bool PartialMapScene::init()
       scrollY = 0.02;
     else
       scrollY = -0.02;
-    
-//    m_rootNode->setScale(m_mapScale);
 
     float cursorX = mouseEvent->getCursorX();
     float cursorY = mouseEvent->getCursorY();
@@ -553,6 +558,14 @@ void PartialMapScene::visit(cocos2d::Renderer *renderer, const cocos2d::Mat4 &pa
                                      origin.y));
     m_menuButton->setPosition(Vec2(kButtonSize/2.f, visibleSize.height - kButtonSize/2.f));
     if (m_currenMenu) m_currenMenu->Resize(visibleSize);
+    
+    m_viewport->Resize(visibleSize);
+    
+    float bgAspect = 1.0;
+    {
+      bgAspect = AspectToFill(m_bg->getContentSize(), visibleSize);
+    }
+    m_bg->setScale(bgAspect);
   }
   
   Layer::visit(renderer, parentTransform, parentFlags);
@@ -622,7 +635,7 @@ void PartialMapScene::timerForUpdate(float dt)
 
 void PartialMapScene::timerForViewportUpdate(float dt)
 {
-//  m_viewport->Calculate();
+  m_viewport->Calculate();
 }
 
 void PartialMapScene::timerForMove(float dt)
@@ -641,41 +654,21 @@ void PartialMapScene::timerForMove(float dt)
 
 void PartialMapScene::Zoom(float direction)
 {
-#warning don't forget
-  return;
-  
-  if(m_mapScale + direction <= 0.1)
-    return;
-  if (m_mapScale + direction >= 3.0)
-    return;
-  
-  m_mapScale += direction;
-  
-  float scaleRatio = m_mapScale/m_rootNode->getScale();
-  
-  m_rootNode->setScale(m_mapScale);
-  
   Size visibleSize = Director::getInstance()->getVisibleSize();
   float cursorX = visibleSize.width/2;
   float cursorY = visibleSize.height/2;
-  
-  float newX = cursorX - scaleRatio * (cursorX - m_mapPos.x);
-  float newY = cursorY - scaleRatio * (cursorY - m_mapPos.y);
-  
-  m_mapPos = Point(newX, newY);
-  m_rootNode->setPosition(m_mapPos);
-  
-  SetBackgroundPosition();
+
+  m_viewport->Zoom({cursorX, cursorY}, direction);
 }
 
 void PartialMapScene::ZoomIn()
 {
-  Zoom(+kZoomStep);
+  Zoom(-kZoomStep);
 }
 
 void PartialMapScene::ZoomOut()
 {
-  Zoom(-kZoomStep);
+  Zoom(+kZoomStep);
 }
 
 void PartialMapScene::Move(const Vec2& direction, float animationDuration)

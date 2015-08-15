@@ -163,9 +163,6 @@ ui::Viewport::~Viewport()
  assert(0);
 }
 
-
-
-
 void ui::Viewport::Test()
 {
   {
@@ -421,14 +418,13 @@ void ui::Viewport::CreatePixelMaps(const Rect& rect, const cocos2d::Vec2& offset
   }
 }
 
-void ui::Viewport::Resize(const cocos2d::Size& originalSize)
+void ui::Viewport::Resize(const cocos2d::Size& size)
 {
-  m_pixelWorldPos.size = originalSize;
-  m_originalSize = originalSize;
+  float resizeRatio =  m_originalSize.width / size.width;
+  m_superView->setScale(resizeRatio);
   
-  m_initialScale = 0.1;
-  
-  CreateMap();
+  m_originalSize = size;
+  m_performMove = true;
 }
 
 cocos2d::Size ui::Viewport::GetTotalMapSize() const
@@ -576,13 +572,10 @@ void ui::Viewport::Update(float updateTime, float& outUpdateTime)
     map->AdoptIncomingItems();
   }
   
-
-  
   for (const auto& map : m_maps)
   {
     LOG_W("map: %s", map->Description().c_str());
   }
-
 
   for (const auto& map : m_maps)
   {
@@ -598,16 +591,6 @@ void ui::Viewport::Update(float updateTime, float& outUpdateTime)
     PerformMove(mapsToCreate, mapsToRemove);
   }
   
-  for (const auto& map : mapsToRemove)
-  {
-    LOG_W("mapsToRemove: %s", map->Description().c_str());
-  }
-  
-  for (const auto& map : mapsToRemove)
-  {
-    LOG_W("mapsToCreate: %s", map->Description().c_str());
-  }
- 
   for (const auto& map : m_maps)
   {
     map->DeleteOutgoingItems();
