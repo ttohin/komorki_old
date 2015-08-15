@@ -122,6 +122,8 @@ void ui::Viewport::Calculate()
   Rect pixelRect = PixelRectInner(rect, m_initialScale);
   Rect innerPrevRect = ResizeByStep(m_pos, pixelRect, kSegmentSize);
   Rect extendedRect = ExtendRectWithStep(innerPrevRect, pixelRect, kSegmentSize);
+  komorki::Vec2 size = m_provider->GetSize();
+  extendedRect = extendedRect.Extract({Vec2(0, 0), size});
   
   if ( extendedRect != m_pos )
   {
