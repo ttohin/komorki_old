@@ -337,6 +337,17 @@ void PartialMap::Update(const std::list<IPixelDescriptorProvider::UpdateResult>&
   {
     m_cellMap->Reset();
   }
+
+  
+  void PartialMap::StopSmallAnimations()
+  {
+    m_cellMap->StopSmallAnimations();
+  }
+  
+  void PartialMap::StartSmallAnimations()
+  {
+    m_cellMap->StartSmallAnimations();
+  }
  
   void PartialMap::Transfrorm(const cocos2d::Vec2& pos, float scale)
   {

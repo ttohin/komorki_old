@@ -45,12 +45,18 @@ public:
   void AdoptSprite(PartialMap::Context* context);
   void MoveCreature(PartialMap::Context* context, const Vec2& source, const Vec2& dest);
   void Attack(PartialMap::Context* context, const Vec2& pos, const Vec2& offset);
+  void StopSmallAnimations();
+  void StartSmallAnimations();
  
 private:
+  
+  void PlaySmallAnimation(cocos2d::Sprite* sprite);
+  
   cocos2d::Sprite* m_hlSprite;
   std::list<cocos2d::Sprite*> m_spritesPull;
   unsigned int m_pullSize;
   float m_updateTime;
+  bool m_enableSmallAnimations;
 };
 }
 }

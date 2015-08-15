@@ -139,6 +139,7 @@ ui::Viewport::Viewport(cocos2d::Node* superView, PixelDescriptorProvider::Config
   m_performMove = false;
   
   m_initialScale = 0.2;
+  m_enableSmallAnimations = true;
   
   m_pixelWorldPos.origin = {0, 0};
   m_pixelWorldPos.size = originalSize;
@@ -566,9 +567,33 @@ void ui::Viewport::Update(float updateTime, float& outUpdateTime)
           operationType.c_str(), initialPos.Description().c_str(), destinationPos.Description().c_str(), id, descriptor->m_type);
     }
 #endif
+  
+  if (m_performMove)
+  {
+    Rect upcommingRect = GetUpcommingRect();
+    float upcommingRectSquare = upcommingRect.size.x * upcommingRect.size.y;
+    if (upcommingRectSquare > 10 * 50 * 50)
+    {
+      m_enableSmallAnimations = false;
+    }
+    else
+    {
+      m_enableSmallAnimations = true;
+    }
+    
+  }
  
   for (const auto& map : m_maps)
   {
+    if (!m_enableSmallAnimations)
+    {
+      map->StopSmallAnimations();
+    }
+    else
+    {
+      map->StartSmallAnimations();
+    }
+    
     map->AdoptIncomingItems();
   }
   
@@ -708,7 +733,7 @@ void ui::Viewport::PerformMove(MapList& mapsToCreate, MapList& mapsToRemove)
   m_visibleRect = rect;
 }
 
-Rect ui::Viewport::PixelRect(const cocos2d::Rect& rect, float scale)
+Rect ui::Viewport::PixelRect(const cocos2d::Rect& rect, float scale) const
 {
   Rect result;
   
@@ -720,7 +745,7 @@ Rect ui::Viewport::PixelRect(const cocos2d::Rect& rect, float scale)
   return result;
 }
 
-Rect ui::Viewport::PixelRectInner(const cocos2d::Rect& rect, float scale)
+Rect ui::Viewport::PixelRectInner(const cocos2d::Rect& rect, float scale) const
 {
   Rect result;
   
@@ -732,7 +757,7 @@ Rect ui::Viewport::PixelRectInner(const cocos2d::Rect& rect, float scale)
   return result;
 }
 
-cocos2d::Rect ui::Viewport::CocosRect(const Rect& rect, float scale)
+cocos2d::Rect ui::Viewport::CocosRect(const Rect& rect, float scale) const
 {
   auto result = cocos2d::Rect();
   result.origin.x = rect.origin.x * (kSpritePosition * scale);
@@ -835,10 +860,38 @@ bool ui::Viewport::CreatePartialMapsInRects(const std::vector<Rect>& rects,
     offsetPoints += offset;
     map->Transfrorm(offsetPoints,
                     m_initialScale * scale);
+    if (!m_enableSmallAnimations)
+    {
+      map->StopSmallAnimations();
+    }
+    else
+    {
+      map->StartSmallAnimations();
+    }
     maps.push_back(map);
   }
   
   return true;
+}
+
+Rect ui::Viewport::GetUpcommingRect() const
+{
+  float pixelsScale = m_originalSize.width / m_pixelWorldPos.size.width;
+  float screenScale = 1.0 / m_superView->getScale();
+  
+  cocos2d::Size pixelWorldSize = m_pixelWorldPos.size * screenScale;
+  cocos2d::Vec2 pixelWorldPos = m_pixelWorldPos.origin -(m_superView->getPosition() - m_superViewOffset) * screenScale / pixelsScale;
+  
+  auto observableRect = cocos2d::Rect(pixelWorldPos.x,
+                                      pixelWorldPos.y,
+                                      pixelWorldSize.width,
+                                      pixelWorldSize.height);
+  
+  Rect rect = PixelRectInner(observableRect, m_initialScale);
+  Rect innerPrevRect = ResizeByStep(m_pos, rect, kSegmentSize);
+  Rect extendedRect = ExtendRectWithStep(innerPrevRect, rect, kSegmentSize);
+  
+  return extendedRect;
 }
 
 

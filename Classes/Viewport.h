@@ -60,9 +60,9 @@ namespace komorki
       void CreateMap(const cocos2d::Rect& viewSize, float scale);
       void CreatePixelMaps(const Rect& rect, const cocos2d::Vec2& offset, float scale);
       
-      Rect PixelRect(const cocos2d::Rect& rect, float scale);
-      Rect PixelRectInner(const cocos2d::Rect& rect, float scale);
-      cocos2d::Rect CocosRect(const Rect& rect, float scale);
+      Rect PixelRect(const cocos2d::Rect& rect, float scale) const;
+      Rect PixelRectInner(const cocos2d::Rect& rect, float scale) const;
+      cocos2d::Rect CocosRect(const Rect& rect, float scale) const;
       bool RemoveMapsOutsideOfRect(const Rect& rect, MapList& toRemove);
       bool MoveMaps(const Vec2& offset, const cocos2d::Vec2& pointOffset, float scale);
       bool SplitRectOnChunks(const Rect& rect, const Rect& existingRect, std::vector<Rect>& result) const;
@@ -71,6 +71,7 @@ namespace komorki
                                     const cocos2d::Vec2& offset,
                                     float scale,
                                     MapList& maps);
+      Rect GetUpcommingRect() const;
       
       Rect m_prevPos;
       Rect m_pos;
@@ -86,6 +87,7 @@ namespace komorki
       
       bool m_performMove;
       float m_initialScale;
+      bool m_enableSmallAnimations;
      
       std::shared_ptr<PixelDescriptorProvider> m_provider;
       std::shared_ptr<AsyncPixelManager> m_manager;

@@ -69,6 +69,9 @@ namespace komorki
       
       void Reset();
       
+      void StopSmallAnimations();
+      void StartSmallAnimations();
+      
       void Transfrorm(const cocos2d::Vec2& pos, float scale);
       void ChangeAABB(int a, int b, int width, int height);
       
