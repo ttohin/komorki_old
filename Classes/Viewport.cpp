@@ -149,7 +149,7 @@ ui::Viewport::Viewport(cocos2d::Node* superView, PixelDescriptorProvider::Config
   m_provider = std::make_shared<PixelDescriptorProvider>();
   m_provider->InitWithConfig(config);
   std::list<komorki::PixelDescriptorProvider::UpdateResult> result;
-  for (int i = 0; i < 100; i++)
+  for (int i = 0; i < 0; i++)
   {
     m_provider->Update(false, result);
   }
@@ -468,15 +468,12 @@ void ui::Viewport::UpdateAsync(float& updateTime)
     return;
   }
   
-  float lastUpdateDuration = m_manager->GetLastUpdateTime();
-  
   float mapsUpdateTime = 0.0f;
-  
   Update(updateTime, mapsUpdateTime);
   
-  if (lastUpdateDuration > updateTime)
+  if (mapsUpdateTime > updateTime)
   {
-    updateTime = lastUpdateDuration;
+    updateTime = mapsUpdateTime;
   }
   
   m_lastUpdateId++;
@@ -536,6 +533,8 @@ void ui::Viewport::Update(float updateTime, float& outUpdateTime)
   
   const std::list<komorki::PixelDescriptorProvider::UpdateResult>& result = m_manager->GetUpdateResult();
   
+  m_updateTime.AddValue(m_manager->GetLastUpdateTime());
+  
 #ifdef LOG_UPDATES
     for (const auto& u : result)
     {
@@ -572,7 +571,7 @@ void ui::Viewport::Update(float updateTime, float& outUpdateTime)
   
   if (m_performMove)
   {
-    Rect upcommingRect = GetUpcommingRect();
+    Rect upcommingRect = GetCurrentVisibleRect();
     float upcommingRectSquare = upcommingRect.size.x * upcommingRect.size.y;
     if (upcommingRectSquare > 10 * 50 * 50)
     {
@@ -642,7 +641,17 @@ void ui::Viewport::Update(float updateTime, float& outUpdateTime)
   gettimeofday(&tv, NULL);
   elapsed = (tv.tv_sec - start_tv.tv_sec) + (tv.tv_usec - start_tv.tv_usec) / 1000000.0;
   
-  outUpdateTime += elapsed;
+  outUpdateTime = m_manager->GetLastUpdateTime() + elapsed;
+  
+  m_mapsUpdateTime.AddValue(elapsed);
+  m_numberOfUpdates.AddValue(result.size());
+  
+  if (m_numberOfUpdates.number % 100 == 0)
+  {
+    cocos2d::log("Update time: %s", m_updateTime.ToString().c_str());
+    cocos2d::log("Map update: %s", m_mapsUpdateTime.ToString().c_str());
+    cocos2d::log("Number of diff: %s", m_numberOfUpdates.ToString().c_str());
+  }
   
   HealthCheck();
   
@@ -896,5 +905,22 @@ Rect ui::Viewport::GetUpcommingRect() const
   return extendedRect;
 }
 
+Rect ui::Viewport::GetCurrentVisibleRect() const
+{
+  float pixelsScale = m_originalSize.width / m_pixelWorldPos.size.width;
+  float screenScale = 1.0 / m_superView->getScale();
+  
+  cocos2d::Size pixelWorldSize = m_pixelWorldPos.size * screenScale;
+  cocos2d::Vec2 pixelWorldPos = m_pixelWorldPos.origin -(m_superView->getPosition() - m_superViewOffset) * screenScale / pixelsScale;
+  
+  auto observableRect = cocos2d::Rect(pixelWorldPos.x,
+                                      pixelWorldPos.y,
+                                      pixelWorldSize.width,
+                                      pixelWorldSize.height);
+  
+  Rect rect = PixelRectInner(observableRect, m_initialScale);
+
+  return rect;
+}
 
 

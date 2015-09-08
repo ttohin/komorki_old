@@ -3,6 +3,7 @@
 #include "cocostudio/DictionaryHelper.h"
 #include "UIButton.h"
 #include "ConfigManager.h"
+#include "DiamondSquareGenerator.h"
 
 static const float kUpdateTime = 0.4;
 
@@ -87,6 +88,7 @@ bool PartialMapScene::init()
     bgAspect = AspectToFill(m_bg->getContentSize(), visibleSize);
   }
   m_bg->setScale(bgAspect);
+
   
   m_rootNode = Node::create();
   addChild(m_rootNode);
@@ -372,6 +374,7 @@ bool PartialMapScene::init()
   
   m_rendTexSprite->setGLProgram(p);
   
+  
   return true;
 }
 
@@ -551,7 +554,6 @@ void PartialMapScene::visit(cocos2d::Renderer *renderer, const cocos2d::Mat4 &pa
    
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
     Size visibleSize = Director::getInstance()->getVisibleSize();
-    SetBackgroundPosition();
     m_toolbarNode->setPosition(Vec2(origin.x + visibleSize.width,
                                     origin.y + visibleSize.height));
     m_speedToolbar->setPosition(Vec2(origin.x + visibleSize.width,
@@ -617,9 +619,9 @@ void PartialMapScene::timerForUpdate(float dt)
     float updateTimeEstimated = updateTime;
     m_viewport->UpdateAsync(updateTimeEstimated);
     
-    if (updateTimeEstimated - updateTime > 2)
+    if (updateTimeEstimated > updateTime)
     {
-      updateTimeEstimated = updateTime;
+      updateTimeEstimated = 0.f;
     }
     schedule(schedule_selector(PartialMapScene::timerForUpdate), updateTimeEstimated, kRepeatForever, updateTimeEstimated);
   }

@@ -39,6 +39,14 @@ public:
   
     number += 1;
   }
+  
+  std::string ToString() const
+  {
+    return "max: " + std::to_string(maxValue) +
+    " min: " + std::to_string(minValue) +
+    " av: " + std::to_string(avaregeValue) +
+    " num: " + std::to_string(number);
+  }
 };
 
 #endif

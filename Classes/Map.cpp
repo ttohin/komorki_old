@@ -17,7 +17,7 @@ namespace
 
 using namespace komorki;
 
-void komorki::Map::Apply(komorki::PixelDescriptorProvider *provider)
+void Map::Apply(komorki::PixelDescriptorProvider *provider)
 {
   Vec2 size = provider->GetSize();
   for (int i = 0; i < size.x; ++i)

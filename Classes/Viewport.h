@@ -13,6 +13,7 @@
 #include "cocos2d.h"
 #include "Common.h"
 #include "PixelDescriptorProvider.h"
+#include "Statistic.hpp"
 
 namespace komorki
 {
@@ -72,6 +73,7 @@ namespace komorki
                                     float scale,
                                     MapList& maps);
       Rect GetUpcommingRect() const;
+      Rect GetCurrentVisibleRect() const;
       
       Rect m_prevPos;
       Rect m_pos;
@@ -95,7 +97,9 @@ namespace komorki
       MapList m_mapsToRemove;
       MapList m_mapsToCreate;
       unsigned char m_lastUpdateId;
-      
+      StatisticCounter<double> m_updateTime;
+      StatisticCounter<double> m_mapsUpdateTime;
+      StatisticCounter<int> m_numberOfUpdates;
     };
   }
 }

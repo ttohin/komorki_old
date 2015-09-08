@@ -115,7 +115,8 @@ namespace komorki
     
     Sprite* PixelMapPartial::spriteForDescriptor(komorki::PixelDescriptor* pixelD)
     {
-      if (pixelD->m_type == komorki::PixelDescriptor::Empty)
+      if (pixelD->m_type == komorki::PixelDescriptor::Empty
+          || pixelD->m_type == komorki::PixelDescriptor::TerrainType)
       {
         return nullptr;
       }
@@ -232,7 +233,8 @@ namespace komorki
     {
       auto s = spriteForDescriptor(pd);
       
-      if(pd->m_type != PixelDescriptor::Empty)
+      if(pd->m_type != PixelDescriptor::Empty
+        && pd->m_type != PixelDescriptor::TerrainType)
       {
         assert(s);
       }

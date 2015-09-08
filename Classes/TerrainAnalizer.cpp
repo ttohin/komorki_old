@@ -16,9 +16,9 @@ TerrainAnalizer::TerrainAnalizer(const Buffer2DPtr<float>& buffer)
 , m_foreground(new Buffer2D<TerrainInfo>(buffer->GetWidth() * 2, buffer->GetHeight() * 2))
 , m_levels(new Levels(buffer->GetWidth() * 2, buffer->GetHeight() * 2))
 {
-  float topLevel = 0.84;
+  float topLevel = 0.92;
   float wallLevel = 0.7;
-  float bgLevel = 0.19;
+  float bgLevel = 0.35;
   
   buffer->ForEach([&](int _x, int _y, const float& value)
                  {

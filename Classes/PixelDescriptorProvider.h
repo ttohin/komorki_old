@@ -66,6 +66,7 @@ public:
   void InitWithConfig(Config* config);
   
   virtual PixelDescriptor* GetDescriptor(komorki::PixelPos x, komorki::PixelPos y) const;
+  virtual TerrainAnalizer::Result GetTerrain() const;
   virtual komorki::Vec2 GetSize() const;
   virtual void Update(bool passUpdateResult, std::list<UpdateResult>& result);
   virtual ~PixelDescriptorProvider () {};
@@ -84,6 +85,7 @@ private:
   int CountTypeAroundPosition(komorki::Vec2 pos, int character);
   PixelMap m_map;
   unsigned int m_updateId;
+  TerrainAnalizer::Result m_terrain;
   std::vector<std::vector<PixelDescriptor::Type> > m_typeMap;
 };
   

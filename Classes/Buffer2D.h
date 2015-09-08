@@ -70,6 +70,19 @@ public:
     }
   }
   
+  inline bool SubSet(const S& _x, const S& _y, Buffer2D<T>& bufferOut) const
+  {
+    if (!IsInside(_x, _y) || !IsInside(_x + bufferOut.GetWidth() - 1, _y + bufferOut.GetHeight() - 1)) return false;
+    
+    for (int i = 0; i < bufferOut.GetWidth(); ++i)
+    {
+      for (int j = 0; j < bufferOut.GetHeight(); ++j)
+      {
+        bufferOut.Set(i, j, GetInternal(i + _x, j + _y));
+      }
+    }
+  }
+  
 private:
   
   inline bool IsInside(const S& x, const S& y) const

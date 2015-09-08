@@ -5,8 +5,9 @@
 #include "CellShapes.h"
 #include "CellDescriptor.h"
 #include "Map.h"
+#include "DiamondSquareGenerator.h"
 
-#define COLLECT_POPULATION_METRICS 0
+#define COLLECT_POPULATION_METRICS 1
 
 namespace komorki
 {
@@ -318,8 +319,25 @@ void PixelDescriptorProvider::Init()
     }
   }
   
-  Map map;
-  map.Apply(this);
+  komorki::DiamondSquareGenerator gen(512, 512, 60.f, -0.5, false);
+  gen.Generate(nullptr);
+  
+  auto buffer = gen.GetBuffer(0,0, m_config->mapWidth, m_config->mapHeight);
+  auto analizer = std::shared_ptr<TerrainAnalizer>(new TerrainAnalizer(buffer));
+  auto analizedBuffer = analizer->GetLevels();
+
+  analizedBuffer->ForEach([&](const int& x, const int& y, const TerrainLevel& level)
+                          {
+                            if (x%2 != 0 && y%2 != 0) {
+                              return ;
+                            }
+                            if (level >= TerrainLevel::Ground)
+                            {
+                              m_map[x/2][y/2]->m_type = PixelDescriptor::TerrainType;
+                            }
+                          });
+  
+  m_terrain = analizer->GetResult();
   
   for (int i = 0; i < m_config->mapWidth; ++i)
   {
@@ -418,6 +436,11 @@ PixelDescriptor* PixelDescriptorProvider::GetDescriptor(PixelPos x, PixelPos y) 
   
   return m_map[x][y].get();
 }
+  
+TerrainAnalizer::Result PixelDescriptorProvider::GetTerrain() const
+  {
+    return m_terrain;
+  }
 
 Vec2 PixelDescriptorProvider::GetSize() const
 {
@@ -548,7 +571,7 @@ void PixelDescriptorProvider::Update(bool passUpdateResult, std::list<PixelDescr
 //  {
 //    return;
 //  }
-  
+ 
   #if COLLECT_POPULATION_METRICS
     m_population.clear();
   #endif
@@ -576,9 +599,7 @@ void PixelDescriptorProvider::Update(bool passUpdateResult, std::list<PixelDescr
       {
         auto pd = line[j];
         
-#if COLLECT_POPULATION_METRICS
-        m_population[d->m_character]=m_population[d->m_character]+1;
-#endif
+
         auto d = pd->m_cellDescriptor;
         if (d == nullptr || d->parent != pd.get())
         {
@@ -589,6 +610,10 @@ void PixelDescriptorProvider::Update(bool passUpdateResult, std::list<PixelDescr
         {
           continue;
         }
+        
+#if COLLECT_POPULATION_METRICS
+        m_population[d->m_character]=m_population[d->m_character]+1;
+#endif
         
         d->m_updateId = m_updateId;
         
