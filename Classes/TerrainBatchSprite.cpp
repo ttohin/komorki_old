@@ -69,7 +69,7 @@ bool TerrainBatchSprite::init(const TerrainAnalizer::Result& buffer)
   }
   
   getTexture()->setAliasTexParameters();
- 
+// 
 //  buffer.background->ForEach([&](const int& x, const int& y, const TerrainInfo& value)
 //                               {
 //                                 auto s = waterSprite();
@@ -77,7 +77,7 @@ bool TerrainBatchSprite::init(const TerrainAnalizer::Result& buffer)
 //                                 pos += {kScale * kSpriteSize / 2.f, kScale * kSpriteSize / 2.f};
 //                                 s->setPosition(pos);
 //                               });
-//  
+//
   buffer.background->ForEach([&](const int& x, const int& y, const TerrainInfo& value)
                    {
                      auto s = spriteForDescriptor(value);

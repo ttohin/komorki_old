@@ -61,6 +61,8 @@ namespace komorki
     }
   };
   
+  bool SplitRectOnChunks(const Rect& rect, const Rect& existingRect, const PixelPos chunkSize, std::vector<Rect>& result);
+  
 
 }
 

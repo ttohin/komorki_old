@@ -131,10 +131,12 @@ void ui::Viewport::Calculate()
   }
 }
 
-ui::Viewport::Viewport(cocos2d::Node* superView, PixelDescriptorProvider::Config* config, const cocos2d::Size& originalSize)
+ui::Viewport::Viewport(cocos2d::Node* superView,
+                       const cocos2d::Size& originalSize,
+                       const std::shared_ptr<komorki::PixelDescriptorProvider>& provider)
+
 {
   assert(superView);
-  assert(config);
  
   m_originalSize = originalSize;
   m_superView = superView;
@@ -146,13 +148,8 @@ ui::Viewport::Viewport(cocos2d::Node* superView, PixelDescriptorProvider::Config
   m_pixelWorldPos.origin = {0, 0};
   m_pixelWorldPos.size = originalSize;
   
-  m_provider = std::make_shared<PixelDescriptorProvider>();
-  m_provider->InitWithConfig(config);
-  std::list<komorki::PixelDescriptorProvider::UpdateResult> result;
-  for (int i = 0; i < 0; i++)
-  {
-    m_provider->Update(false, result);
-  }
+  m_provider = provider;
+  
   m_manager = std::make_shared<komorki::AsyncPixelManager>(m_provider.get());
   m_lastUpdateId = 0;
   
@@ -163,11 +160,27 @@ ui::Viewport::Viewport(cocos2d::Node* superView, PixelDescriptorProvider::Config
 
 ui::Viewport::~Viewport()
 {
- assert(0);
+  m_manager->Stop();
 }
 
 void ui::Viewport::Test()
 {
+  {
+    Rect r1 = {{0,0}, {60,70}};
+    Rect existingRect = {{0,0}, {50,50}};
+    Rect expected2 = {{50,0}, {10,50}};
+    Rect expected3 = {{0,50}, {50,20}};
+    Rect expected4 = {{50,50}, {10,20}};
+    
+    std::vector<Rect> res;
+    assert(::SplitRectOnChunks(r1, existingRect, 50, res));
+    assert(res.size() == 3);
+    assert(res.end() != std::find(res.begin(), res.end(), expected2));
+    assert(res.end() != std::find(res.begin(), res.end(), expected3));
+    assert(res.end() != std::find(res.begin(), res.end(), expected4));
+    
+  }
+  
   {
     Rect r1 = {{0,0}, {100,100}};
     Rect r2 = {{-10,10}, {120,60}};
@@ -486,6 +499,11 @@ bool ui::Viewport::IsAvailable()
   return m_manager->IsAvailable();
 }
 
+cocos2d::Node* ui::Viewport::GetRootNode() const
+{
+  return m_superView;
+}
+
 void ui::Viewport::UpdateWarp(float& updateTime, unsigned int numberOfUpdates)
 {
   if ( false == m_manager->IsAvailable() )
@@ -533,7 +551,6 @@ void ui::Viewport::Update(float updateTime, float& outUpdateTime)
   
   const std::list<komorki::PixelDescriptorProvider::UpdateResult>& result = m_manager->GetUpdateResult();
   
-  m_updateTime.AddValue(m_manager->GetLastUpdateTime());
   
 #ifdef LOG_UPDATES
     for (const auto& u : result)
@@ -642,9 +659,13 @@ void ui::Viewport::Update(float updateTime, float& outUpdateTime)
   elapsed = (tv.tv_sec - start_tv.tv_sec) + (tv.tv_usec - start_tv.tv_usec) / 1000000.0;
   
   outUpdateTime = m_manager->GetLastUpdateTime() + elapsed;
-  
-  m_mapsUpdateTime.AddValue(elapsed);
-  m_numberOfUpdates.AddValue(result.size());
+ 
+  if (m_lastUpdateId >= 3)
+  {
+    m_mapsUpdateTime.AddValue(elapsed);
+    m_numberOfUpdates.AddValue(result.size());
+    m_updateTime.AddValue(m_manager->GetLastUpdateTime());
+  }
   
   if (m_numberOfUpdates.number % 100 == 0)
   {
@@ -813,41 +834,7 @@ bool ui::Viewport::MoveMaps(const Vec2& offset, const cocos2d::Vec2& pointOffset
 
 bool ui::Viewport::SplitRectOnChunks(const Rect& rect, const Rect& existingRect, std::vector<Rect>& result) const
 {
-  assert(rect.size.x);
-  assert(rect.size.y);
-  
-  uint mapSegmentSize = MIN(kSegmentSize, rect.size.x);
-  mapSegmentSize = MIN(mapSegmentSize, rect.size.y);
-  
-  int stepsX = rect.size.x/mapSegmentSize + 1;
-  int stepsY = rect.size.y/mapSegmentSize + 1;
-  
-  for (int i = 0; i < stepsX; ++i)
-  {
-    for (int j = 0; j < stepsY; ++j)
-    {
-      int width = MIN(mapSegmentSize, rect.size.x - i*mapSegmentSize);
-      int height = MIN(mapSegmentSize, rect.size.y - j*mapSegmentSize);
-      
-      if (width <= 0 || height <= 0)
-      {
-        continue;
-      }
-     
-      Rect mapRect;
-      mapRect.origin.x = rect.origin.x + i*mapSegmentSize;
-      mapRect.origin.y = rect.origin.y + j*mapSegmentSize;
-      mapRect.size.x = width;
-      mapRect.size.y = height;
-      
-      if (!mapRect.In(existingRect))
-      {
-        result.push_back(mapRect);
-      }
-    }
-  }
-  
-  return true;
+  return ::SplitRectOnChunks(rect, existingRect, kSegmentSize, result);
 }
 
 bool ui::Viewport::CreatePartialMapsInRects(const std::vector<Rect>& rects,

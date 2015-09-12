@@ -14,6 +14,7 @@
 #include "IPixelDescriptorProvider.h"
 #include "cocos2d.h"
 #include "TerrainBatchSprite.h"
+#include "TerrainSprite.h"
 
 namespace komorki
 {
@@ -104,7 +105,8 @@ namespace komorki
       std::shared_ptr<PixelMapLightOverlay> m_lightOverlay;
       std::shared_ptr<PixelMapBackground> m_background;
       std::shared_ptr<GlowMapOverlay> m_glow;
-      std::shared_ptr<TerrainBatchSprite> m_terrain;
+//      std::shared_ptr<TerrainBatchSprite> m_terrain;
+      cocos2d::Sprite* m_terrainSprite;
       PixelDescriptorProvider* m_provider;
       std::list<Context*> m_upcomingContexts;
       std::list<CellDescriptor*> m_outgoingCells;

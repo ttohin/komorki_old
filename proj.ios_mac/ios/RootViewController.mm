@@ -88,7 +88,7 @@
 
 - (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation
 {
-  return UIInterfaceOrientationLandscapeLeft;
+  return UIInterfaceOrientationPortrait;
 }
 
 //fix not hide status on ios7

@@ -88,7 +88,8 @@ PartialMap::~PartialMap()
   m_lightOverlay->removeFromParentAndCleanup(true);
   m_debugView->removeFromParentAndCleanup(true);
   m_glow->removeFromParentAndCleanup(true);
-  m_terrain->removeFromParentAndCleanup(true);
+//  m_terrain->removeFromParentAndCleanup(true);
+  m_terrainSprite->removeFromParentAndCleanup(true);
   
   for (auto cell : m_outgoingCells)
   {
@@ -145,7 +146,8 @@ bool PartialMap::Init(int a, int b, int width, int height,
   m_lightOverlay = std::make_shared<PixelMapLightOverlay>(a, b, width, height, provider);
   m_background = std::make_shared<PixelMapBackground>(a, b, width, height);
   m_glow = std::make_shared<GlowMapOverlay>();
-  m_terrain = std::make_shared<TerrainBatchSprite>();
+//  m_terrain = std::make_shared<TerrainBatchSprite>();
+  m_terrainSprite = TerrainSprite::create(a, b, width, height);
   
   m_cellMap->init();
   m_debugView->init();
@@ -153,28 +155,30 @@ bool PartialMap::Init(int a, int b, int width, int height,
   m_background->init();
   m_glow->init();
   
-  auto terrain = provider->GetTerrain();
-  TerrainAnalizer::Result result;
-  
-  result.background = std::make_shared<Buffer2D<TerrainInfo>>(width * 2, height * 2);
-  result.ground = std::make_shared<Buffer2D<TerrainInfo>>(width * 2, height * 2);
-  result.foreground = std::make_shared<Buffer2D<TerrainInfo>>(width * 2, height * 2);
-  
-  terrain.background->SubSet(a * 2, b * 2, *result.background.get());
-  terrain.ground->SubSet(a * 2, b * 2, *result.ground.get());
-  terrain.foreground->SubSet(a * 2, b * 2, *result.foreground.get());
-  
-  m_terrain->init(result);
+//  auto terrain = provider->GetTerrain();
+//  TerrainAnalizer::Result result;
+//  
+//  result.background = std::make_shared<Buffer2D<TerrainInfo>>(width * 2, height * 2);
+//  result.ground = std::make_shared<Buffer2D<TerrainInfo>>(width * 2, height * 2);
+//  result.foreground = std::make_shared<Buffer2D<TerrainInfo>>(width * 2, height * 2);
+//  
+//  terrain.background->SubSet(a * 2, b * 2, *result.background.get());
+//  terrain.ground->SubSet(a * 2, b * 2, *result.ground.get());
+//  terrain.foreground->SubSet(a * 2, b * 2, *result.foreground.get());
+//  
+//  m_terrain->init(result);
   
   m_cellMap->setPosition(offset);
   m_debugView->setPosition(offset);
   m_lightOverlay->setPosition(offset);
   m_background->setPosition(offset);
   m_glow->setPosition(offset);
-  m_terrain->setPosition(offset);
+//  m_terrain->setPosition(offset);
+  m_terrainSprite->setPosition(offset);
   
   superView->addChild(m_background.get(), -1);
-  superView->addChild(m_terrain.get(), 0);
+//  superView->addChild(m_terrain.get(), 0);
+  superView->addChild(m_terrainSprite, 0);
   superView->addChild(m_cellMap.get(), 1);
   superView->addChild(m_lightOverlay.get(), 2);
   superView->addChild(m_glow.get(), 3);
@@ -373,14 +377,16 @@ void PartialMap::Update(const std::list<IPixelDescriptorProvider::UpdateResult>&
     m_debugView->setPosition(pos);
     m_lightOverlay->setPosition(pos);
     m_glow->setPosition(pos);
-    m_terrain->setPosition(pos);
+//    m_terrain->setPosition(pos);
+    m_terrainSprite->setPosition(pos);
     
     m_cellMap->setScale(scale);
     m_background->setScale(scale);
     m_debugView->setScale(scale);
     m_lightOverlay->setScale(scale);
     m_glow->setScale(scale);
-    m_terrain->setScale(scale);
+//    m_terrain->setScale(scale);
+    m_terrainSprite->setScale(scale * 4.f);
   }
  
   void PartialMap::ChangeAABB(int a, int b, int width, int height)

@@ -137,3 +137,44 @@ bool Rect::operator!=(const Rect& rect) const
 {
   return !(*this == rect);
 }
+
+
+bool komorki::SplitRectOnChunks(const Rect& rect, const Rect& existingRect, const PixelPos chunkSize, std::vector<Rect>& result)
+
+{
+  if (rect.size.x == 0 || rect.size.y == 0)
+    return false;
+  
+  uint mapSegmentSize = MIN(chunkSize, rect.size.x);
+  mapSegmentSize = MIN(chunkSize, rect.size.y);
+  
+  int stepsX = rect.size.x/mapSegmentSize + 1;
+  int stepsY = rect.size.y/mapSegmentSize + 1;
+  
+  for (int i = 0; i < stepsX; ++i)
+  {
+    for (int j = 0; j < stepsY; ++j)
+    {
+      int width = MIN(mapSegmentSize, rect.size.x - i*mapSegmentSize);
+      int height = MIN(mapSegmentSize, rect.size.y - j*mapSegmentSize);
+      
+      if (width <= 0 || height <= 0)
+      {
+        continue;
+      }
+      
+      Rect mapRect;
+      mapRect.origin.x = rect.origin.x + i*mapSegmentSize;
+      mapRect.origin.y = rect.origin.y + j*mapSegmentSize;
+      mapRect.size.x = width;
+      mapRect.size.y = height;
+      
+      if (!mapRect.In(existingRect))
+      {
+        result.push_back(mapRect);
+      }
+    }
+  }
+  
+  return true;
+}

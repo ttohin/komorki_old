@@ -27,27 +27,19 @@ static float kViewportUpdateTime = 0.1;
 USING_NS_CC;
 using namespace cocostudio;
 
-Scene* PartialMapScene::createScene()
+void PartialMapScene::CreateMap(const komorki::ui::Viewport::Ptr& viewport)
 {
-  auto scene = Scene::create();
-  auto layer = PartialMapScene::create();
-  scene->addChild(layer);
-  return scene;
-}
-
-void PartialMapScene::CreateMap()
-{
-  auto config = komorki::ConfigManager::GetInstance()->GetCurrentConfig();
-
   Size visibleSize = Director::getInstance()->getVisibleSize();
-  m_viewport = new komorki::ui::Viewport(m_rootNode, config.get(), visibleSize);
+  m_viewport = viewport;
+  addChild(m_viewport->GetRootNode());
+  m_viewport->GetRootNode()->release();
   
   m_mapScale = 0.1;
   m_mapPos = cocos2d::Vec2::ZERO;
   
 }
 
-bool PartialMapScene::init()
+bool PartialMapScene::init(const komorki::ui::Viewport::Ptr& viewport)
 {
   if ( !Layer::init() )
   {
@@ -88,13 +80,11 @@ bool PartialMapScene::init()
     bgAspect = AspectToFill(m_bg->getContentSize(), visibleSize);
   }
   m_bg->setScale(bgAspect);
-
   
   m_rootNode = Node::create();
   addChild(m_rootNode);
   
-  komorki::ConfigManager::GetInstance()->CreateNewConfig();
-  CreateMap();
+  CreateMap(viewport);
   
   SetBackgroundPosition();
 
@@ -591,19 +581,19 @@ void PartialMapScene::timerForUpdate(float dt)
   
   if (m_restartManagerFromOptionMenu)
   {
-    delete m_viewport;
-    
     komorki::ConfigManager::GetInstance()->ApplyPendingConfig();
-    
-    CreateMap();
+#warning Recrate map
+//    delete m_viewport;
+//    CreateMap();
     m_restartManagerFromOptionMenu = false;
     return;
   }
   
   if (m_stopManager)
   {
-    delete m_viewport;
-    CreateMap();
+#warning Recrate map
+//    delete m_viewport;
+//    CreateMap();
     m_stopManager = false;
     return;
   }

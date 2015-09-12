@@ -57,6 +57,7 @@ public:
     Config::CellConfig* ConfigForCell(CellType type);
     
     Config();
+    ~Config(){}
   };
   
   typedef std::shared_ptr<PixelDescriptor> PixelPtr;

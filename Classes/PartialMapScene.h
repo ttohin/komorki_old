@@ -15,9 +15,26 @@
 class PartialMapScene : public cocos2d::Layer, cocos2d::TextFieldDelegate
 {
 public:
-  static cocos2d::Scene* createScene();
-  virtual bool init();
-  CREATE_FUNC(PartialMapScene);
+
+  virtual bool init(const komorki::ui::Viewport::Ptr& viewport);
+  static cocos2d::Scene* createScene(const komorki::ui::Viewport::Ptr& viewport)
+  {
+    auto scene = cocos2d::Scene::create();
+    
+    PartialMapScene *pRet = new(std::nothrow) PartialMapScene();
+    if (pRet && pRet->init(viewport))
+    {
+      pRet->autorelease();
+      scene->addChild(pRet);
+      return scene;
+    }
+    else
+    {
+      delete pRet;
+      pRet = NULL;
+      return NULL;
+    }
+  }
   
   virtual ~PartialMapScene(){}
   
@@ -53,7 +70,7 @@ private:
   bool m_eraseBrush;
   
 //  PixelMapManager* m_mapManager;
-  komorki::ui::Viewport* m_viewport;
+  komorki::ui::Viewport::Ptr m_viewport;
   cocos2d::Node* m_rootNode;
   cocos2d::Sprite* m_bg;
   cocos2d::Sprite* m_brush;
@@ -96,7 +113,7 @@ private:
   void timerForUpdate(float dt);
   void timerForViewportUpdate(float dt);
   void timerForMove(float dt);
-  void CreateMap();
+  void CreateMap(const komorki::ui::Viewport::Ptr& viewport);
   
   void ShowMainMenu();
   void ShowOptionsMenu();

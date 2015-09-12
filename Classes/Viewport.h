@@ -26,13 +26,17 @@ namespace komorki
     class Viewport
     {
     public:
-    
      
+      typedef std::shared_ptr<Viewport> Ptr;
+      
       void Move(const cocos2d::Vec2& ofset);
       void Zoom(const cocos2d::Vec2& point, float scaleOffset);
       void Calculate();
       
-      Viewport(cocos2d::Node* superView, PixelDescriptorProvider::Config* config, const cocos2d::Size& originalSize);
+      Viewport(cocos2d::Node* superView,
+               const cocos2d::Size& originalSize,
+               const std::shared_ptr<komorki::PixelDescriptorProvider>& provider);
+      
       ~Viewport();
       void Test();
       void CreateMap();
@@ -49,6 +53,7 @@ namespace komorki
       void UpdateAsync(float& updateTime);
       void UpdateWarp(float& updateTime, unsigned int numberOfUpdates);
       bool IsAvailable();
+      cocos2d::Node* GetRootNode() const;
       
     private:
       

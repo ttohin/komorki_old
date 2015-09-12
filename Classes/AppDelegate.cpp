@@ -2,7 +2,7 @@
 
 #include <time.h>
 #include <stdlib.h>
-#include "PartialMapScene.h"
+#include "LoadingScene.h"
 
 USING_NS_CC;
 
@@ -39,7 +39,7 @@ bool AppDelegate::applicationDidFinishLaunching()
   director->setDisplayStats(true);
   
   director->setAnimationInterval(1.0 / 60);
-  auto scene = PartialMapScene::createScene();
+  auto scene = LoadingScene::createScene();
   director->runWithScene(scene);
   
   return true;
