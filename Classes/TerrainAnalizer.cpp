@@ -17,8 +17,8 @@ TerrainAnalizer::TerrainAnalizer(const Buffer2DPtr<float>& buffer)
 , m_foreground(new Buffer2D<TerrainInfo>(buffer->GetWidth() * 2, buffer->GetHeight() * 2))
 , m_levels(new Levels(buffer->GetWidth() * 2, buffer->GetHeight() * 2))
 {
-  float topLevel = 0.92;
-  float wallLevel = 0.7;
+  float topLevel = 0.87;
+  float wallLevel = 0.6;
   float bgLevel = 0.35;
   
   buffer->ForEach([&](int _x, int _y, const float& value)
@@ -320,6 +320,7 @@ int TerrainAnalizer::ColorFromneighbros(TerrainInfoBuffer buffer, int x, int y, 
       }
     }
   }
+  return 0;
 }
 
 void TerrainAnalizer::AnalizeCorner(TerrainInfoBuffer buffer, int x, int y, TerrainInfo& info)

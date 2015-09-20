@@ -43,7 +43,7 @@ public:
   void AddSprite(PixelDescriptor* pd, const Vec2& pos);
   void AddCreature(CellDescriptor* cd, PartialMap::Context* context);
   void AdoptSprite(PartialMap::Context* context);
-  void MoveCreature(PartialMap::Context* context, const Vec2& source, const Vec2& dest);
+  void MoveCreature(PartialMap::Context* context, const Vec2& source, const Vec2& dest, int duration = 0);
   void Attack(PartialMap::Context* context, const Vec2& pos, const Vec2& offset);
   void StopSmallAnimations();
   void StartSmallAnimations();

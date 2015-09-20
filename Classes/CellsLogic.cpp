@@ -160,6 +160,7 @@ void ProcessBigBlue(CellDescriptor* pd,
     pd->Move(empty[0]);
     movement.SetValueFlag(true);
     movement.value.destinationDesc = empty[0];
+    movement.value.duration = pd->m_sleepCounter;
   }
 }
 
@@ -378,6 +379,7 @@ void ProcessGreenCell(CellDescriptor* pd,
           pd->Move(newPos);
           movement.SetValueFlag(true);
           movement.value.destinationDesc = newPos;
+          movement.value.duration = pd->m_sleepCounter;
         }
         
         stop = true;
@@ -415,6 +417,7 @@ void ProcessGreenCell(CellDescriptor* pd,
       pd->Move(newPos);
       movement.SetValueFlag(true);
       movement.value.destinationDesc = newPos;
+      movement.value.duration = pd->m_sleepCounter;
       return;
     }
   }
@@ -459,6 +462,7 @@ void ProcessGreenCell(CellDescriptor* pd,
     pd->Move(emptyBlock);
     movement.SetValueFlag(true);
     movement.value.destinationDesc = emptyBlock;
+    movement.value.duration = pd->m_sleepCounter;
   }
 }
 

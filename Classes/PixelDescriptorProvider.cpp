@@ -603,7 +603,6 @@ void PixelDescriptorProvider::Update(bool passUpdateResult, std::list<PixelDescr
       if (oldPd == PixelDescriptor::CreatureType)
       {
         auto pd = line[j];
-        
 
         auto d = pd->m_cellDescriptor;
         if (d == nullptr || d->parent != pd.get())

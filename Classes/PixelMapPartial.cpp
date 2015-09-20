@@ -288,7 +288,7 @@ namespace komorki
       }
     }
     
-    void PixelMapPartial::MoveCreature(PartialMap::Context* context, const Vec2& source, const Vec2& dest)
+    void PixelMapPartial::MoveCreature(PartialMap::Context* context, const Vec2& source, const Vec2& dest, int duration)
     {
       assert(std::abs(source.x - dest.x) <= 2);
       assert(std::abs(source.y - dest.y) <= 2);
@@ -302,7 +302,7 @@ namespace komorki
       {
         s->stopAllActionsByTag(0);
         s->setPosition(spriteVector(source, offset));
-        auto moveTo = MoveTo::create(m_updateTime*0.9, spriteVector(dest, randOffset));
+        auto moveTo = MoveTo::create(m_updateTime*0.9*(duration + 1), spriteVector(dest, randOffset));
         moveTo->setTag(0);
         s->runAction(moveTo);
       }

@@ -15,22 +15,23 @@ namespace komorki
   
   struct AddCreature
   {
-    PixelDescriptor* destinationDesc;
+    PixelDescriptor* destinationDesc = nullptr;
   };
   
   struct Action
   {
-    Vec2 delta;
+    Vec2 delta = Vec2(0.f, 0.f);
   };
   
   struct DeleteCreature
   {
-    std::shared_ptr<CellDescriptor> cellDescriptor;
+    std::shared_ptr<CellDescriptor> cellDescriptor = nullptr;
   };
   
   struct Movement
   {
-    PixelDescriptor* destinationDesc;
+    int duration = 0;
+    PixelDescriptor* destinationDesc = nullptr;
   };
   
   template<typename T>
@@ -81,8 +82,8 @@ public:
 
   struct UpdateResult
   {
-    void* userData;
-    PixelDescriptor* desc;
+    void* userData = nullptr;
+    PixelDescriptor* desc = nullptr;
     komorki::Optional<komorki::Action> action;
     komorki::Optional<komorki::Movement> movement;
     komorki::Optional<komorki::AddCreature> addCreature;

@@ -300,7 +300,17 @@ void PartialMap::Update(const std::list<IPixelDescriptorProvider::UpdateResult>&
         {
           context->Free(this);
           m_outgoingCells.push_back(destinationDesc->m_cellDescriptor);
-          Move(initialPos, destinationPos, context);
+          int duration = 0;
+          if (m == true)
+          {
+            duration = m.value.duration;
+            
+            if (duration > 5)
+            {
+              duration /= 2;
+            }
+          }
+          Move(initialPos, destinationPos, context, duration);
         }
       }
       else
@@ -327,8 +337,19 @@ void PartialMap::Update(const std::list<IPixelDescriptorProvider::UpdateResult>&
             context = AddCreature(destinationPos, destinationDesc);
           }
         }
-        
-        Move(initialPos, destinationPos, context);
+       
+        int duration = 0;
+        if (m == true)
+        {
+          duration = m.value.duration;
+          
+          if (duration > 5)
+          {
+            duration /= 2;
+          }
+        }
+      
+        Move(initialPos, destinationPos, context, duration);
       }
     }
     else if (a == true)
@@ -486,9 +507,9 @@ void PartialMap::Update(const std::list<IPixelDescriptorProvider::UpdateResult>&
     }
   }
   
-  void PartialMap::Move(const Vec2& source, const Vec2& dest, Context* context)
+  void PartialMap::Move(const Vec2& source, const Vec2& dest, Context* context, int duration)
   {
-    m_cellMap->MoveCreature(context, LocalVector(source), LocalVector(dest));
+    m_cellMap->MoveCreature(context, LocalVector(source), LocalVector(dest), duration);
     m_glow->MoveCreature(context, LocalVector(source), LocalVector(dest));
   }
  

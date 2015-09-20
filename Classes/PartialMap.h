@@ -92,7 +92,7 @@ namespace komorki
       PartialMap::Context* AddCreature(const Vec2& source, PixelDescriptor* dest);
       PartialMap::Context* CreateCell(PixelDescriptor* dest);
       void Delete(Context* context);
-      void Move(const Vec2& source, const Vec2& dest, Context* context);
+      void Move(const Vec2& source, const Vec2& dest, Context* context, int duration = 0);
       void Attack(Context* context, const Vec2& pos, const Vec2& offset);
       
       inline bool IsInAABB(const Vec2& vec);

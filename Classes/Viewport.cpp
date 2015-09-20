@@ -538,7 +538,6 @@ void ui::Viewport::Update(float updateTime, float& outUpdateTime)
 {
   assert(m_lastUpdateId == m_manager->GetUpdateId());
   
-  LOG_W("Update %d", m_lastUpdateId);
   
   outUpdateTime = 0;
   
@@ -550,6 +549,8 @@ void ui::Viewport::Update(float updateTime, float& outUpdateTime)
   double elapsed = 0.0;
   
   const std::list<komorki::PixelDescriptorProvider::UpdateResult>& result = m_manager->GetUpdateResult();
+  
+  LOG_W("Update %d. updates: %lu", m_lastUpdateId, result.size());
   
   
 #ifdef LOG_UPDATES
