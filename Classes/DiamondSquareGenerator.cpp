@@ -105,6 +105,21 @@ void DiamondSquareGenerator::Add(DiamondSquareGenerator* other, const OnDiff& on
   }
 }
 
+void DiamondSquareGenerator::Multiply(DiamondSquareGenerator* other, const OnDiff& onDiff)
+{
+  for (int i = 0; i < m_width; ++i)
+  {
+    for (int j = 0; j < m_height; ++j)
+    {
+      float prevValue = GetValue(i, j);
+      float result = prevValue * other->GetValue(i, j);
+      float diff = result - prevValue;
+      if (onDiff) onDiff(i, j, prevValue, diff);
+      SetValue(i, j, prevValue + diff);
+    }
+  }
+}
+
 void DiamondSquareGenerator::Add(float diff)
 {
   for (int i = 0; i < m_width; ++i)

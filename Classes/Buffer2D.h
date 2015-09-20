@@ -48,7 +48,7 @@ public:
     return true;
   }
   
-  inline const T& Get(const S& x, const S& y, const T& defaultValue) const
+  inline const T& GetWithDefault(const S& x, const S& y, const T& defaultValue) const
   {
     if (!IsInside(x , y))
     {
@@ -81,6 +81,7 @@ public:
         bufferOut.Set(i, j, GetInternal(i + _x, j + _y));
       }
     }
+    return true;
   }
   
 private:

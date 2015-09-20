@@ -13,6 +13,15 @@ USING_NS_CC;
 static const float kSpriteSize = 32;
 static const float kScale = 0.5;
 
+static const std::vector<Color3B> colors =
+{
+  Color3B(85, 3, 7), Color3B(203, 8, 16), Color3B(213, 86, 67),
+  Color3B(86, 44, 4), Color3B(202, 139, 10), Color3B(221, 202, 99),
+  Color3B(31, 121, 70), Color3B(103, 180, 100), Color3B(172, 213, 121),
+  Color3B(12, 41, 135), Color3B(47, 136, 152), Color3B(116, 176, 186),
+  Color3B(79, 10, 135), Color3B(123, 89, 176), Color3B(138, 133, 200),
+  Color3B(87, 8, 63), Color3B(122, 62, 74), Color3B(185, 104, 111),
+};
 
 cocos2d::Sprite* TerrainBatchSprite::waterSprite()
 {
@@ -29,13 +38,15 @@ cocos2d::Sprite* TerrainBatchSprite::waterSprite()
 
 cocos2d::Color3B TerrainBatchSprite::colorForInfo(const TerrainInfo& terrainInfo)
 {
-  switch (terrainInfo.resultLevel) {
+  assert(terrainInfo.color >= 0);
+  switch (terrainInfo.resultLevel)
+  {
     case TerrainLevel::Background:
-      return Color3B(26, 46, 44);
+      return colors[terrainInfo.color * 3 + 0];
     case TerrainLevel::Foreground:
-      return Color3B(154, 19, 2);
+      return colors[terrainInfo.color * 3 + 2];
     case TerrainLevel::Ground:
-      return Color3B(131, 15, 3);
+      return colors[terrainInfo.color * 3 + 1];
     default:
       return Color3B(255, 255, 255);
   }

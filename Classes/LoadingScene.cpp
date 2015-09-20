@@ -102,14 +102,10 @@ void LoadingScene::LoadTerrainMaps(float dt)
     mapName += std::to_string(rect.size.x / 2) + "_" + std::to_string(rect.size.y / 2);
     mapName += ".png";
     
-    cocos2d::log("%s", mapName.c_str());
-    
     m_mapList.push_back(FileUtils::getInstance()->getWritablePath() + mapName);
     
     rt->saveToFile(mapName, true, [&](RenderTexture*, const std::string& image)
                    {
-                     cocos2d::log("saved %s", image.c_str());
-                     
                      m_mapList.pop_back();
                      
                      if (m_mapList.empty())

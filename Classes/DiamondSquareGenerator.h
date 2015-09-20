@@ -27,6 +27,7 @@ namespace komorki
     void ForEach(const OnValue& onValue) ;
     void Step(const OnDiff& onDiff = nullptr, int value = 1, float roughness = 0.1);
     void Add(DiamondSquareGenerator* other, const OnDiff& onDiff);
+    void Multiply(DiamondSquareGenerator* other, const OnDiff& onDiff);
     void Add(float diff);
     void Multiply(float value);
     Buffer2DPtr<float> GetBuffer(int x, int y, int width, int height) const;

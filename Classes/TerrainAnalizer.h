@@ -44,6 +44,7 @@ struct TerrainInfo
   TerrainLevel resultLevel = TerrainLevel::Water;
   TerrainPos pos = TerrainPos::Unknown;
   TerrainRotation rotation = TerrainRotation::Zero;
+  int color = -1;
 };
 
 class TerrainAnalizer {
@@ -69,11 +70,13 @@ public:
   virtual ~TerrainAnalizer () {}
   
 private:
- 
+
+  void MakeColors(TerrainInfoBuffer buffer);
   void Analize(TerrainInfoBuffer buffer, int x, int y, TerrainInfo& info, TerrainLevel level);
   int CountNeighbors(TerrainInfoBuffer buffer, int x, int y, TerrainLevel level) const;
   int CountNeighborsSquare(TerrainInfoBuffer buffer, int x, int y, TerrainLevel level) const;
   int CountNeighborsDiamond(TerrainInfoBuffer buffer, int x, int y, TerrainLevel level) const;
+  int ColorFromneighbros(TerrainInfoBuffer buffer, int x, int y, TerrainLevel level) const;
   void AnalizeCorner(TerrainInfoBuffer buffer, int x, int y, TerrainInfo& info);
   void AnalizeBorder(TerrainInfoBuffer buffer, int x, int y, TerrainInfo& info);
   void AnalizeBorderToCorner(TerrainInfoBuffer buffer, int x, int y, TerrainInfo& info);

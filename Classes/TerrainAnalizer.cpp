@@ -7,6 +7,7 @@
 //
 
 #include "TerrainAnalizer.h"
+#include <iostream>
 
 
 TerrainAnalizer::TerrainAnalizer(const Buffer2DPtr<float>& buffer)
@@ -77,6 +78,35 @@ TerrainAnalizer::TerrainAnalizer(const Buffer2DPtr<float>& buffer)
                       }
                     });
   
+  ResultPtr tempBuffer = std::make_shared<Buffer2D<TerrainInfo>>(m_bg->GetWidth(),
+                                                                 m_bg->GetHeight());
+  
+  auto res = m_bg->SubSet(0, 0, *tempBuffer.get());
+  assert(res);
+  MakeColors(tempBuffer);
+ 
+  tempBuffer->ForEach([&](const int& x, const int& y, const TerrainInfo& value)
+                      {
+                        {
+                          TerrainInfo info;
+                          m_ground->Get(x, y, info);
+                          info.color = value.color;
+                          m_ground->Set(x, y, info);
+                        }
+                        {
+                          TerrainInfo info;
+                          m_bg->Get(x, y, info);
+                          info.color = value.color;
+                          m_bg->Set(x, y, info);
+                        }
+                        {
+                          TerrainInfo info;
+                          m_foreground->Get(x, y, info);
+                          info.color = value.color;
+                          m_foreground->Set(x, y, info);
+                        }
+                      });
+  
   m_ground->ForEach([&](const int& x, const int& y, const TerrainInfo& value)
                     {
                       TerrainInfo info = value;
@@ -95,6 +125,8 @@ TerrainAnalizer::TerrainAnalizer(const Buffer2DPtr<float>& buffer)
                       Analize(m_foreground, x, y, info, TerrainLevel::Foreground);
                       m_foreground->Set(x, y, info);
                     });
+  
+
 }
 
 TerrainAnalizer::Result TerrainAnalizer::GetResult() const
@@ -110,6 +142,76 @@ TerrainAnalizer::Result TerrainAnalizer::GetResult() const
 TerrainAnalizer::LevelsPtr TerrainAnalizer::GetLevels() const
 {
   return m_levels;
+}
+
+void TerrainAnalizer::MakeColors(TerrainInfoBuffer buffer)
+{
+  int color = 0;
+  int colorNumber = 0;
+  
+  buffer->ForEach([&](const int& x, const int& y, const TerrainInfo& value)
+                  {
+                    if (value.level < TerrainLevel::Background)
+                    {
+                      return;
+                    }
+                    
+                    auto collectNeibours = [&](const int& x, const int& y)
+                    {
+                      std::vector<std::tuple<int, int>> neibours;
+                      for (int i = -1; i < 2; i++)
+                      {
+                        for (int j = -1; j < 2; j++)
+                        {
+                          TerrainInfo value;
+                          if (i == 0 && j == 0)
+                          {
+                            buffer->Get(x + i, y + j, value);
+                            if (value.color != -1)
+                            {
+                              continue;
+                            }
+                            value.color = color;
+                            buffer->Set(x + i, y + j, value);
+                            colorNumber += 1;
+                          }
+                          else if (buffer->Get(x + i, y + j, value))
+                          {
+                            if (value.color == -1 &&
+                                value.level >= TerrainLevel::Background)
+                            {
+                              value.color = color;
+                              buffer->Set(x + i, y + j, value);
+                              neibours.emplace_back(x + i, y + j);
+                              colorNumber += 1;
+                            }
+                          }
+                        }
+                      }
+                      return neibours;
+                    };
+                    
+                    std::vector<std::tuple<int, int>> neibours;
+                    neibours.emplace_back(x, y);
+                    do
+                    {
+                      std::vector<std::tuple<int, int>> upcommingNeibours;
+                      for (const auto& i : neibours)
+                      {
+                        auto n = collectNeibours(std::get<0>(i), std::get<1>(i));
+                        upcommingNeibours.insert(upcommingNeibours.end(), n.begin(), n.end());
+                      }
+                      neibours = upcommingNeibours;
+                      
+                    } while (!neibours.empty());
+
+                    if (colorNumber != 0)
+                    {
+                      color = (color + 1)%6;
+                      colorNumber = 0;
+                    }
+
+                  });
 }
 
 void TerrainAnalizer::Analize(TerrainInfoBuffer buffer, int x, int y, TerrainInfo& info, TerrainLevel level)
@@ -148,6 +250,7 @@ void TerrainAnalizer::Analize(TerrainInfoBuffer buffer, int x, int y, TerrainInf
     {
       info.pos = TerrainPos::InnnerCornter;
       info.resultLevel = level;
+      info.color = ColorFromneighbros(buffer, x, y, level);
       AnalizeInnterCorner(buffer, x, y, info);
     }
     else
@@ -199,6 +302,24 @@ int TerrainAnalizer::CountNeighborsDiamond(TerrainInfoBuffer buffer, int x, int 
   if (GetInfo(buffer, x - 1, y + 1, value, level) && value.level >= level) count += 1;
   
   return count;
+}
+
+int TerrainAnalizer::ColorFromneighbros(TerrainInfoBuffer buffer, int x, int y, TerrainLevel level) const
+{
+  TerrainInfo value;
+  for (int i = -1; i < 2; i++)
+  {
+    for (int j = -1; j < 2; j++)
+    {
+      if (i != 0 && j != 0 && buffer->Get(x + i, y + j, value))
+      {
+        if (value.level == level)
+        {
+          return value.color;
+        }
+      }
+    }
+  }
 }
 
 void TerrainAnalizer::AnalizeCorner(TerrainInfoBuffer buffer, int x, int y, TerrainInfo& info)
