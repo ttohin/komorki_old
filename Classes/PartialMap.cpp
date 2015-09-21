@@ -510,7 +510,7 @@ void PartialMap::Update(const std::list<IPixelDescriptorProvider::UpdateResult>&
   void PartialMap::Move(const Vec2& source, const Vec2& dest, Context* context, int duration)
   {
     m_cellMap->MoveCreature(context, LocalVector(source), LocalVector(dest), duration);
-    m_glow->MoveCreature(context, LocalVector(source), LocalVector(dest));
+    m_glow->MoveCreature(context, LocalVector(source), LocalVector(dest), duration);
   }
  
   void PartialMap::Attack(Context* context, const Vec2& pos, const Vec2& offset)

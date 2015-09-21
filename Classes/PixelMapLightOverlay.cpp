@@ -65,11 +65,18 @@ namespace komorki
         assert(value >= 0);
         assert(value < 32);
         
-        cocos2d::Rect r = cocos2d::Rect(value, 2, 1, 1);
+        cocos2d::Rect r = cocos2d::Rect(value, 3, 1, 1);
         auto s = CreateSprite();
         s->setTextureRect(r);
         s->setScale(kSpriteScale);
-        //    s->setOpacity(180);
+        
+        int opacity = 255.f * float(value) / 32.f;
+        if (value > 25)
+        {
+          opacity = 255 - 100 * (float(value - 25) / (32.f-25.f));
+        }
+        
+        s->setOpacity(opacity);
         //    s->setLocalZOrder(-1);
         s->setAnchorPoint({0, 0});
         s->setScale(kTileFrameSize, kTileFrameSize);
@@ -106,10 +113,10 @@ namespace komorki
           return false;
         }
         getTexture()->setAliasTexParameters();
-       
-        return true;
         
-//        setBlendFunc(BlendFunc::ADDITIVE);
+        return true;
+       
+        setBlendFunc({GL_DST_COLOR, GL_ONE_MINUS_DST_ALPHA});
         
         komorki::Vec2 mapSize = m_provider->GetSize();
         

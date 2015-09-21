@@ -17,7 +17,7 @@ public:
   
   static cocos2d::Sprite* create(int a, int b, int width, int height)
   {
-    std::string mapName = "map";
+    std::string mapName = "Komorki/tmp/map";
     mapName += std::to_string(a) + "_" + std::to_string(b);
     mapName += "_";
     mapName += std::to_string(width) + "_" + std::to_string(height);

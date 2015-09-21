@@ -66,6 +66,13 @@ void LoadingScene::LoadTerrainMaps(float dt)
   std::vector<komorki::Rect> mapRects;
   komorki::SplitRectOnChunks(totalSize, {{0, 0}, {0, 0}}, komorki::ui::kSegmentSize * 2, mapRects);
   
+  auto sharedFileUtils = FileUtils::getInstance();
+  
+  const std::string mapDirName = "Komorki/tmp";
+  const std::string mapDir = sharedFileUtils->getWritablePath() + mapDirName;
+  bool ok = sharedFileUtils->createDirectory(mapDir);
+  assert(ok && sharedFileUtils->isDirectoryExist(mapDir));
+  
   for (const auto& rect : mapRects)
   {
     TerrainAnalizer::Result terrainAnalizerResult;
@@ -96,13 +103,13 @@ void LoadingScene::LoadTerrainMaps(float dt)
     terrainBatch->visit(renderer, parentTransform, true);
     rt->end();
     
-    std::string mapName = "map";
+    std::string mapName = mapDirName + "/map";
     mapName += std::to_string(rect.origin.x / 2) + "_" + std::to_string(rect.origin.y / 2);
     mapName += "_";
     mapName += std::to_string(rect.size.x / 2) + "_" + std::to_string(rect.size.y / 2);
     mapName += ".png";
     
-    m_mapList.push_back(FileUtils::getInstance()->getWritablePath() + mapName);
+    m_mapList.push_back(mapName);
     
     rt->saveToFile(mapName, true, [&](RenderTexture*, const std::string& image)
                    {

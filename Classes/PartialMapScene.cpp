@@ -347,7 +347,9 @@ bool PartialMapScene::init(const komorki::ui::Viewport::Ptr& viewport)
                                    origin.y));
   
   // shaider programm
-  auto p = GLProgram::createWithFilenames("generic.vsh", "game.glsl");
+  auto p = GLProgram::createWithFilenames("generic.vsh", "example_MultiTexture.fsh");
+  
+  
   
   m_renderTexture = RenderTexture::create(visibleSize.width, visibleSize.height);
   addChild(m_renderTexture);
@@ -363,6 +365,9 @@ bool PartialMapScene::init(const komorki::ui::Viewport::Ptr& viewport)
   addChild(m_rendTexSprite);
   
   m_rendTexSprite->setGLProgram(p);
+  m_rendTexSprite->getGLProgramState()->setUniformFloat("u_interpolate", 0.5);
+  m_rendTexSprite->getGLProgramState()->setUniformTexture("u_texture1",
+                                                          Director::getInstance()->getTextureCache()->addImage("cyan.png"));
   
   
   return true;
@@ -560,17 +565,17 @@ void PartialMapScene::visit(cocos2d::Renderer *renderer, const cocos2d::Mat4 &pa
     m_bg->setScale(bgAspect);
   }
   
-  Layer::visit(renderer, parentTransform, parentFlags);
+//  Layer::visit(renderer, parentTransform, parentFlags);
   
-//  m_renderTexture->beginWithClear(0, 0, 0, 0);
-//  for (auto child : getChildren())
-//  {
-//    if (child != m_renderTexture && child != m_rendTexSprite)
-//      child->visit(renderer, parentTransform, parentFlags);
-//  }
-//  m_renderTexture->end();
-//  
-//  m_rendTexSprite->visit(renderer, parentTransform, parentFlags);
+  m_renderTexture->beginWithClear(0, 0, 0, 0);
+  for (auto child : getChildren())
+  {
+    if (child != m_renderTexture && child != m_rendTexSprite)
+      child->visit(renderer, parentTransform, parentFlags);
+  }
+  m_renderTexture->end();
+  
+  m_rendTexSprite->visit(renderer, parentTransform, parentFlags);
 }
 
 void PartialMapScene::timerForUpdate(float dt)
@@ -722,6 +727,7 @@ void PartialMapScene::CreateToolBar()
 {
   m_toolbarNode = Node::create();
   addChild(m_toolbarNode, 999);
+  m_toolbarNode->setVisible(false);
   
   auto brushButton = ui::Button::create("add_icon.png", "add_icon_hl.png");
   brushButton->addTouchEventListener(CC_CALLBACK_2(PartialMapScene::SelectBrushTouchDownAction, this));

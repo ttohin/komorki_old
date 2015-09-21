@@ -138,7 +138,7 @@ namespace komorki
       source->release();
       source->setPosition(SpriteVector(context->pos, context->offset));
     }
-    void GlowMapOverlay::MoveCreature(PartialMap::Context* context, const Vec2& source, const Vec2& dest)
+    void GlowMapOverlay::MoveCreature(PartialMap::Context* context, const Vec2& source, const Vec2& dest, int duration)
     {
       if (context->glow == nullptr)
       {
@@ -156,7 +156,7 @@ namespace komorki
       {
         s->stopAllActions();
         s->setPosition(SpriteVector(source, offset));
-        auto moveTo = MoveTo::create(m_updateTime*0.9, SpriteVector(dest, randOffset));
+        auto moveTo = MoveTo::create(m_updateTime*0.9*(duration + 1), SpriteVector(dest, randOffset));
         s->runAction(moveTo);
       }
       else

@@ -76,6 +76,8 @@ void MainMenu::ShowInView(cocos2d::Node* root)
   
   auto optionsButton = buttons->getChildByName<ui::Button*>("Options");
   optionsButton->setAnchorPoint({0.5, 0});
+  optionsButton->setEnabled(false);
+  optionsButton->loadTextureNormal("buttonDis.png");
 
   optionsButton->addTouchEventListener([this](Ref*,ui::Widget::TouchEventType type)
                                        {

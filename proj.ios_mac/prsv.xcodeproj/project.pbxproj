@@ -33,6 +33,8 @@
 		521A8EA919F11F5000D177D7 /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = 521A8EA819F11F5000D177D7 /* fonts */; };
 		521A8EAA19F11F5000D177D7 /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = 521A8EA819F11F5000D177D7 /* fonts */; };
 		52B47A471A53D09C004E4C60 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52B47A461A53D09B004E4C60 /* Security.framework */; };
+		8F0E4B291BB09B1D00705159 /* example_MultiTexture.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 8F0E4B281BB09B1D00705159 /* example_MultiTexture.fsh */; };
+		8F0E4B2A1BB09B1D00705159 /* example_MultiTexture.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 8F0E4B281BB09B1D00705159 /* example_MultiTexture.fsh */; };
 		8F108B171AF820ED00580096 /* PixelDescriptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F108B161AF820ED00580096 /* PixelDescriptor.cpp */; };
 		8F108B181AF820ED00580096 /* PixelDescriptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F108B161AF820ED00580096 /* PixelDescriptor.cpp */; };
 		8F108B1A1AF8241900580096 /* CellDescriptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F108B191AF8241900580096 /* CellDescriptor.cpp */; };
@@ -288,6 +290,7 @@
 		5087E78A17EB975400C73F5D /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		521A8EA819F11F5000D177D7 /* fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = fonts; sourceTree = "<group>"; };
 		52B47A461A53D09B004E4C60 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS8.1.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
+		8F0E4B281BB09B1D00705159 /* example_MultiTexture.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = example_MultiTexture.fsh; sourceTree = "<group>"; };
 		8F108B161AF820ED00580096 /* PixelDescriptor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PixelDescriptor.cpp; sourceTree = "<group>"; };
 		8F108B191AF8241900580096 /* CellDescriptor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CellDescriptor.cpp; sourceTree = "<group>"; };
 		8F108B1D1AF8272100580096 /* CellShapes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CellShapes.cpp; sourceTree = "<group>"; };
@@ -548,6 +551,7 @@
 		46880B7519C43A67006E1F66 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				8F0E4B281BB09B1D00705159 /* example_MultiTexture.fsh */,
 				8FB7C3E81BA49E3D00194722 /* font.png */,
 				8FFE7FEC1B9F52B0008D2289 /* ground.png */,
 				8FDE8CF41B23B0A6000EE52C /* glow.png */,
@@ -870,6 +874,7 @@
 				8F12C22C1ADEFF3100C14BBE /* buttonHl.png in Resources */,
 				8FF338701AEC4C3F00CF6F6B /* toolbar.png in Resources */,
 				8FEFC7481AD047D9001E97A7 /* saladButton_hl.png in Resources */,
+				8F0E4B291BB09B1D00705159 /* example_MultiTexture.fsh in Resources */,
 				8FEFC7641AD07542001E97A7 /* plusButton.png in Resources */,
 				8F12C2441AE3EDF900C14BBE /* LoadConfigView.csb in Resources */,
 				8F6288301AD19D8600526404 /* speed2_hl.png in Resources */,
@@ -990,6 +995,7 @@
 				8FEFC7451AD047D9001E97A7 /* improvedSaladButton_hl.png in Resources */,
 				8FEFC73D1AD047D9001E97A7 /* greenButton_hl.png in Resources */,
 				8F62882D1AD19D8600526404 /* speed1_sel.png in Resources */,
+				8F0E4B2A1BB09B1D00705159 /* example_MultiTexture.fsh in Resources */,
 				8F906BB71ABDFB7800A8EF90 /* background.png in Resources */,
 				8FEFC7631AD07542001E97A7 /* plusButton_hl.png in Resources */,
 			);
