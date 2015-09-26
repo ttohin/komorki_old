@@ -102,8 +102,8 @@ PixelDescriptorProvider::Config::Config()
 //  this->percentOfBlue = 0.2;
   
   this->terrainSize = 8;
-  this->mapWidth = 500;
-  this->mapHeight = 500;
+  this->mapWidth = 100;
+  this->mapHeight = 100;
   
   this->green.health = 301;
   this->green.sleepTime = 2;
@@ -111,9 +111,9 @@ PixelDescriptorProvider::Config::Config()
   this->green.passiveHealthChunkMin = -1;
   this->green.passiveHealthChunkMax = -1;
   this->green.armor = 10;
-  this->green.lifeTime = 830;
+  this->green.lifeTime = 1530;
   this->green.percentOfMutations = 0.0;
-  this->green.healthPerAttack = 140;
+  this->green.healthPerAttack = 180;
   this->green.food = (CellType)(eCellTypeImprovedSalad | eCellTypeSalad);
   this->green.danger = (CellType)(eCellTypeHunter);
   this->green.friends = eCellTypeGreen;

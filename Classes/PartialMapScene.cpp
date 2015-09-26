@@ -29,14 +29,11 @@ using namespace cocostudio;
 
 void PartialMapScene::CreateMap(const komorki::ui::Viewport::Ptr& viewport)
 {
-  Size visibleSize = Director::getInstance()->getVisibleSize();
   m_viewport = viewport;
   addChild(m_viewport->GetRootNode());
-  m_viewport->GetRootNode()->release();
   
   m_mapScale = 0.1;
   m_mapPos = cocos2d::Vec2::ZERO;
-  
 }
 
 bool PartialMapScene::init(const komorki::ui::Viewport::Ptr& viewport)
@@ -71,7 +68,7 @@ bool PartialMapScene::init(const komorki::ui::Viewport::Ptr& viewport)
   Vec2 origin = Director::getInstance()->getVisibleOrigin();
   Size winSize = Director::getInstance()->getWinSize();
   
-  m_bg = Sprite::create("background.png");
+  m_bg = Sprite::create("mapBackground.png");
   m_bg->setAnchorPoint({0, 0});
   addChild(m_bg, -999);
   
@@ -349,13 +346,14 @@ bool PartialMapScene::init(const komorki::ui::Viewport::Ptr& viewport)
   // shaider programm
   auto p = GLProgram::createWithFilenames("generic.vsh", "example_MultiTexture.fsh");
   
-  
-  
-  m_renderTexture = RenderTexture::create(visibleSize.width, visibleSize.height);
-  addChild(m_renderTexture);
+ 
+  m_mainTexture = RenderTexture::create(visibleSize.width, visibleSize.height);
+  m_mainTexture->retain();
+  m_lightTexture = RenderTexture::create(visibleSize.width, visibleSize.height);
+  m_lightTexture->retain();
   
   m_rendTexSprite = Sprite::create();
-  m_rendTexSprite->setTexture(m_renderTexture->getSprite()->getTexture());
+  m_rendTexSprite->setTexture(m_mainTexture->getSprite()->getTexture());
   m_rendTexSprite->setTextureRect(Rect(0, 0,
                                        m_rendTexSprite->getTexture()->getContentSize().width,
                                        m_rendTexSprite->getTexture()->getContentSize().height));
@@ -367,7 +365,7 @@ bool PartialMapScene::init(const komorki::ui::Viewport::Ptr& viewport)
   m_rendTexSprite->setGLProgram(p);
   m_rendTexSprite->getGLProgramState()->setUniformFloat("u_interpolate", 0.5);
   m_rendTexSprite->getGLProgramState()->setUniformTexture("u_texture1",
-                                                          Director::getInstance()->getTextureCache()->addImage("cyan.png"));
+                                                          m_lightTexture->getSprite()->getTexture());
   
   
   return true;
@@ -567,15 +565,23 @@ void PartialMapScene::visit(cocos2d::Renderer *renderer, const cocos2d::Mat4 &pa
   
 //  Layer::visit(renderer, parentTransform, parentFlags);
   
-  m_renderTexture->beginWithClear(0, 0, 0, 0);
-  for (auto child : getChildren())
-  {
-    if (child != m_renderTexture && child != m_rendTexSprite)
-      child->visit(renderer, parentTransform, parentFlags);
-  }
-  m_renderTexture->end();
+  m_mainTexture->beginWithClear(0, 0, 0, 0);
+  m_bg->visit(renderer, parentTransform, parentFlags);
+  m_viewport->GetMainNode()->setVisible(true);
+  m_viewport->GetLightNode()->setVisible(false);
+  m_viewport->GetRootNode()->visit(renderer, parentTransform, parentFlags);
+  m_mainTexture->end();
+  
+  m_lightTexture->beginWithClear(0, 0, 0, 0);
+  m_viewport->GetMainNode()->setVisible(false);
+  m_viewport->GetLightNode()->setVisible(true);
+  m_viewport->GetRootNode()->visit(renderer, parentTransform, parentFlags);
+  m_lightTexture->end();
   
   m_rendTexSprite->visit(renderer, parentTransform, parentFlags);
+  
+  m_speedToolbar->visit(renderer, parentTransform, parentFlags);
+  m_menuButton->visit(renderer, parentTransform, parentFlags);
 }
 
 void PartialMapScene::timerForUpdate(float dt)

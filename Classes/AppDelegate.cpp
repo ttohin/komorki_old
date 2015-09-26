@@ -20,6 +20,9 @@ bool AppDelegate::applicationDidFinishLaunching()
   gettimeofday(&tval, NULL);
   srand(tval.tv_usec);
   
+  GLContextAttrs attr = {8, 8, 8, 8, 16, 0};
+  GLView::setGLContextAttrs(attr);
+  
   auto director = Director::getInstance();
   auto glview = director->getOpenGLView();
   if(!glview)

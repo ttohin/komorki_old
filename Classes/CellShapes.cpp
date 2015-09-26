@@ -71,21 +71,19 @@ void BigCell::AroundRandom(const PerPixelFunc& op) const
   bool stop = false;
   for (int ri = start; (ri - dir*start) != 12; ri += dir)
   {
-    if (stop) break;
-    
     int i = ri%12;
-    if (i == 0) op(m_pd->lc, stop);
-    if (i == 1) op(m_pd->lb, stop);
-    if (i == 2) op(m_pd->cb, stop);
-    if (i == 3) op(m_pd->rc->cb, stop);
-    if (i == 4) op(m_pd->rc->rb, stop);
-    if (i == 5) op(m_pd->rc->rc, stop);
-    if (i == 6) op(m_pd->rt->rt, stop);
-    if (i == 7) op(m_pd->rt->rc, stop);
-    if (i == 8) op(m_pd->rt->ct, stop);
-    if (i == 9) op(m_pd->ct->ct, stop);
-    if (i == 10) op(m_pd->ct->lt, stop);
-    if (i == 11) op(m_pd->ct->lc, stop);
+    if (i == 0) op(m_pd->lc, stop); if (stop) break;
+    if (i == 1) op(m_pd->lb, stop); if (stop) break;
+    if (i == 2) op(m_pd->cb, stop); if (stop) break;
+    if (i == 3) op(m_pd->rc->cb, stop); if (stop) break;
+    if (i == 4) op(m_pd->rc->rb, stop); if (stop) break;
+    if (i == 5) op(m_pd->rc->rc, stop); if (stop) break;
+    if (i == 6) op(m_pd->rt->rt, stop); if (stop) break;
+    if (i == 7) op(m_pd->rt->rc, stop); if (stop) break;
+    if (i == 8) op(m_pd->rt->ct, stop); if (stop) break;
+    if (i == 9) op(m_pd->ct->ct, stop); if (stop) break;
+    if (i == 10) op(m_pd->ct->lt, stop); if (stop) break;
+    if (i == 11) op(m_pd->ct->lc, stop); if (stop) break;
   }
 }
 

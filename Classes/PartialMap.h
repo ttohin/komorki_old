@@ -57,7 +57,10 @@ namespace komorki
       virtual ~PartialMap();
       
       bool Init(int a, int b, int width, int height,
-                PixelDescriptorProvider* provider, cocos2d::Node* superView, const cocos2d::Vec2& offset);
+                PixelDescriptorProvider* provider,
+                cocos2d::Node* superView,
+                cocos2d::Node* lightNode,
+                const cocos2d::Vec2& offset);
       
       void Move(const Vec2& newPos);
       
@@ -98,7 +101,6 @@ namespace komorki
       inline bool IsInAABB(const Vec2& vec);
       inline bool IsInAABB(const int& x, const int& y);
       inline Vec2 LocalVector(const komorki::Vec2& input) const;
-      
 
       std::shared_ptr<PixelMapPartial> m_cellMap;
       std::shared_ptr<PixelDebugView> m_debugView;

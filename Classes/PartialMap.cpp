@@ -134,7 +134,7 @@ PartialMap::~PartialMap()
 }
   
 bool PartialMap::Init(int a, int b, int width, int height,
-                      PixelDescriptorProvider* provider, cocos2d::Node* superView, const cocos2d::Vec2& offset)
+                      PixelDescriptorProvider* provider, cocos2d::Node* superView, cocos2d::Node* lightNode, const cocos2d::Vec2& offset)
 {
   ChangeAABB(a, b, width, height);
   m_width = width;
@@ -180,8 +180,8 @@ bool PartialMap::Init(int a, int b, int width, int height,
 //  superView->addChild(m_terrain.get(), 0);
   superView->addChild(m_terrainSprite, 0);
   superView->addChild(m_cellMap.get(), 1);
-  superView->addChild(m_lightOverlay.get(), 2);
-  superView->addChild(m_glow.get(), 3);
+  lightNode->addChild(m_lightOverlay.get(), 2);
+  lightNode->addChild(m_glow.get(), 3);
   superView->addChild(m_debugView.get(), 4);
  
   m_cellMap->SetUpdateTime(0.2);

@@ -77,7 +77,7 @@ namespace komorki
       {
         auto s = Sprite::createWithTexture(getTexture());
         addChild(s);
-        s->setOpacity(100);
+//        s->setOpacity(100);
 //        s->setBlendFunc(BlendFunc::ADDITIVE);
         return s;
       }

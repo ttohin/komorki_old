@@ -54,6 +54,8 @@ namespace komorki
       void UpdateWarp(float& updateTime, unsigned int numberOfUpdates);
       bool IsAvailable();
       cocos2d::Node* GetRootNode() const;
+      cocos2d::Node* GetMainNode() const;
+      cocos2d::Node* GetLightNode() const;
       
     private:
       
@@ -90,7 +92,9 @@ namespace komorki
       
       int m_mapSegmentSize;
       
+      cocos2d::Node* m_mainView;
       cocos2d::Node* m_superView;
+      cocos2d::Node* m_lightNode;
       
       bool m_performMove;
       float m_initialScale;

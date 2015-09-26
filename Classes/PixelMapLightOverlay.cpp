@@ -70,12 +70,7 @@ namespace komorki
         s->setTextureRect(r);
         s->setScale(kSpriteScale);
         
-        int opacity = 255.f * float(value) / 32.f;
-        if (value > 25)
-        {
-          opacity = 255 - 100 * (float(value - 25) / (32.f-25.f));
-        }
-        
+        int opacity = 255;
         s->setOpacity(opacity);
         //    s->setLocalZOrder(-1);
         s->setAnchorPoint({0, 0});
@@ -114,9 +109,9 @@ namespace komorki
         }
         getTexture()->setAliasTexParameters();
         
-        return true;
+//        return true;
        
-        setBlendFunc({GL_DST_COLOR, GL_ONE_MINUS_DST_ALPHA});
+//        setBlendFunc({GL_DST_COLOR, GL_ONE_MINUS_DST_ALPHA});
         
         komorki::Vec2 mapSize = m_provider->GetSize();
         

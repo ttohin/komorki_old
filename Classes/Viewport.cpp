@@ -140,6 +140,10 @@ ui::Viewport::Viewport(cocos2d::Node* superView,
  
   m_originalSize = originalSize;
   m_superView = superView;
+  m_lightNode = cocos2d::Node::create();
+  m_mainView = cocos2d::Node::create();
+  m_superView->addChild(m_lightNode);
+  m_superView->addChild(m_mainView);
   m_performMove = false;
   
   m_initialScale = 0.2;
@@ -423,7 +427,8 @@ void ui::Viewport::CreatePixelMaps(const Rect& rect, const cocos2d::Vec2& offset
                 width,
                 height,
                 m_provider.get(),
-                m_superView,
+                m_mainView,
+                m_lightNode,
                 cocos2d::Vec2::ZERO);
       map->Transfrorm(offset + cocos2d::Vec2(i*m_mapSegmentSize * kSpritePosition * m_initialScale * scale,
                                              j*m_mapSegmentSize * kSpritePosition * m_initialScale * scale),
@@ -502,6 +507,17 @@ bool ui::Viewport::IsAvailable()
 cocos2d::Node* ui::Viewport::GetRootNode() const
 {
   return m_superView;
+}
+
+cocos2d::Node* ui::Viewport::GetMainNode() const
+{
+  return m_mainView;
+}
+
+cocos2d::Node* ui::Viewport::GetLightNode() const
+{
+  return m_lightNode;
+  
 }
 
 void ui::Viewport::UpdateWarp(float& updateTime, unsigned int numberOfUpdates)
@@ -853,7 +869,8 @@ bool ui::Viewport::CreatePartialMapsInRects(const std::vector<Rect>& rects,
               newMapRect.size.x,
               newMapRect.size.y,
               m_provider.get(),
-              m_superView,
+              m_mainView,
+              m_lightNode,
               cocos2d::Vec2::ZERO);
     cocos2d::Vec2 offsetPoints = cocos2d::Vec2(newMapRect.origin.x + pixelOffset.x, newMapRect.origin.y + pixelOffset.y) *  kSpritePosition * m_initialScale * scale;
     offsetPoints += offset;

@@ -94,7 +94,8 @@ private:
   std::shared_ptr<LoadConfigMenu> m_loadConfigMenu;
   std::shared_ptr<SaveConfigMenu> m_saveConfigMenu;
   std::shared_ptr<IFullScreenMenu> m_currenMenu;
-  cocos2d::RenderTexture* m_renderTexture;
+  cocos2d::RenderTexture* m_mainTexture;
+  cocos2d::RenderTexture* m_lightTexture;
   cocos2d::Sprite* m_rendTexSprite;
   cocos2d::Sprite* m_debugView;
   
