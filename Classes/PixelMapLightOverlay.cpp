@@ -63,7 +63,7 @@ namespace komorki
       Sprite* PixelMapLightOverlay::SpriteForLight(int value)
       {
         assert(value >= 0);
-        assert(value < 32);
+        assert(value <= 32);
         
         cocos2d::Rect r = cocos2d::Rect(value, 3, 1, 1);
         auto s = CreateSprite();
@@ -108,20 +108,14 @@ namespace komorki
           return false;
         }
         getTexture()->setAliasTexParameters();
-        
-//        return true;
-       
-//        setBlendFunc({GL_DST_COLOR, GL_ONE_MINUS_DST_ALPHA});
-        
-        komorki::Vec2 mapSize = m_provider->GetSize();
-        
+
         for (int i = m_a1; i < m_a2; ++i)
         {
           for (int j = m_b1; j < m_b2; ++j)
           {
-            double lightX = (double)i/(double)mapSize.x;
-            double lightY = (double)j/(double)mapSize.y;
-            auto s = SpriteForLight(32 * (lightX + lightY)/2.0);
+            float value = m_provider->GetDescriptor(i, j)->m_physicalDesc.light;
+            
+            auto s = SpriteForLight(32 * value);
             s->setPosition(spriteVector(komorki::Vec2(i, j)));
           }
         }

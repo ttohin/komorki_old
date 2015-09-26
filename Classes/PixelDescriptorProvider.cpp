@@ -319,30 +319,41 @@ void PixelDescriptorProvider::Init()
     }
   }
   
-  komorki::DiamondSquareGenerator gen(512, 512, 60.f, -0.5, false);
-  gen.Generate(nullptr);
-  
-  komorki::DiamondSquareGenerator gen1(512, 512, 20.f, -0.5, false);
-  gen1.Generate(nullptr);
-  
-  gen.Multiply(&gen1, nullptr);
-  
-  auto buffer = gen.GetBuffer(0,0, m_config->mapWidth, m_config->mapHeight);
-  auto analizer = std::shared_ptr<TerrainAnalizer>(new TerrainAnalizer(buffer));
-  auto analizedBuffer = analizer->GetLevels();
-
-  analizedBuffer->ForEach([&](const int& x, const int& y, const TerrainLevel& level)
-                          {
-                            if (x%2 != 0 && y%2 != 0) {
-                              return ;
-                            }
-                            if (level >= TerrainLevel::Ground)
+  {
+    komorki::DiamondSquareGenerator gen(512, 512, 60.f, -0.5, false);
+    gen.Generate(nullptr);
+    
+    komorki::DiamondSquareGenerator gen1(512, 512, 20.f, -0.5, false);
+    gen1.Generate(nullptr);
+    
+    gen.Multiply(&gen1, nullptr);
+    
+    auto buffer = gen.GetBuffer(0,0, m_config->mapWidth, m_config->mapHeight);
+    auto analizer = std::shared_ptr<TerrainAnalizer>(new TerrainAnalizer(buffer));
+    auto analizedBuffer = analizer->GetLevels();
+    
+    analizedBuffer->ForEach([&](const int& x, const int& y, const TerrainLevel& level)
                             {
-                              m_map[x/2][y/2]->m_type = PixelDescriptor::TerrainType;
-                            }
-                          });
-  
-  m_terrain = analizer->GetResult();
+                              if (x%2 != 0 && y%2 != 0) {
+                                return ;
+                              }
+                              if (level >= TerrainLevel::Ground)
+                              {
+                                m_map[x/2][y/2]->m_type = PixelDescriptor::TerrainType;
+                              }
+                            });
+    
+    m_terrain = analizer->GetResult();
+  }
+  {
+    komorki::DiamondSquareGenerator gen1(512, 512, 10.f, -0.5, false);
+    gen1.Generate(nullptr);
+    auto buffer = gen1.GetBuffer(0,0, m_config->mapWidth, m_config->mapHeight);
+    buffer->ForEach([&](const int& x, const int& y, const float& level)
+                    {
+                      m_map[x][y]->m_physicalDesc.light = level;
+                    });
+  }
   
   for (int i = 0; i < m_config->mapWidth; ++i)
   {

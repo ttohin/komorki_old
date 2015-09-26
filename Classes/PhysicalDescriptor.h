@@ -14,6 +14,7 @@ namespace komorki
   using PhysicalFloat = float;
   class PhysicalDescriptor
   {
+  public:
     PhysicalFloat light;
   };
 }
