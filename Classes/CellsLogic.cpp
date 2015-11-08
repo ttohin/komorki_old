@@ -477,7 +477,13 @@ void ProcessCell(CellDescriptor* d,
   PixelDescriptorProvider::Config::CellConfig* cellConfig = config->ConfigForCell(d->m_character);
   
   Transaction t;
-  t.m_health = cRandABInt(cellConfig->passiveHealthChunkMin, cellConfig->passiveHealthChunkMax);
+  const PhysicalFloat& light = d->parent->m_physicalDesc.light;
+  int h = cRandABInt(light * cellConfig->passiveHealthChunkMin, cellConfig->passiveHealthChunkMax);
+  if (h > 0)
+  {
+    h *= light;
+  }
+  t.m_health = h;
   d->nextTurnTransaction.push_back(t);
   
   if (d->m_character == eCellTypeGreen)

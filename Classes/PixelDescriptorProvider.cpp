@@ -102,16 +102,16 @@ PixelDescriptorProvider::Config::Config()
 //  this->percentOfBlue = 0.2;
   
   this->terrainSize = 8;
-  this->mapWidth = 100;
-  this->mapHeight = 100;
+  this->mapWidth = 500;
+  this->mapHeight = 500;
   
-  this->green.health = 301;
+  this->green.health = 501;
   this->green.sleepTime = 2;
   this->green.attack = 25;
   this->green.passiveHealthChunkMin = -1;
   this->green.passiveHealthChunkMax = -1;
   this->green.armor = 10;
-  this->green.lifeTime = 1530;
+  this->green.lifeTime = 9530;
   this->green.percentOfMutations = 0.0;
   this->green.healthPerAttack = 180;
   this->green.food = (CellType)(eCellTypeImprovedSalad | eCellTypeSalad);

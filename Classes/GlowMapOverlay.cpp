@@ -32,13 +32,13 @@ namespace komorki
     
     bool GlowMapOverlay::IsGlowCell(komorki::CellDescriptor* cd) const
     {
-      if (cd->m_character == eCellTypeImprovedSalad ||
-          cd->m_character == eCellTypeSalad ||
-          cd->m_character == eCellTypeBigBlue)
-      {
+//      if (cd->m_character == eCellTypeImprovedSalad ||
+//          cd->m_character == eCellTypeSalad ||
+//          cd->m_character == eCellTypeBigBlue)
+//      {
         return true;
-      }
-      return false;
+//      }
+//      return false;
     }
     
     void GlowMapOverlay::SetUpdateTime(float updateTime)
@@ -58,7 +58,7 @@ namespace komorki
       if (d->m_character == komorki::eCellTypeSalad) index = 2;
       else if (d->m_character == komorki::eCellTypeBigBlue) index = 1;
       else if (d->m_character == komorki::eCellTypeImprovedSalad) index = 0;
-      else assert(0);
+      else index = 3;
       
       return cocos2d::Rect(index*160, 0, 160, 160);
     }

@@ -256,7 +256,7 @@ namespace komorki
       auto s = CreateSprite();
       s->setTextureRect(r);
       s->setScale(kSpriteScale);
-      s->setOpacity(180);
+//      s->setOpacity(180);
       s->setAnchorPoint({0, 0});
       context->offset = RandomVectorOffset();
       
