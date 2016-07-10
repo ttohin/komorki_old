@@ -20,9 +20,20 @@ struct Transaction
 class CellDescriptor
 {
 public:
+  
+  enum ShapeType
+  {
+    eShapeTypeSinglePixel,
+    eShapeTypeSquare,
+    eShapeTypePolymorph,
+    eShapeTypeAmorph,
+    eShapeTypeRect
+  };
+  
   CellDescriptor (PixelDescriptor* pd);
  
   virtual void Shape(const PerPixelFunc& op);
+  virtual void ShapeRandom(const PerPixelFunc& op);
   virtual void Around(const PerPixelFunc& op);
   virtual void AroundRandom(const PerPixelFunc& op);
   virtual bool Check();
@@ -30,6 +41,13 @@ public:
   virtual void Move(PixelDescriptor* pd);
   virtual bool TestSpace(PixelDescriptor* pd);
   virtual bool TestSpaceEmpty(PixelDescriptor* pd);
+  virtual IShape* GetShape() const;
+  virtual bool Move(const std::vector<PixelDescriptor*>& removePixels,
+                    const std::vector<PixelDescriptor*>& addPixels);
+  virtual std::string GetAsciiArt() const;
+  virtual void PrintAsciiArt() const;
+  virtual bool IsMyFood(CellDescriptor* cd) const;
+  virtual ShapeType GetShapeType() const;
   
   virtual ~CellDescriptor () {};
 
@@ -50,6 +68,7 @@ public:
   int m_m2;
   int m_m3;
   int m_m4;
+  int m_volume;
  
   std::shared_ptr<IShape> m_shape;
   CellType m_character;

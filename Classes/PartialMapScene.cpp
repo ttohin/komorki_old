@@ -80,6 +80,8 @@ bool PartialMapScene::init(const komorki::ui::Viewport::Ptr& viewport)
   
   m_rootNode = Node::create();
   addChild(m_rootNode);
+  m_menuNode = Node::create();
+  addChild(m_menuNode);
   
   CreateMap(viewport);
   
@@ -343,30 +345,8 @@ bool PartialMapScene::init(const komorki::ui::Viewport::Ptr& viewport)
   m_speedToolbar->setPosition(Vec2(origin.x + visibleSize.width,
                                    origin.y));
   
-  // shaider programm
-  auto p = GLProgram::createWithFilenames("generic.vsh", "example_MultiTexture.fsh");
-  
- 
-  m_mainTexture = RenderTexture::create(visibleSize.width, visibleSize.height);
-  m_mainTexture->retain();
-  m_lightTexture = RenderTexture::create(visibleSize.width, visibleSize.height);
-  m_lightTexture->retain();
-  
-  m_rendTexSprite = Sprite::create();
-  m_rendTexSprite->setTexture(m_mainTexture->getSprite()->getTexture());
-  m_rendTexSprite->setTextureRect(Rect(0, 0,
-                                       m_rendTexSprite->getTexture()->getContentSize().width,
-                                       m_rendTexSprite->getTexture()->getContentSize().height));
-  m_rendTexSprite->setPosition(Point::ZERO);
-  m_rendTexSprite->setAnchorPoint(Point::ZERO);
-  m_rendTexSprite->setFlippedY(true);
-  addChild(m_rendTexSprite);
-  
-  m_rendTexSprite->setGLProgram(p);
-  m_rendTexSprite->getGLProgramState()->setUniformFloat("u_interpolate", 0.5);
-  m_rendTexSprite->getGLProgramState()->setUniformTexture("u_texture1",
-                                                          m_lightTexture->getSprite()->getTexture());
-  
+  CreateRenderTextures(visibleSize);
+
   
   return true;
 }
@@ -436,7 +416,7 @@ void PartialMapScene::SetCurrentMenu(const std::shared_ptr<IFullScreenMenu> menu
   
   m_currenMenu = menu;
   
-  m_currenMenu->ShowInView(this);
+  m_currenMenu->ShowInView(m_menuNode);
   m_pause = true;
 }
 
@@ -561,9 +541,11 @@ void PartialMapScene::visit(cocos2d::Renderer *renderer, const cocos2d::Mat4 &pa
       bgAspect = AspectToFill(m_bg->getContentSize(), visibleSize);
     }
     m_bg->setScale(bgAspect);
+    
+    CreateRenderTextures(visibleSize);
   }
   
-//  Layer::visit(renderer, parentTransform, parentFlags);
+  Layer::visit(renderer, parentTransform, parentFlags);
   
   m_mainTexture->beginWithClear(0, 0, 0, 0);
   m_bg->visit(renderer, parentTransform, parentFlags);
@@ -582,6 +564,7 @@ void PartialMapScene::visit(cocos2d::Renderer *renderer, const cocos2d::Mat4 &pa
   
   m_speedToolbar->visit(renderer, parentTransform, parentFlags);
   m_menuButton->visit(renderer, parentTransform, parentFlags);
+  if (m_currenMenu) m_menuNode->visit(renderer, parentTransform, parentFlags);
 }
 
 void PartialMapScene::timerForUpdate(float dt)
@@ -953,6 +936,48 @@ komorki::CellType PartialMapScene::GetCurretnCellType()
   
   assert(0);
   return komorki::eCellTypeGreen;
+}
+
+void PartialMapScene::CreateRenderTextures(const cocos2d::Size& visibleSize)
+{
+  if (m_mainTexture)
+  {
+    m_mainTexture->release();
+    m_mainTexture = nullptr;
+  }
+  if (m_lightTexture)
+  {
+    m_lightTexture->release();
+    m_lightTexture = nullptr;
+  }
+  if (m_rendTexSprite)
+  {
+    m_rendTexSprite->removeFromParentAndCleanup(true);
+    m_rendTexSprite = nullptr;
+  }
+  
+  // shaider programm
+  auto p = GLProgram::createWithFilenames("generic.vsh", "example_MultiTexture.fsh");
+  
+  m_mainTexture = RenderTexture::create(visibleSize.width, visibleSize.height);
+  m_mainTexture->retain();
+  m_lightTexture = RenderTexture::create(visibleSize.width, visibleSize.height);
+  m_lightTexture->retain();
+  
+  m_rendTexSprite = Sprite::create();
+  m_rendTexSprite->setTexture(m_mainTexture->getSprite()->getTexture());
+  m_rendTexSprite->setTextureRect(Rect(0, 0,
+                                       m_rendTexSprite->getTexture()->getContentSize().width,
+                                       m_rendTexSprite->getTexture()->getContentSize().height));
+  m_rendTexSprite->setPosition(Point::ZERO);
+  m_rendTexSprite->setAnchorPoint(Point::ZERO);
+  m_rendTexSprite->setFlippedY(true);
+  addChild(m_rendTexSprite);
+  
+  m_rendTexSprite->setGLProgram(p);
+  m_rendTexSprite->getGLProgramState()->setUniformFloat("u_interpolate", 0.5);
+  m_rendTexSprite->getGLProgramState()->setUniformTexture("u_texture1",
+                                                          m_lightTexture->getSprite()->getTexture());
 }
 
 float PartialMapScene::AspectToFit(const Size& source, const Size& target)

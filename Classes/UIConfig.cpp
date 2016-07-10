@@ -17,5 +17,8 @@ namespace komorki
     const double kSpriteScale = kSpritePosition/kTileFrameSize;
     const float kViewportMargin = 00.f;
     const int kSegmentSize = 50;
+    const bool kAnimated = true;
+    const bool kRedrawEachUpdate = false;
+    const bool kSimpleDraw = false;
   }
 }

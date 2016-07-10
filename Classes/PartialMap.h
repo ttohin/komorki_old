@@ -10,6 +10,8 @@
 #define __prsv__PartialMap__
 
 #include <memory>
+#include <unordered_map>
+#include <list>
 #include "Common.h"
 #include "IPixelDescriptorProvider.h"
 #include "cocos2d.h"
@@ -32,21 +34,50 @@ namespace komorki
     {
     public:
       
+      struct PolymorphShapeContext
+      {
+        cocos2d::Sprite* sprite = nullptr;
+        Vec2 pos;
+        Vec2 prevPos;
+        bool animationPlayed = false;
+      };
+      
       struct Context
       {
+        enum ContextType
+        {
+          eContextTypeDefault,
+          eContextTypePolymorph,
+          eContextTypeAmorph,
+          eContextTypeRect
+        };
+        
+        typedef std::unordered_map<std::string, PolymorphShapeContext> SpriteMap;
+        typedef std::list<cocos2d::Sprite*> SpriteList;
+        
         PartialMap* owner;
-        cocos2d::Sprite* sprite;
-        cocos2d::Sprite* glow;
+        cocos2d::Sprite* sprite = nullptr;
+        cocos2d::Sprite* glow = nullptr;
         cocos2d::Vec2 offset;
         Vec2 pos;
+        ContextType type;
+        SpriteMap spriteMap;
+        SpriteList toRemove;
         
         void BecomeOwner(PartialMap* _owner);
         void Free(PartialMap* _owner);
         void Destory(PartialMap* _owner);
+        void ForceDestory(PartialMap* _owner);
+        PolymorphShapeContext PopSprite(int x, int y);
+        PolymorphShapeContext GetSprite(int x, int y);
+        void SetSprite(cocos2d::Sprite*, int x, int y);
+        
+        bool IsMultiShape() const { return type == eContextTypePolymorph || type == eContextTypeAmorph; }
        
         Context(PartialMap *_owner);
        
         std::string Description() const;
+        std::string GetKey(int x, int y) const;
         
         
       private:
@@ -67,7 +98,7 @@ namespace komorki
       void AdoptIncomingItems();
       void DeleteOutgoingItems();
       void HandleItemsOnBounds(const std::list<IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime);
-      void Update(const std::list<IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime);
+      void Update(std::list<IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime);
       
       void HightlightCellOnPos(int x, int y, komorki::CellType type);
       void StopHightlighting();
@@ -92,10 +123,11 @@ namespace komorki
     private:
    
       void InitPixel(PixelDescriptor* pd);
-      PartialMap::Context* AddCreature(const Vec2& source, PixelDescriptor* dest);
+      PartialMap::Context* AddCreature(const Vec2& source, PixelDescriptor* dest, Morphing& morphing);
       PartialMap::Context* CreateCell(PixelDescriptor* dest);
+      PartialMap::Context* CreatePolymorphCell(PixelDescriptor* dest);
       void Delete(Context* context);
-      void Move(const Vec2& source, const Vec2& dest, Context* context, int duration = 0);
+      void Move(const Vec2& source, const Vec2& dest, Context* context, int duration, Morphing& morphing, CellDescriptor* cd);
       void Attack(Context* context, const Vec2& pos, const Vec2& offset);
       
       inline bool IsInAABB(const Vec2& vec);

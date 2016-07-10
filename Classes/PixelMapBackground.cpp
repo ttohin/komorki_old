@@ -124,7 +124,7 @@ USING_NS_CC;
   
   void PixelMapBackground::Update(const std::list<komorki::PixelDescriptorProvider::UpdateResult>& updateResult, float updateTime)
   {
-    for (auto u : updateResult)
+    for (auto& u : updateResult)
     {
       Vec2 initialPos = Vec2(u.desc->x, u.desc->y);
       

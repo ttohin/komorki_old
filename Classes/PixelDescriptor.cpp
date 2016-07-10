@@ -29,6 +29,8 @@ PixelDescriptor::PixelDescriptor(int _x, int _y)
 , m_cellDescriptor(nullptr)
 , m_type(PixelDescriptor::Empty)
 , x(_x), y(_y)
+, offsetX(0), offsetY(0)
+, pushHandled(false)
 {
   
 }
@@ -88,6 +90,30 @@ PixelDescriptor* PixelDescriptor::Offset(PixelPos x, PixelPos y) const
   return *directions[index];
 }
 
+PixelDescriptor* PixelDescriptor::RecOffset(PixelPos x, PixelPos y) 
+{
+  if (x == 0 && y == 0) return this;
+  PixelPos _x = x > 0 ? 1 : x < 0 ? -1 : x;
+  PixelPos _y = y > 0 ? 1 : y < 0 ? -1 : y;
+  
+  auto pd = Offset(_x, _y);
+//  if (pd == nullptr)
+//  {
+//    pd = Offset(0, _y);
+//    if (pd) return pd->RecOffset(0, y - _y);
+//  }
+//  
+//  if (pd == nullptr)
+//  {
+//    pd = Offset(_x, 0);
+//    if (pd) return pd->RecOffset(x - _x, 0);
+//  }
+  
+  if (pd == nullptr) return nullptr;
+  
+  return pd->RecOffset(x - _x, y - _y);
+}
+
 bool PixelDescriptor::Offset(PixelDescriptor* target, Vec2& offset) const
 {
   if (target == lt) { offset = {-1, 1}; return true; }
@@ -109,4 +135,23 @@ void PixelDescriptor::SetDirection(PixelPos x, PixelPos y, PixelDescriptor* pd)
   int index = x + 1 + (y + 1) * 3;
   if (index >= 4) index -= 1;
   *directions[index] = pd;
+}
+
+std::string PixelDescriptor::GetAscii() const
+{
+  return GetAscii('a');
+}
+
+std::string PixelDescriptor::GetAscii(char cellSymbol) const
+{
+  switch (m_type)
+  {
+    case CreatureType:
+      return std::string(&cellSymbol, 1);
+    case TerrainType:
+      return "#";
+    case Empty:
+      return ".";
+  }
+  return "?";
 }

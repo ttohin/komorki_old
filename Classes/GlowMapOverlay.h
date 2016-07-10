@@ -27,6 +27,7 @@ namespace komorki
       cocos2d::Rect OffsetForType(komorki::CellDescriptor* pd);
       cocos2d::Sprite* CreateSprite();
       void RemoveSprite(cocos2d::Sprite* sprite);
+      void Reset();
       
       void Delete(PartialMap::Context* context);
       void AddCreature(CellDescriptor* cd, PartialMap::Context* context);

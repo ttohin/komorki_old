@@ -47,12 +47,16 @@ public:
     float percentOfSalad;
     float percentOfCyan;
     float percentOfBlue;
+    float percentOfWhite;
     
     CellConfig orange;
     CellConfig green;
     CellConfig salad;
     CellConfig cyan;
     CellConfig blue;
+    CellConfig white;
+    CellConfig yellow;
+    CellConfig pink;
     
     Config::CellConfig* ConfigForCell(CellType type);
     

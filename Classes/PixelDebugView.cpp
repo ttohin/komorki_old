@@ -134,33 +134,32 @@ namespace ui
   
   void PixelDebugView::Update(const std::list<komorki::PixelDescriptorProvider::UpdateResult>& updateResult, float updateTime)
   {
-    
     removeAllChildren();
     
-    return;
+//    return;
+//    for (int i = m_a1; i < m_a2; ++i)
+//    {
+//      for (int j = m_b1; j < m_b2; ++j)
+//      {
+//        auto pixelD = m_provider->GetDescriptor(i, j);
+//        if (pixelD->m_cellDescriptor && pixelD->m_cellDescriptor->parent == pixelD)
+//        {
+//          auto healthSprite = HealthSprite(pixelD);
+//          healthSprite->setPosition(this->spriteVector(pixelD, cocos2d::Vec2(0, kTileFrameSize + 2)));
+//        }
+//        
+//      }
+//    }
+    
+//    return;
+    
+    
     for (int i = m_a1; i < m_a2; ++i)
     {
       for (int j = m_b1; j < m_b2; ++j)
       {
         auto pixelD = m_provider->GetDescriptor(i, j);
-        if (pixelD->m_cellDescriptor && pixelD->m_cellDescriptor->parent == pixelD)
-        {
-          auto healthSprite = HealthSprite(pixelD);
-          healthSprite->setPosition(this->spriteVector(pixelD, cocos2d::Vec2(0, kTileFrameSize + 2)));
-        }
-        
-      }
-    }
-    
-    return;
-    
-    
-    for (int i = m_a1; i < m_a2; ++i)
-    {
-      for (int j = m_b1; j < m_b2; ++j)
-      {
-        auto pixelD = m_provider->GetDescriptor(i, j);
-        if (pixelD->m_cellDescriptor && pixelD->m_cellDescriptor->m_character == komorki::eCellTypeSalad && pixelD->m_cellDescriptor->parent == pixelD)
+        if (pixelD->m_cellDescriptor && pixelD->m_cellDescriptor->m_character == komorki::eCellTypePink && pixelD->m_cellDescriptor->parent == pixelD)
         {
           int i = 0;
           auto cd = pixelD->m_cellDescriptor;
@@ -174,6 +173,10 @@ namespace ui
                              auto s = this->ColorSprite(i++);
                              s->setPosition(this->spriteVector(pd));
                            });
+          
+          auto s = this->ColorSprite(cRandAB(0, 20));
+          s->setPosition(this->spriteVector(komorki::Vec2(cd->m_m1, cd->m_m2)));
+          
         }
         
       }
@@ -198,6 +201,30 @@ namespace ui
   void PixelDebugView::Reset()
   {
     removeAllChildren();
+    
+    for (int i = m_a1; i < m_a2; ++i)
+    {
+      for (int j = m_b1; j < m_b2; ++j)
+      {
+        auto pixelD = m_provider->GetDescriptor(i, j);
+        if (pixelD->m_cellDescriptor && pixelD->m_cellDescriptor->m_character == komorki::eCellTypePink && pixelD->m_cellDescriptor->parent == pixelD)
+        {
+          int i = 0;
+          auto cd = pixelD->m_cellDescriptor;
+          cd->AroundRandom([this, &i](komorki::PixelDescriptor* pd, bool& stop)
+                           {
+                             if (pd == nullptr)
+                             {
+                               return ;
+                             }
+                             
+                             auto s = this->ColorSprite(i++);
+                             s->setPosition(this->spriteVector(pd));
+                           });
+        }
+        
+      }
+    }
   }
   
 }

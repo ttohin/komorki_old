@@ -32,7 +32,7 @@ public:
   void RemoveSprite(cocos2d::Sprite* sprite);
   cocos2d::Sprite* spriteForDescriptor(komorki::PixelDescriptor* pixelD);
   
-  cocos2d::Vec2 spriteVector(const komorki::Vec2& vec, const cocos2d::Vec2& vector = cocos2d::Vec2());
+//  cocos2d::Vec2 spriteVector(const komorki::Vec2& vec, const cocos2d::Vec2& vector = cocos2d::Vec2());
   bool init();
   void Reset();
   void HightlightCellOnPos(int x, int y, komorki::CellType type);
@@ -41,10 +41,13 @@ public:
   
   void Delete(PartialMap::Context* context);
   void AddSprite(PixelDescriptor* pd, const Vec2& pos);
-  void AddCreature(CellDescriptor* cd, PartialMap::Context* context);
-  void AdoptSprite(PartialMap::Context* context);
-  void MoveCreature(PartialMap::Context* context, const Vec2& source, const Vec2& dest, int duration = 0);
-  void Attack(PartialMap::Context* context, const Vec2& pos, const Vec2& offset);
+  void AddCreature(CellDescriptor* cd, PartialMap::Context* context, Vec2 partialMapOffset);
+  void AddPolymorphCreature(CellDescriptor* cd, PartialMap::Context* context, Vec2 partialMapOffset);
+  void MoveAmorphCells(PartialMap::Context* context, const Vec2& source, komorki::Morphing& morph, Vec2 partialMapOffset, CellDescriptor* cd);
+  void MovePolymorphCells(PartialMap::Context* context, const Vec2& source, komorki::Morphing& morph, Vec2 partialMapOffset, CellDescriptor* cd);
+  void AdoptSprite(PartialMap::Context* context, Vec2 partialMapOffset);
+  void MoveCreature(PartialMap::Context* context, const Vec2& source, const Vec2& dest, int duration, Morphing& morphing, Vec2 partialMapOffset,CellDescriptor* cd);
+  void Attack(PartialMap::Context* context, const Vec2& pos, const Vec2& offset, const Vec2& partialMapOffset);
   void StopSmallAnimations();
   void StartSmallAnimations();
  

@@ -28,10 +28,12 @@ namespace komorki
     inline Vec2& operator=(const Vec2& pos)  {x = pos.x; y = pos.y; return *this; }
     inline bool operator==(const Vec2& pos) const {return x == pos.x && y == pos.y;}
     inline bool operator!=(const Vec2& pos) const {return !(*this==pos);}
+    inline void operator+=(const Vec2& pos) {x += pos.x; y += pos.y;}
     inline Vec2 operator-(const Vec2& pos) const {return Vec2(x - pos.x, y - pos.y);}
     inline Vec2 operator+(const Vec2& pos) const {return Vec2(x + pos.x, y + pos.y);}
     inline Vec2 operator-() const {return Vec2(-x, -y);}
     bool In(const Rect& rect) const;
+    Vec2 Normalize() const;
     
     std::string Description()const { return std::to_string(x) + "," + std::to_string(y); }
   };;

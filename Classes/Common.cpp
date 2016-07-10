@@ -15,6 +15,18 @@ bool Vec2::In(const komorki::Rect &rect) const
   return !(x < rect.Left() || x >= rect.Right()) && !(y < rect.Bottom() || y >= rect.Top());
 }
 
+Vec2 Vec2::Normalize() const
+{
+  float max = std::max(std::abs(x), std::abs(y));
+  if (max == 0.f)
+  {
+    return {0, 0};
+  }
+  
+  auto res = Vec2(std::round((float)x/max), std::round((float)y/max));
+  return res;
+}
+
 Rect Rect::Extract(const Rect &other) const
 {
   Rect result;

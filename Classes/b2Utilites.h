@@ -40,6 +40,7 @@ inline int cRandABInt(int a, int b)
   return rand()%abs(b - a) + a;
 }
 
+
 #define cBoolRandPercent(percent) (RANDOM_0_1() <= percent)
 
 #define cccb2(cgp) (CGPointMake(cgp.x * PTM_RATIO, cgp.y  * PTM_RATIO))

@@ -10,7 +10,7 @@
 #include "UIConfig.h"
 #include "UICommon.h"
 
-#define ANIMATED 1
+#define PMP_PULL_SIZE 32
 
 namespace komorki
 {
@@ -96,6 +96,21 @@ namespace komorki
         sprite->removeFromParentAndCleanup(true);
       }
     }
+    
+    void GlowMapOverlay::Reset()
+    {
+      removeAllChildren();
+      return;
+//      m_pullSize += _children.size() + 1;
+      
+      for(auto it=_children.cbegin(); it != _children.cend(); ++it)
+      {
+        (*it)->stopAllActions();
+        RemoveSprite(static_cast<Sprite*>(*it));
+      }
+      
+//      m_pullSize = PMP_PULL_SIZE;
+    }
 
     void GlowMapOverlay::Delete(PartialMap::Context* context)
     {
@@ -145,14 +160,14 @@ namespace komorki
         return;
       }
       
-      assert(std::abs(source.x - dest.x) <= 2);
-      assert(std::abs(source.y - dest.y) <= 2);
+//      assert(std::abs(source.x - dest.x) <= 2);
+//      assert(std::abs(source.y - dest.y) <= 2);
       
       auto randOffset = RandomVectorOffset();
       cocos2d::Vec2 offset = context->offset;
       Sprite* s = context->glow;
       
-      if (ANIMATED)
+      if (kAnimated)
       {
         s->stopAllActions();
         s->setPosition(SpriteVector(source, offset));

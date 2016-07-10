@@ -20,6 +20,9 @@ namespace komorki
     extern const double kSpriteScale;
     extern const float kViewportMargin;
     extern const int kSegmentSize;
+    extern const bool kAnimated;
+    extern const bool kRedrawEachUpdate;
+    extern const bool kSimpleDraw;
   }
 }
 

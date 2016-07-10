@@ -157,6 +157,45 @@ PixelDescriptorProvider::Config::Config()
   this->cyan.danger = (CellType)(eCellTypeGreen);
   this->cyan.friends = (CellType)(eCellTypeImprovedSalad);
   
+  this->white.health = 501;
+  this->white.sleepTime = 0;
+  this->white.attack = 8;
+  this->white.passiveHealthChunkMin = -2;
+  this->white.passiveHealthChunkMax = 1;
+  this->white.armor = 300;
+  this->white.lifeTime = INT_MAX;
+  this->white.percentOfMutations = 0.0;
+  this->white.healthPerAttack = 30;
+  this->white.food = (CellType)(eCellTypeBigBlue | eCellTypeSalad | eCellTypeHunter);
+  this->white.danger = (CellType)(eCellTypeUnknown);
+  this->white.friends = (CellType)(eCellTypeUnknown);
+  
+  this->yellow.health = 501;
+  this->yellow.sleepTime = 4;
+  this->yellow.attack = 8;
+  this->yellow.passiveHealthChunkMin = 0;
+  this->yellow.passiveHealthChunkMax = 0;
+  this->yellow.armor = 300;
+  this->yellow.lifeTime = INT_MAX;
+  this->yellow.percentOfMutations = 0.0;
+  this->yellow.healthPerAttack = 30;
+  this->yellow.food = (CellType)(eCellTypeUnknown);
+  this->yellow.danger = (CellType)(eCellTypeUnknown);
+  this->yellow.friends = (CellType)(eCellTypeUnknown);
+  
+  this->pink.health = 501;
+  this->pink.sleepTime = 4;
+  this->pink.attack = 8;
+  this->pink.passiveHealthChunkMin = 0;
+  this->pink.passiveHealthChunkMax = 0;
+  this->pink.armor = 300;
+  this->pink.lifeTime = INT_MAX;
+  this->pink.percentOfMutations = 0.0;
+  this->pink.healthPerAttack = 30;
+  this->pink.food = (CellType)(eCellTypeUnknown);
+  this->pink.danger = (CellType)(eCellTypeUnknown);
+  this->pink.friends = (CellType)(eCellTypeUnknown);
+  
   this->blue.health = 501;
   this->blue.sleepTime = 5;
   this->blue.attack = 100;
@@ -176,6 +215,7 @@ PixelDescriptorProvider::Config::Config()
   this->percentOfSalad = 0.4;
   this->percentOfCyan = 0.4;
   this->percentOfBlue = 0.2;
+  this->percentOfWhite = 0.1;
   
 }
 
@@ -217,9 +257,21 @@ bool CreateCell(PixelDescriptor* pd, CellType creatureType, PixelDescriptorProvi
   {
     shape = std::make_shared<BigCell>(pd);
   }
+  else if (creatureType == eCellTypeWhite)
+  {
+    shape = std::make_shared<PolymorphShape>(pd, 1);
+  }
+  else if (creatureType == eCellTypeYellow)
+  {
+    shape = std::make_shared<PolymorphShape>(pd, 4);
+  }
+  else if (creatureType == eCellTypePink)
+  {
+    shape = std::make_shared<RectShape>(pd, Vec2(1, 1), Vec2(3, 4));
+  }
   else
   {
-    shape = std::make_shared<SingleCell>(pd);
+    shape = std::make_shared<SinglePixel>(pd);
   }
  
   bool empty = true;
@@ -380,17 +432,20 @@ void PixelDescriptorProvider::Init()
       PixelDescriptor::Type type = cBoolRandPercent(m_config->percentOfCreatures) ? PixelDescriptor::CreatureType : PixelDescriptor::Empty;
       if (type == PixelDescriptor::CreatureType)
       {
-        CellType creatureType = eCellTypeUnknown;
-        if (cBoolRandPercent(m_config->percentOfGreen))
-          creatureType = eCellTypeGreen;
-        else if (cBoolRandPercent(m_config->percentOfOrange))
-          creatureType = eCellTypeHunter;
-        else if (cBoolRandPercent(m_config->percentOfSalad))
-          creatureType = eCellTypeSalad;
-        else if (cBoolRandPercent(m_config->percentOfCyan))
-          creatureType = eCellTypeImprovedSalad;
-        else if (cBoolRandPercent(m_config->percentOfBlue))
-          creatureType = eCellTypeBigBlue;
+        CellType creatureType = eCellTypePink;
+//        CellType creatureType = eCellTypeUnknown;
+//        if (cBoolRandPercent(m_config->percentOfGreen))
+//          creatureType = eCellTypeGreen;
+//        else if (cBoolRandPercent(m_config->percentOfOrange))
+//          creatureType = eCellTypeHunter;
+//        else if (cBoolRandPercent(m_config->percentOfSalad))
+//          creatureType = eCellTypeSalad;
+//        else if (cBoolRandPercent(m_config->percentOfCyan))
+//          creatureType = eCellTypeImprovedSalad;
+//        else if (cBoolRandPercent(m_config->percentOfBlue))
+//          creatureType = eCellTypeBigBlue;
+//        else if (cBoolRandPercent(m_config->percentOfWhite))
+//          creatureType = eCellTypeWhite;
        
         static int count = 0;
         if (creatureType == eCellTypeUnknown)
@@ -398,13 +453,14 @@ void PixelDescriptorProvider::Init()
           continue;
         }
         
+//        
         if (count == 1) {
           continue;
         }
         
         if(komorki::CreateCell(pd, creatureType, m_config->ConfigForCell(creatureType)))
         {
-//          count++;
+          count++;
         }
       }
     }
@@ -432,6 +488,18 @@ PixelDescriptorProvider::Config::CellConfig* PixelDescriptorProvider::Config::Co
   if (type == CellType::eCellTypeBigBlue)
   {
     return &blue;
+  }
+  if (type == CellType::eCellTypeWhite)
+  {
+    return &white;
+  }
+  if (type == CellType::eCellTypeYellow)
+  {
+    return &yellow;
+  }
+  if (type == CellType::eCellTypePink)
+  {
+    return &pink;
   }
   
   assert(0);
@@ -551,6 +619,7 @@ CellType GetRanromCellType()
   if (randIntType == 2) return eCellTypeHunter;
   if (randIntType == 3) return eCellTypeImprovedSalad;
   if (randIntType == 4) return eCellTypeBigBlue;
+  if (randIntType == 6) return eCellTypeWhite;
   assert(0);
   return eCellTypeUnknown;
 }
@@ -655,6 +724,7 @@ void PixelDescriptorProvider::Update(bool passUpdateResult, std::list<PixelDescr
         
         Optional<Action> a;
         Optional<Movement> m;
+        Optional<Morphing> morph;
 
         d->Check();
         
@@ -663,17 +733,19 @@ void PixelDescriptorProvider::Update(bool passUpdateResult, std::list<PixelDescr
                         m_config,
                         m_map,
                         m,
-                        a);
+                        a,
+                        morph);
         
         d->Check();
        
-        if (m == false && a == false)
+        if (m == false && a == false && morph == false)
           continue;
         
         UpdateResult updateResult(d);
         updateResult.desc = pd.get();
         updateResult.action = a;
         updateResult.movement = m;
+        updateResult.morph = morph;
 
         if (passUpdateResult)
         {

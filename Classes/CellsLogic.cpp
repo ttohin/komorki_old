@@ -10,6 +10,8 @@
 #include "b2Utilites.h"
 #include "PixelDescriptor.h"
 #include "CellDescriptor.h"
+#include "CellShapesHelper.h"
+#include <iostream>
 
 namespace komorki
 {
@@ -163,6 +165,368 @@ void ProcessBigBlue(CellDescriptor* pd,
     movement.value.duration = pd->m_sleepCounter;
   }
 }
+  
+//**************************************************************************************************
+void ProcessYellow(CellDescriptor* cd,
+                  Vec2 pos,
+                  PixelDescriptorProvider::Config::CellConfig* config,
+                  const PixelDescriptorProvider::PixelMap& map, // ugly hack
+                  Optional<Movement>& movement,
+                  Optional<Morphing>& morph,
+                  Optional<Action>& action)
+{
+  if (cd->m_sleepCounter != 0)
+  {
+    cd->m_sleepCounter -= 1;
+    return;
+  }
+  else
+  {
+    cd->m_sleepCounter = cd->m_sleepTime;
+  }
+  
+  // using memory to store destination (1, 2) and number of steps (2)
+  if ((cd->parent->x == cd->m_m1 &&
+       cd->parent->y == cd->m_m2) || cd->m_m1 == 0 || cd->m_m2 == 0 || cd->m_m3 > 50)
+  {
+    cd->m_m1 = cRandABInt(0, map[0].size());
+    cd->m_m2 = cRandABInt(0, map[0].size());
+    cd->m_m3 = 0;
+  }
+  
+  cd->m_m3 += 1;
+  
+  cd->PrintAsciiArt();
+  
+  DistanceMeasureResult distanceResult;
+  
+  GetMaxMinDistantPixel(Vec2(cd->m_m1, cd->m_m2), cd->GetShape(), distanceResult);
+  
+  if (distanceResult.targetIsInShape)
+  {
+    cd->m_m1 = 0;
+    cd->m_m2 = 0;
+    cd->m_m3 = 0;
+    return;
+  }
+  
+  std::vector<PixelDescriptor*> toRemove;
+  
+  distanceResult.maxPd->AroundRandom([&](PixelDescriptor* pd, bool& stop)
+                                     {
+                                       if (pd->m_cellDescriptor != cd)
+                                       {
+                                         return;
+                                       }
+                                       
+                                       Morph m;
+                                       m.dir = Morph::Inside;
+                                       m.pos = Vec2(distanceResult.maxPd->x, distanceResult.maxPd->y);
+                                       distanceResult.maxPd->Offset(pd, m.delta);
+                                       morph.value.vec.push_back(m);
+                                       morph.SetValueFlag(true);
+                                       
+                                       if (distanceResult.maxPd == cd->parent)
+                                       {
+                                         movement.value.destinationDesc = pd;
+                                         movement.SetValueFlag(true);
+                                       }
+                                       
+                                       toRemove.push_back(distanceResult.maxPd);
+                                       
+                                       stop = true;
+                                       
+                                     });
+  
+  if (morph.value.vec.size() == 0)
+  {
+    cd->m_m1 = 0;
+    cd->m_m2 = 0;
+    cd->m_m3 = 0;
+    morph.SetValueFlag(false);
+    movement.SetValueFlag(false);
+    return;
+  }
+  
+  Vec2 normalizedMinDist = distanceResult.minDist.Normalize();
+  
+  std::vector<PixelDescriptor*> toInsert;
+  
+  {
+    auto tagetPd = distanceResult.minPd->Offset(normalizedMinDist);
+    if (FreePixelHasMyParts(cd, tagetPd, distanceResult.minPd))
+    {
+      Morph m;
+      m.dir = Morph::Outside;
+      m.pos = tagetPd->GetPos();
+      m.delta = -normalizedMinDist;
+      morph.value.vec.push_back(m);
+      morph.SetValueFlag(true);
+      
+      toInsert.push_back(tagetPd);
+    }
+  }
+  
+  if (toInsert.size() == 0)
+  {
+    distanceResult.minPd->AroundRandom([&](PixelDescriptor* pd, bool& stop)
+                                       {
+                                         if (!FreePixelHasMyParts(cd, pd, distanceResult.minPd))
+                                         {
+                                           return;
+                                         }
+                                         
+                                         Vec2 offset;
+                                         distanceResult.minPd->Offset(pd, offset);
+                                         
+                                         Morph m;
+                                         m.dir = Morph::Outside;
+                                         m.pos = pd->GetPos();
+                                         m.delta = -offset;
+                                         morph.value.vec.push_back(m);
+                                         morph.SetValueFlag(true);
+                                         
+                                         toInsert.push_back(pd);
+                                         
+                                         stop = true;
+                                       });
+  }
+  
+  
+  if (toInsert.size() == 0 || toRemove.size() == 0)
+  {
+    cd->m_m1 = 0;
+    cd->m_m2 = 0;
+    cd->m_m3 = 0;
+    morph.SetValueFlag(false);
+    movement.SetValueFlag(false);
+    return;
+  }
+  
+  PolymorphShape* shape = static_cast<PolymorphShape*>(cd->GetShape());
+  
+
+  for (auto& pd : toInsert)
+  {
+    shape->AddPixel(pd);
+    pd->m_cellDescriptor = cd;
+    pd->m_type = PixelDescriptor::CreatureType;
+  }
+  
+  for (auto& pd : toRemove)
+  {
+    shape->RemovePixel(pd);
+    pd->m_cellDescriptor = nullptr;
+    pd->m_type = PixelDescriptor::Empty;
+  }
+ 
+  if (movement.isSet)
+  {
+    cd->Move(movement.value.destinationDesc);
+  }
+  
+  cd->Finish();
+  
+  std::cout << "intermidiateChanges2:" << std::endl;
+  
+  for (auto & m : morph.value.vec)
+  {
+    std::cout << m.pos.Description() << "->" << m.delta.Description() << std::endl;
+  }
+  
+  cd->PrintAsciiArt();
+}
+  
+//**************************************************************************************************
+void ProcessWhite(CellDescriptor* pd,
+                  Vec2 pos,
+                  PixelDescriptorProvider::Config::CellConfig* config,
+                  const PixelDescriptorProvider::PixelMap& map, // ugly hack
+                  Optional<Movement>& movement,
+                  Optional<Morphing>& morph,
+                  Optional<Action>& action)
+{
+  if (pd->m_sleepCounter != 0)
+  {
+    pd->m_sleepCounter -= 1;
+    return;
+  }
+  else
+  {
+    pd->m_sleepCounter = pd->m_sleepTime;
+  }
+  
+  pd->AroundRandom([&](PixelDescriptor* targetPd, bool& stop)
+                   {
+                     if (targetPd->m_cellDescriptor && pd->IsMyFood(targetPd->m_cellDescriptor))
+                     {
+                       Attack(pd, targetPd->m_cellDescriptor, {0, 0}, config, action);
+                       stop = true;
+                     }
+                   });
+  
+  if (action.isSet)
+  {
+    return;
+  }
+ 
+  // using memory to store destination (1, 2) and number of steps (2)
+  if ((pd->parent->x == pd->m_m1 &&
+       pd->parent->y == pd->m_m2) || pd->m_m1 == 0 || pd->m_m2 == 0 || pd->m_m3 > 100)
+  {
+    pd->m_m1 = cRandABInt(0, map[0].size());
+    pd->m_m2 = cRandABInt(0, map[0].size());
+    pd->m_m3 = 0;
+  }
+  
+  pd->m_m3 += 1;
+  
+  DistanceMeasureResult distanceResult;
+  
+  GetMaxMinDistantPixel(Vec2(pd->m_m1, pd->m_m2), pd->GetShape(), distanceResult);
+  
+  if (distanceResult.targetIsInShape)
+  {
+    pd->m_m1 = 0;
+    pd->m_m2 = 0;
+    pd->m_m3 = 0;
+    return;
+  }
+  
+  Vec2 maxDistnacePdOffset = Vec2(pd->m_m1, pd->m_m2) - Vec2(distanceResult.maxPd->x, distanceResult.maxPd->y);
+  Vec2 minDistnacePdOffset = Vec2(pd->m_m1, pd->m_m2) - Vec2(distanceResult.minPd->x, distanceResult.minPd->y);
+
+  MorphingInternal destinationMorphing;
+  
+  bool found = false;
+  
+  if (pd->m_m3%2 == 0)
+  {
+    auto targetPd = distanceResult.minPd->Offset(minDistnacePdOffset.Normalize());
+    if (targetPd->m_type == PixelDescriptor::Empty ||
+        targetPd->m_cellDescriptor == pd)
+    {
+      if (!WillCauseTheGap(pd, distanceResult.minPd, minDistnacePdOffset.Normalize()))
+      {
+        MorphInternal m;
+        m.offset = minDistnacePdOffset.Normalize();
+        m.pd = distanceResult.minPd;
+        destinationMorphing.push_back(m);
+        found = true;
+      }
+    }
+  }
+  else
+  {
+    auto targetPd = distanceResult.maxPd->Offset(maxDistnacePdOffset.Normalize());
+    if (targetPd->m_type == PixelDescriptor::Empty ||
+        targetPd->m_cellDescriptor == pd)
+    {
+      if (!WillCauseTheGap(pd, distanceResult.maxPd, maxDistnacePdOffset.Normalize()))
+      {
+        MorphInternal m;
+        m.offset = maxDistnacePdOffset.Normalize();
+        m.pd = distanceResult.maxPd;
+        destinationMorphing.push_back(m);
+        found = true;
+      }
+    }
+  }
+  
+  if (!found)
+  {
+    pd->ShapeRandom([&](PixelDescriptor* pixel, bool& stop)
+                    {
+                      Vec2 offsetFromTarget = Vec2(pd->m_m1, pd->m_m2) - Vec2(pixel->x, pixel->y);
+                      offsetFromTarget = offsetFromTarget.Normalize();
+                      auto targetPd = pixel->Offset(offsetFromTarget);
+                      
+                      if (targetPd->m_type == PixelDescriptor::Empty ||
+                          targetPd->m_cellDescriptor == pd)
+                      {
+                        if (WillCauseTheGap(pd, pixel, offsetFromTarget))
+                        {
+                          return;
+                        }
+                        
+                        MorphInternal m;
+                        m.offset = offsetFromTarget;
+                        m.pd = pixel;
+                        destinationMorphing.push_back(m);
+                        stop = true;
+                        found = true;
+                      }
+                    });
+  }
+  
+  if (!found)
+  {
+    distanceResult.maxPd->AroundRandom([&](PixelDescriptor* pixel, bool& stop)
+                                       {
+                                         Vec2 offsetFromTarget;
+                                         distanceResult.maxPd->Offset(pixel, offsetFromTarget);
+                                         
+                                         if (pixel->m_cellDescriptor == pd)
+                                         {
+                                           if (WillCauseTheGap(pd, distanceResult.maxPd, offsetFromTarget))
+                                           {
+                                             return;
+                                           }
+                                           
+                                           MorphInternal m;
+                                           m.offset = offsetFromTarget;
+                                           m.pd = distanceResult.maxPd;
+                                           destinationMorphing.push_back(m);
+                                           stop = true;
+                                           found = true;
+                                         }
+                                       });
+  }
+  
+  if (!found)
+  {
+    pd->m_m1 = 0;
+    pd->m_m2 = 0;
+    pd->m_m3 = 0;
+    return;
+  }
+  
+  MoveCellShape(pd, destinationMorphing, map, morph.value, movement.value);
+  if (morph.value.vec.size() == 0)
+  {
+    return;
+  }
+  
+  morph.SetValueFlag(true);
+  if (movement.value.destinationDesc) {
+    movement.SetValueFlag(true);
+  }
+  
+  if (pd->m_volume <= 5)
+  {
+    pd->AroundRandom([&](PixelDescriptor* pixel, bool& stop){
+      if (pixel->m_type == PixelDescriptor::Empty)
+      {
+        stop = true;
+        Morph m;
+        m.dir = Morph::Move;
+        m.pos = Vec2(pixel->x, pixel->y);
+        morph.value.vec.push_back(m);
+        
+        PolymorphShape* shape = static_cast<PolymorphShape*>(pd->m_shape.get());
+        shape->AddPixel(pixel);
+        AddPixelToCell(pd, pixel);
+        pd->m_volume += 1;
+      }
+    });
+  }
+  
+  
+//  pd->PrintAsciiArt();
+
+  //pd->Move(toRemovePxls, newPixels);
+}
+
 
 //**************************************************************************************************
 void ProcessImprovedSalad(CellDescriptor* pd,
@@ -472,7 +836,8 @@ void ProcessCell(CellDescriptor* d,
                  PixelDescriptorProvider::Config* config,
                  const PixelDescriptorProvider::PixelMap& map, // ugly hack
                  Optional<Movement>& m,
-                 Optional<Action>& a)
+                 Optional<Action>& a,
+                 Optional<Morphing>& morph)
 {
   PixelDescriptorProvider::Config::CellConfig* cellConfig = config->ConfigForCell(d->m_character);
   
@@ -506,6 +871,16 @@ void ProcessCell(CellDescriptor* d,
   {
     ProcessBigBlue(d, pos, cellConfig, map, m, a);
   }
+  else if (d->m_character == eCellTypeWhite)
+  {
+    ProcessWhite(d, pos, cellConfig, map, m, morph, a);
+  }
+  else if (d->m_character == eCellTypeYellow)
+  {
+    ProcessYellow(d, pos, cellConfig, map, m, morph, a);
+  }
+  
+  d->PrintAsciiArt();
 }
 
 } // namespace komorki;

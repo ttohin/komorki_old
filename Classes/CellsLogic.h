@@ -19,7 +19,8 @@ namespace komorki
                    PixelDescriptorProvider::Config* config,
                    const PixelDescriptorProvider::PixelMap& map, // ugly hack
                    Optional<Movement>& movement,
-                   Optional<Action>& action);
+                   Optional<Action>& action,
+                   Optional<Morphing>& morph);
 }
 
 

@@ -12,7 +12,6 @@ namespace komorki
   class CellDescriptor;
   class PixelDescriptor;
 
-  
   struct AddCreature
   {
     PixelDescriptor* destinationDesc = nullptr;
@@ -20,7 +19,31 @@ namespace komorki
   
   struct Action
   {
+    Vec2 pos;
     Vec2 delta = Vec2(0.f, 0.f);
+  };
+  
+  struct Morph
+  {
+    enum MorphDir
+    {
+      Move,
+      Inside,
+      Outside
+    };
+    Vec2 delta = Vec2(0.f, 0.f);
+    Vec2 pos = Vec2(0.f, 0.f);
+    Vec2 offsetFromBase = Vec2(0.f, 0.f);
+    MorphDir dir;
+  };
+  
+  struct Morphing
+  {
+    typedef std::vector<Morph> Vec;
+    Vec vec;
+    bool proccessed = false;
+//    Morphing() {}
+//    Morphing(const Morphing& m) {}
   };
   
   struct DeleteCreature
@@ -88,6 +111,7 @@ public:
     komorki::Optional<komorki::Movement> movement;
     komorki::Optional<komorki::AddCreature> addCreature;
     komorki::Optional<komorki::DeleteCreature> deleteCreature;
+    komorki::Optional<komorki::Morphing> morph;
     UpdateResult(CellDescriptor* desc);
   };
 

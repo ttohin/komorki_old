@@ -14,6 +14,7 @@
 #include "GlowMapOverlay.h"
 #include "PixelDescriptorProvider.h"
 #include "Utilities.h"
+#include "UIConfig.h"
 #include <stdio.h>
 #include <sstream> //for std::stringstream
 #include <string>  //for std::string
@@ -48,6 +49,7 @@ namespace ui
   : owner(_owner)
   , sprite(nullptr)
   , glow(nullptr)
+  , type(eContextTypeDefault)
   {
     LOG_W("%s, %s", __FUNCTION__, Description().c_str());
   }
@@ -69,6 +71,43 @@ namespace ui
     LOG_W("%s, %s. caller: %p", __FUNCTION__, Description().c_str(), _owner);
     assert(owner == _owner || owner == nullptr);
     delete this;
+  }
+  
+  void PartialMap::Context::ForceDestory(PartialMap* _owner)
+  {
+    LOG_W("%s, %s. caller: %p", __FUNCTION__, Description().c_str(), _owner);
+    delete this;
+  }
+  
+  PartialMap::PolymorphShapeContext PartialMap::Context::GetSprite(int x, int y)
+  {
+    std::string key = GetKey(x, y);
+    auto s = spriteMap[key];
+    return s;
+  }
+  
+  PartialMap::PolymorphShapeContext PartialMap::Context::PopSprite(int x, int y)
+  {
+    std::string key = GetKey(x, y);
+    auto s = spriteMap[key];
+    spriteMap.erase(key);
+    return s;
+  }
+  
+  void PartialMap::Context::SetSprite(cocos2d::Sprite* s, int x, int y)
+  {
+    PartialMap::PolymorphShapeContext c;
+    c.sprite = s;
+    c.pos = Vec2(x, y);
+    spriteMap[GetKey(x, y)] = c;
+  }
+  
+ std::string PartialMap::Context::GetKey(int x, int y) const
+  {
+//    const unsigned kMaxPolymorphSize = 256;
+//    unsigned long long key = (x + kMaxPolymorphSize) + (y + kMaxPolymorphSize) * kMaxPolymorphSize;
+//    return key;
+    return std::to_string(x) + "_" + std::to_string(y);
   }
   
 PartialMap::Context::~Context()
@@ -201,11 +240,13 @@ bool PartialMap::Init(int a, int b, int width, int height,
   
 void PartialMap::AdoptIncomingItems()
 {
+  if (kRedrawEachUpdate) return;
+  
   for (auto context : m_upcomingContexts)
   {
     context->BecomeOwner(this);
     
-    m_cellMap->AdoptSprite(context);
+    m_cellMap->AdoptSprite(context, Vec2(m_a1, m_b1));
     m_glow->AdoptSprite(context);
   }
   
@@ -215,6 +256,8 @@ void PartialMap::AdoptIncomingItems()
 void PartialMap::DeleteOutgoingItems()
 {
   LOG_W("%s, %s", __FUNCTION__, Description().c_str());
+  if (kRedrawEachUpdate) return;
+  
   for (auto cell : m_outgoingCells)
   {
     if (cell->userData == nullptr) {
@@ -241,12 +284,29 @@ void PartialMap::HandleItemsOnBounds(const std::list<IPixelDescriptorProvider::U
 {
 }
 
-void PartialMap::Update(const std::list<IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime)
+void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime)
 {
+  if (kRedrawEachUpdate)
+  {
+    Reset();
+    
+    for (int i = m_a1; i < m_a2; ++i)
+    {
+      for (int j = m_b1; j < m_b2; ++j)
+      {
+        auto pd = m_provider->GetDescriptor(i, j);
+        InitPixel(pd);
+      }
+    }
+
+    m_debugView->Update(updateResult,updateTime);
+    return;
+  }
+  
   m_cellMap->SetUpdateTime(updateTime);
   m_glow->SetUpdateTime(updateTime);
   
-  for (auto u : updateResult)
+  for (auto& u : updateResult)
   {
     std::string operationType;
     
@@ -274,6 +334,11 @@ void PartialMap::Update(const std::list<IPixelDescriptorProvider::UpdateResult>&
       context = static_cast<Context*>(u.userData);
     }
     
+    if (u.morph == true && m == false && !IsInAABB(initialPos))
+    {
+      continue;
+    }
+    
     if (!IsInAABB(initialPos) && !IsInAABB(destinationPos))
     {
       continue;
@@ -286,6 +351,17 @@ void PartialMap::Update(const std::list<IPixelDescriptorProvider::UpdateResult>&
         continue;
       }
       Delete(context);
+    }
+    else if (u.morph == true && m == false)
+    {
+      if (context->type == Context::eContextTypePolymorph)
+      {
+        m_cellMap->MovePolymorphCells(context, initialPos, u.morph.value, Vec2(m_a1, m_b1), u.desc->m_cellDescriptor);
+      }
+      else
+      {
+        m_cellMap->MoveAmorphCells(context, initialPos, u.morph.value, Vec2(m_a1, m_b1), u.desc->m_cellDescriptor);
+      }
     }
     else if (m == true || u.addCreature == true)
     {
@@ -310,7 +386,7 @@ void PartialMap::Update(const std::list<IPixelDescriptorProvider::UpdateResult>&
               duration /= 2;
             }
           }
-          Move(initialPos, destinationPos, context, duration);
+          Move(initialPos, destinationPos, context, duration, u.morph.value, destinationDesc->m_cellDescriptor);
         }
       }
       else
@@ -325,7 +401,7 @@ void PartialMap::Update(const std::list<IPixelDescriptorProvider::UpdateResult>&
           
           if (context->owner != this || context->owner == nullptr)
           {
-            m_cellMap->AdoptSprite(context);
+            m_cellMap->AdoptSprite(context, Vec2(m_a1, m_b1));
             m_glow->AdoptSprite(context);
             context->BecomeOwner(this);
           }
@@ -334,7 +410,7 @@ void PartialMap::Update(const std::list<IPixelDescriptorProvider::UpdateResult>&
         {
           if (context == nullptr)
           {
-            context = AddCreature(destinationPos, destinationDesc);
+            context = AddCreature(destinationPos, destinationDesc, u.morph.value);
           }
         }
        
@@ -349,7 +425,7 @@ void PartialMap::Update(const std::list<IPixelDescriptorProvider::UpdateResult>&
           }
         }
       
-        Move(initialPos, destinationPos, context, duration);
+        Move(initialPos, destinationPos, context, duration, u.morph.value, destinationDesc->m_cellDescriptor);
       }
     }
     else if (a == true)
@@ -361,6 +437,10 @@ void PartialMap::Update(const std::list<IPixelDescriptorProvider::UpdateResult>&
       assert(context);
       Attack(context, initialPos, a.value.delta);
     }
+    else
+    {
+      assert(0);
+    }
   }
   
   m_background->Update(updateResult,updateTime);
@@ -371,15 +451,17 @@ void PartialMap::Update(const std::list<IPixelDescriptorProvider::UpdateResult>&
   {
     m_cellMap->HightlightCellOnPos(x, y, type);
   }
+  
   void PartialMap::StopHightlighting()
   {
     m_cellMap->StopHightlighting();
   }
+  
   void PartialMap::Reset()
   {
     m_cellMap->Reset();
+    m_glow->Reset();
   }
-
   
   void PartialMap::StopSmallAnimations()
   {
@@ -445,14 +527,18 @@ void PartialMap::Update(const std::list<IPixelDescriptorProvider::UpdateResult>&
             context->BecomeOwner(this);
             context->pos = initialPos;
             
-            m_cellMap->AdoptSprite(context);
+            m_cellMap->AdoptSprite(context, Vec2(m_a1, m_b1));
             m_glow->AdoptSprite(context);
           }
         }
-        else
+        else // create new cell
         {
           CreateCell(pd);
         }
+      }
+      else if (kSimpleDraw && kRedrawEachUpdate)
+      {
+        CreateCell(pd);
       }
     }
     else
@@ -461,17 +547,35 @@ void PartialMap::Update(const std::list<IPixelDescriptorProvider::UpdateResult>&
     }
   }
   
-  PartialMap::Context* PartialMap::AddCreature(const Vec2& source, PixelDescriptor* dest)
+  PartialMap::Context::ContextType GetContextType(CellDescriptor* cd)
+  {
+    if (cd->GetShapeType() == CellDescriptor::eShapeTypeAmorph) {
+      return PartialMap::Context::eContextTypeAmorph;
+    }
+    if (cd->GetShapeType() == CellDescriptor::eShapeTypePolymorph) {
+      return PartialMap::Context::eContextTypePolymorph;
+    }
+    if (cd->GetShapeType() == CellDescriptor::eShapeTypeRect) {
+      return PartialMap::Context::eContextTypeRect;
+    }
+    return PartialMap::Context::eContextTypeDefault;
+  }
+  
+  PartialMap::Context* PartialMap::AddCreature(const Vec2& source, PixelDescriptor* dest, Morphing& morphing)
   {
     Context* context = new Context(this);
+    context->type = GetContextType(dest->m_cellDescriptor);
+    
+    morphing.proccessed = true;
+    
     context->pos = LocalVector(source);
     
     dest->m_cellDescriptor->userData = context;
     
-    m_cellMap->AddCreature(dest->m_cellDescriptor, context);
+    m_cellMap->AddCreature(dest->m_cellDescriptor, context, Vec2(m_a1, m_b1));
     m_glow->AddCreature(dest->m_cellDescriptor, context);
     if (source != Vec2()) {
-      m_cellMap->MoveCreature(context, LocalVector(source), LocalVector(Vec2(dest->x, dest->y)));
+      m_cellMap->MoveCreature(context, LocalVector(source), LocalVector(Vec2(dest->x, dest->y)), 0, morphing, Vec2(m_a1, m_b1), dest->m_cellDescriptor);
       m_glow->MoveCreature(context, LocalVector(source), LocalVector(Vec2(dest->x, dest->y)));
     }
     
@@ -481,13 +585,29 @@ void PartialMap::Update(const std::list<IPixelDescriptorProvider::UpdateResult>&
   PartialMap::Context* PartialMap::CreateCell(PixelDescriptor* dest)
   {
     Context* context = new Context(this);
+    context->type = GetContextType(dest->m_cellDescriptor);
     context->pos = LocalVector(Vec2(dest->x, dest->y));
+
     assert(dest->m_cellDescriptor->userData == nullptr);
-    dest->m_cellDescriptor->userData = context;
-    m_cellMap->AddCreature(dest->m_cellDescriptor, context);
+    m_cellMap->AddCreature(dest->m_cellDescriptor, context, Vec2(m_a1, m_b1));
     m_glow->AddCreature(dest->m_cellDescriptor, context);
     
+    if (!kRedrawEachUpdate)
+    {
+      dest->m_cellDescriptor->userData = context;
+    }
+    else
+    {
+      context->Destory(this);
+      return nullptr;
+    }
+    
     return context;
+  }
+  
+  PartialMap::Context* PartialMap::CreatePolymorphCell(PixelDescriptor* dest)
+  {
+    return nullptr;
   }
   
   void PartialMap::Delete(Context* context)
@@ -507,15 +627,15 @@ void PartialMap::Update(const std::list<IPixelDescriptorProvider::UpdateResult>&
     }
   }
   
-  void PartialMap::Move(const Vec2& source, const Vec2& dest, Context* context, int duration)
+  void PartialMap::Move(const Vec2& source, const Vec2& dest, Context* context, int duration, Morphing& morphing, CellDescriptor* cd)
   {
-    m_cellMap->MoveCreature(context, LocalVector(source), LocalVector(dest), duration);
+    m_cellMap->MoveCreature(context, LocalVector(source), LocalVector(dest), duration, morphing, Vec2(m_a1, m_b1), cd);
     m_glow->MoveCreature(context, LocalVector(source), LocalVector(dest), duration);
   }
  
   void PartialMap::Attack(Context* context, const Vec2& pos, const Vec2& offset)
   {
-    m_cellMap->Attack(context, LocalVector(pos), offset);
+    m_cellMap->Attack(context, LocalVector(pos), offset, Vec2(m_a1, m_b1));
   }
   
   inline bool PartialMap::IsInAABB(const Vec2& vec)

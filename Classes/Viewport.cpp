@@ -322,6 +322,30 @@ void ui::Viewport::Test()
     assert(r2p.In(r1p));
     assert(!r3p.In(r1p));
   }
+  {
+    Vec2 a(100, 100);
+    assert(a.Normalize() == Vec2(1,1));
+    Vec2 b(100, 99);
+    assert(b.Normalize() == Vec2(1,1));
+    Vec2 c(100, 50);
+    assert(c.Normalize() == Vec2(1,1));
+    Vec2 d(100, 49);
+    assert(d.Normalize() == Vec2(1,0));
+    Vec2 e(100, 1);
+    assert(e.Normalize() == Vec2(1,0));
+  }
+  {
+    Vec2 e(-100, 1);
+    assert(e.Normalize() == Vec2(-1,0));
+  }
+  {
+    Vec2 e(-100, -1);
+    assert(e.Normalize() == Vec2(-1,0));
+  }
+  {
+    Vec2 e(-100, 50);
+    assert(e.Normalize() == Vec2(-1,1));
+  }
 }
 
 void ui::Viewport::CreateMap()
@@ -564,7 +588,7 @@ void ui::Viewport::Update(float updateTime, float& outUpdateTime)
   
   double elapsed = 0.0;
   
-  const std::list<komorki::PixelDescriptorProvider::UpdateResult>& result = m_manager->GetUpdateResult();
+  std::list<komorki::PixelDescriptorProvider::UpdateResult>& result = m_manager->GetUpdateResult();
   
   LOG_W("Update %d. updates: %lu", m_lastUpdateId, result.size());
   
@@ -591,6 +615,8 @@ void ui::Viewport::Update(float updateTime, float& outUpdateTime)
         operationType = "addCreature";
       else if (u.deleteCreature == true)
         operationType = "delete";
+      else if (u.morph== true)
+        operationType = "morph";
       
       if(u.addCreature == true)
         destinationPos = Vec2(u.addCreature.value.destinationDesc->x, u.addCreature.value.destinationDesc->y);
@@ -697,6 +723,8 @@ void ui::Viewport::Update(float updateTime, float& outUpdateTime)
 
 void ui::Viewport::HealthCheck()
 {
+  if (kRedrawEachUpdate) return;
+  
   komorki::Vec2 size = m_provider->GetSize();
   for (int i = 0; i < size.x; ++i)
   {

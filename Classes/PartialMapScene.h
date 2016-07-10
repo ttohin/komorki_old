@@ -89,6 +89,7 @@ private:
   cocos2d::Node* m_toolbarNode;
   cocos2d::Node* m_cellsSelectoToolbar;
   cocos2d::Node* m_speedToolbar;
+  cocos2d::Node* m_menuNode;
   std::shared_ptr<OptionsMenu> m_optionsMenu;
   std::shared_ptr<MainMenu> m_mainMenu;
   std::shared_ptr<LoadConfigMenu> m_loadConfigMenu;
@@ -139,6 +140,7 @@ private:
   void SetEraseMode(bool enabled);
   void SetSpeed(Speed speed);
   komorki::CellType GetCurretnCellType();
+  void CreateRenderTextures(const cocos2d::Size& size);
   
   float AspectToFill(const cocos2d::Size& source, const cocos2d::Size& target);
   float AspectToFit(const cocos2d::Size& source, const cocos2d::Size& target);

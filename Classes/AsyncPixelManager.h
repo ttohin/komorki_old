@@ -111,7 +111,7 @@ namespace komorki
       m_semaphore.notify_one();
     }
     
-    const std::list<PixelDescriptorProvider::UpdateResult>& GetUpdateResult()const
+    std::list<PixelDescriptorProvider::UpdateResult>& GetUpdateResult()
     {
       return m_updateResult;
     }
