@@ -30,105 +30,15 @@ namespace komorki
 {
 namespace ui
 {
-  void PartialMap::Context::BecomeOwner(PartialMap* _owner)
-  {
-    LOG_W("%s, %s. New owner: %p", __FUNCTION__, Description().c_str(), _owner);
-    owner = _owner;
-  }
-  
-  void PartialMap::Context::Free(PartialMap* _owner)
-  {
-    LOG_W("%s, %s: argument: %p", __FUNCTION__, Description().c_str(), _owner);
-    if (owner == _owner)
-    {
-      owner = nullptr;
-    }
-  }
-  
-  PartialMap::Context::Context(PartialMap *_owner)
-  : owner(_owner)
-  , sprite(nullptr)
-  , glow(nullptr)
-  , type(eContextTypeDefault)
-  {
-    LOG_W("%s, %s", __FUNCTION__, Description().c_str());
-  }
-  
-  std::string PartialMap::Context::Description() const
-  {
-    std::stringstream ss;
-    ss <<
-    static_cast<const void*>(this) <<
-    " ownwer " <<
-    static_cast<const void*>(owner) <<
-    " sprite: " <<
-    static_cast<const void*>(sprite);
-    return ss.str();
-  }
-  
-  void PartialMap::Context::Destory(PartialMap* _owner)
-  {
-    LOG_W("%s, %s. caller: %p", __FUNCTION__, Description().c_str(), _owner);
-    assert(owner == _owner || owner == nullptr);
-    delete this;
-  }
-  
-  void PartialMap::Context::ForceDestory(PartialMap* _owner)
-  {
-    LOG_W("%s, %s. caller: %p", __FUNCTION__, Description().c_str(), _owner);
-    delete this;
-  }
-  
-  PartialMap::PolymorphShapeContext PartialMap::Context::GetSprite(int x, int y)
-  {
-    std::string key = GetKey(x, y);
-    auto s = spriteMap[key];
-    return s;
-  }
-  
-  PartialMap::PolymorphShapeContext PartialMap::Context::PopSprite(int x, int y)
-  {
-    std::string key = GetKey(x, y);
-    auto s = spriteMap[key];
-    spriteMap.erase(key);
-    return s;
-  }
-  
-  void PartialMap::Context::SetSprite(cocos2d::Sprite* s, int x, int y)
-  {
-    PartialMap::PolymorphShapeContext c;
-    c.sprite = s;
-    c.pos = Vec2(x, y);
-    spriteMap[GetKey(x, y)] = c;
-  }
-  
- std::string PartialMap::Context::GetKey(int x, int y) const
-  {
-//    const unsigned kMaxPolymorphSize = 256;
-//    unsigned long long key = (x + kMaxPolymorphSize) + (y + kMaxPolymorphSize) * kMaxPolymorphSize;
-//    return key;
-    return std::to_string(x) + "_" + std::to_string(y);
-  }
-  
-PartialMap::Context::~Context()
-{
-  LOG_W("%s, %s", __FUNCTION__, Description().c_str());
-}
-  
 PartialMap::PartialMap()
 {
 }
 
 PartialMap::~PartialMap()
 {
+  
   LOG_W("%s, %s", __FUNCTION__, Description().c_str());
-  m_cellMap->removeFromParentAndCleanup(true);
-  m_background->removeFromParentAndCleanup(true);
-  m_lightOverlay->removeFromParentAndCleanup(true);
-  m_debugView->removeFromParentAndCleanup(true);
-  m_glow->removeFromParentAndCleanup(true);
-//  m_terrain->removeFromParentAndCleanup(true);
-  m_terrainSprite->removeFromParentAndCleanup(true);
+
   
   for (auto cell : m_outgoingCells)
   {
@@ -136,15 +46,13 @@ PartialMap::~PartialMap()
       continue;
     }
     
-    auto context = static_cast<Context*>(cell->userData);
+    auto context = static_cast<PixelMap::ObjectContext*>(cell->userData);
     // Remove only context that hasn't been adopted by other pratial maps
-    if (context->owner == this || context->owner == nullptr)
+    if (context->m_owner == this || context->m_owner == nullptr)
     {
       Vec2 pos (cell->parent->x, cell->parent->y);
       LOG_W("%s, %s delete m_outgoingCells [%s]", __FUNCTION__, Description().c_str(), pos.Description().c_str());
       cell->userData = nullptr;
-      m_cellMap->Delete(context);
-      m_glow->Delete(context);
       context->Destory(this);
     }
   }
@@ -158,9 +66,9 @@ PartialMap::~PartialMap()
       auto pd = m_provider->GetDescriptor(i, j);
       if (pd->m_cellDescriptor && pd->m_cellDescriptor->userData != nullptr)
       {
-        auto context = static_cast<Context*>(pd->m_cellDescriptor->userData);
-        assert(context->owner);
-        if (context->owner == this)
+        auto context = static_cast<PixelMap::ObjectContext*>(pd->m_cellDescriptor->userData);
+        assert(context->m_owner);
+        if (context->m_owner == this)
         {
           Vec2 pos (pd->x, pd->y);
           LOG_W("%s, %s delete all items [%s]", __FUNCTION__, Description().c_str(), pos.Description().c_str());
@@ -170,10 +78,17 @@ PartialMap::~PartialMap()
       }
     }
   }
+  
+  m_cellMap->removeFromParentAndCleanup(true);
+  m_background->removeFromParentAndCleanup(true);
+  m_lightOverlay->removeFromParentAndCleanup(true);
+  m_debugView->removeFromParentAndCleanup(true);
+  m_glow->removeFromParentAndCleanup(true);
+  m_terrainSprite->removeFromParentAndCleanup(true);
 }
   
 bool PartialMap::Init(int a, int b, int width, int height,
-                      PixelDescriptorProvider* provider, cocos2d::Node* superView, cocos2d::Node* lightNode, const cocos2d::Vec2& offset)
+                      IPixelDescriptorProvider* provider, cocos2d::Node* superView, cocos2d::Node* lightNode, const cocos2d::Vec2& offset)
 {
   ChangeAABB(a, b, width, height);
   m_width = width;
@@ -185,7 +100,6 @@ bool PartialMap::Init(int a, int b, int width, int height,
   m_lightOverlay = std::make_shared<PixelMapLightOverlay>(a, b, width, height, provider);
   m_background = std::make_shared<PixelMapBackground>(a, b, width, height);
   m_glow = std::make_shared<GlowMapOverlay>();
-//  m_terrain = std::make_shared<TerrainBatchSprite>();
   m_terrainSprite = TerrainSprite::create(a, b, width, height);
   
   m_cellMap->init();
@@ -194,29 +108,14 @@ bool PartialMap::Init(int a, int b, int width, int height,
   m_background->init();
   m_glow->init();
   
-//  auto terrain = provider->GetTerrain();
-//  TerrainAnalizer::Result result;
-//  
-//  result.background = std::make_shared<Buffer2D<TerrainInfo>>(width * 2, height * 2);
-//  result.ground = std::make_shared<Buffer2D<TerrainInfo>>(width * 2, height * 2);
-//  result.foreground = std::make_shared<Buffer2D<TerrainInfo>>(width * 2, height * 2);
-//  
-//  terrain.background->SubSet(a * 2, b * 2, *result.background.get());
-//  terrain.ground->SubSet(a * 2, b * 2, *result.ground.get());
-//  terrain.foreground->SubSet(a * 2, b * 2, *result.foreground.get());
-//  
-//  m_terrain->init(result);
-  
   m_cellMap->setPosition(offset);
   m_debugView->setPosition(offset);
   m_lightOverlay->setPosition(offset);
   m_background->setPosition(offset);
   m_glow->setPosition(offset);
-//  m_terrain->setPosition(offset);
   m_terrainSprite->setPosition(offset);
   
   superView->addChild(m_background.get(), -1);
-//  superView->addChild(m_terrain.get(), 0);
   superView->addChild(m_terrainSprite, 0);
   superView->addChild(m_cellMap.get(), 1);
   lightNode->addChild(m_lightOverlay.get(), 2);
@@ -245,9 +144,6 @@ void PartialMap::AdoptIncomingItems()
   for (auto context : m_upcomingContexts)
   {
     context->BecomeOwner(this);
-    
-    m_cellMap->AdoptSprite(context, Vec2(m_a1, m_b1));
-    m_glow->AdoptSprite(context);
   }
   
   m_upcomingContexts.clear();
@@ -264,17 +160,16 @@ void PartialMap::DeleteOutgoingItems()
       continue;
     }
     
-    auto context = static_cast<Context*>(cell->userData);
+    auto context = static_cast<PixelMap::ObjectContext*>(cell->userData);
     // Remove only context that hasn't been adopted by other pratial maps
-    if (context->owner == this || context->owner == nullptr)
+    if (context->m_owner == this || context->m_owner == nullptr)
     {
       Vec2 pos (cell->parent->x, cell->parent->y);
       LOG_W("%s, %s delete m_outgoingCells [%s]", __FUNCTION__, Description().c_str(), pos.Description().c_str());
       cell->userData = nullptr;
-      m_cellMap->Delete(context);
-      m_glow->Delete(context);
       context->Destory(this);
     }
+    
   }
   
   m_outgoingCells.clear();
@@ -317,7 +212,7 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
    
     Vec2 destinationPos(0,0);
     PixelDescriptor* destinationDesc = nullptr;
-    Context* context = nullptr;
+    PixelMap::ObjectContext* context = nullptr;
     if(u.addCreature == true)
     {
       destinationPos = Vec2(u.addCreature.value.destinationDesc->x, u.addCreature.value.destinationDesc->y);
@@ -325,13 +220,13 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
     }
     else if(m == true)
     {
-      context = static_cast<Context*>(u.userData);
+      context = static_cast<PixelMap::ObjectContext*>(u.userData);
       destinationPos = Vec2(m.value.destinationDesc->x, m.value.destinationDesc->y);
       destinationDesc = m.value.destinationDesc;
     }
     else
     {
-      context = static_cast<Context*>(u.userData);
+      context = static_cast<PixelMap::ObjectContext*>(u.userData);
     }
     
     if (u.morph == true && m == false && !IsInAABB(initialPos))
@@ -352,16 +247,19 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
       }
       Delete(context);
     }
+    else if (u.changeRect == true)
+    {
+      if(!IsInAABB(initialPos))
+      {
+        continue;
+      }
+      
+      static_cast<PixelMap::SingleCellContext*>(context)->ChangeRect(u.desc->m_cellDescriptor, u.changeRect.value.rect, updateTime * 0.9);
+      continue;
+    }
     else if (u.morph == true && m == false)
     {
-      if (context->type == Context::eContextTypePolymorph)
-      {
-        m_cellMap->MovePolymorphCells(context, initialPos, u.morph.value, Vec2(m_a1, m_b1), u.desc->m_cellDescriptor);
-      }
-      else
-      {
-        m_cellMap->MoveAmorphCells(context, initialPos, u.morph.value, Vec2(m_a1, m_b1), u.desc->m_cellDescriptor);
-      }
+      static_cast<PixelMap::AmorphCellContext*>(context)->MoveAmorphCells(initialPos, u.morph.value, updateTime * 0.9);
     }
     else if (m == true || u.addCreature == true)
     {
@@ -372,21 +270,21 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
                      initialPos.Description().c_str(),
                      destinationPos.Description().c_str());
         
-        if (context && (context->owner == this || context->owner == nullptr))
+        if (context && (context->m_owner == this || context->m_owner == nullptr))
         {
-          context->Free(this);
           m_outgoingCells.push_back(destinationDesc->m_cellDescriptor);
-          int duration = 0;
-          if (m == true)
-          {
-            duration = m.value.duration;
-            
-            if (duration > 5)
-            {
-              duration /= 2;
-            }
-          }
-          Move(initialPos, destinationPos, context, duration, u.morph.value, destinationDesc->m_cellDescriptor);
+//          int duration = 0;
+//          if (m == true)
+//          {
+//            duration = m.value.duration;
+//            
+//            if (duration > 5)
+//            {
+//              duration /= 2;
+//            }
+//          }
+//          Move(initialPos, destinationPos, context, updateTime, duration, u.morph.value, destinationDesc->m_cellDescriptor);
+          context->Free(this);
         }
       }
       else
@@ -399,10 +297,8 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
                        initialPos.Description().c_str(),
                        destinationPos.Description().c_str());
           
-          if (context->owner != this || context->owner == nullptr)
+          if (context->m_owner != this || context->m_owner == nullptr)
           {
-            m_cellMap->AdoptSprite(context, Vec2(m_a1, m_b1));
-            m_glow->AdoptSprite(context);
             context->BecomeOwner(this);
           }
         }
@@ -410,7 +306,7 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
         {
           if (context == nullptr)
           {
-            context = AddCreature(destinationPos, destinationDesc, u.morph.value);
+            context = AddCreature(destinationPos, destinationDesc, u.morph.value, updateTime);
           }
         }
        
@@ -425,7 +321,7 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
           }
         }
       
-        Move(initialPos, destinationPos, context, duration, u.morph.value, destinationDesc->m_cellDescriptor);
+        Move(initialPos, destinationPos, context, updateTime, duration, u.morph.value, destinationDesc->m_cellDescriptor);
       }
     }
     else if (a == true)
@@ -503,7 +399,7 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
   std::string PartialMap::Description()
   {
     char buf[1024];
-    snprintf(buf, 1024 - 1, "%p x:[%d,%d]y:[%d,%d]", this, m_a1, m_a2, m_b1, m_b2);
+    snprintf(buf, 1024 - 1, "%p x:[%d,%d]y:[%d,%d] %p", this, m_a1, m_a2, m_b1, m_b2, m_cellMap.get());
     return std::string(buf);
   }
   
@@ -516,19 +412,15 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
         // We are creating map current cell is incomming
         if (pd->m_cellDescriptor->userData != nullptr)
         {
-          auto context = static_cast<Context*>(pd->m_cellDescriptor->userData);
+          auto context = static_cast<PixelMap::ObjectContext*>(pd->m_cellDescriptor->userData);
           Vec2 initialPos = Vec2(pd->x, pd->y);
           LOG_W("%s [%s] adopting: context:[%s][%s]", __FUNCTION__,
                        Description().c_str(),
                        context->Description().c_str(),
                        initialPos.Description().c_str());
-          if (context->owner == nullptr)
+          if (context->m_owner == nullptr)
           {
             context->BecomeOwner(this);
-            context->pos = initialPos;
-            
-            m_cellMap->AdoptSprite(context, Vec2(m_a1, m_b1));
-            m_glow->AdoptSprite(context);
           }
         }
         else // create new cell
@@ -547,97 +439,89 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
     }
   }
   
-  PartialMap::Context::ContextType GetContextType(CellDescriptor* cd)
+  PixelMap::ObjectContext* PartialMap::AddCreature(const Vec2& source, PixelDescriptor* dest, Morphing& morphing, float duration)
   {
-    if (cd->GetShapeType() == CellDescriptor::eShapeTypeAmorph) {
-      return PartialMap::Context::eContextTypeAmorph;
-    }
-    if (cd->GetShapeType() == CellDescriptor::eShapeTypePolymorph) {
-      return PartialMap::Context::eContextTypePolymorph;
-    }
-    if (cd->GetShapeType() == CellDescriptor::eShapeTypeRect) {
-      return PartialMap::Context::eContextTypeRect;
-    }
-    return PartialMap::Context::eContextTypeDefault;
-  }
-  
-  PartialMap::Context* PartialMap::AddCreature(const Vec2& source, PixelDescriptor* dest, Morphing& morphing)
-  {
-    Context* context = new Context(this);
-    context->type = GetContextType(dest->m_cellDescriptor);
-    
-    morphing.proccessed = true;
-    
-    context->pos = LocalVector(source);
-    
-    dest->m_cellDescriptor->userData = context;
-    
-    m_cellMap->AddCreature(dest->m_cellDescriptor, context, Vec2(m_a1, m_b1));
-    m_glow->AddCreature(dest->m_cellDescriptor, context);
-    if (source != Vec2()) {
-      m_cellMap->MoveCreature(context, LocalVector(source), LocalVector(Vec2(dest->x, dest->y)), 0, morphing, Vec2(m_a1, m_b1), dest->m_cellDescriptor);
-      m_glow->MoveCreature(context, LocalVector(source), LocalVector(Vec2(dest->x, dest->y)));
-    }
-    
-    return context;
-  }
-  
-  PartialMap::Context* PartialMap::CreateCell(PixelDescriptor* dest)
-  {
-    Context* context = new Context(this);
-    context->type = GetContextType(dest->m_cellDescriptor);
-    context->pos = LocalVector(Vec2(dest->x, dest->y));
-
-    assert(dest->m_cellDescriptor->userData == nullptr);
-    m_cellMap->AddCreature(dest->m_cellDescriptor, context, Vec2(m_a1, m_b1));
-    m_glow->AddCreature(dest->m_cellDescriptor, context);
-    
-    if (!kRedrawEachUpdate)
+    PixelMap::ObjectContext* context = nullptr;
+    if (dest->m_cellDescriptor->GetShapeType() == eShapeTypeAmorph)
     {
-      dest->m_cellDescriptor->userData = context;
+      auto textureRect = cocos2d::Rect(0*kTileFrameSize, 0*kTileFrameSize, kTileFrameSize, kTileFrameSize);
+      auto c = new PixelMap::AmorphCellContext(this, textureRect);
+      
+      dest->m_cellDescriptor->Shape([&](PixelDescriptor* pd, bool& stop)
+                {
+                  c->AddSprite(pd->GetPos());
+                });
+      
+      c->MoveAmorphCells(source, morphing, duration * 0.9);
+      context = c;
+    }
+    else if (dest->m_cellDescriptor->GetShapeType() == eShapeTypeRect
+        || dest->m_cellDescriptor->GetShapeType() == eShapeTypeSinglePixel)
+    {
+      auto textureRect = cocos2d::Rect(1*kTileFrameSize, 0*kTileFrameSize, kTileFrameSize, kTileFrameSize);
+      auto c = new PixelMap::SingleCellContext(this, textureRect, dest->m_cellDescriptor->parent->GetPos(), dest->m_cellDescriptor->GetShape()->GetAABB());
+      c->Move(source, dest->GetPos(), duration * 0.9);
+      context = c;
     }
     else
     {
-      context->Destory(this);
-      return nullptr;
+      assert(0);
     }
+    
+    dest->m_cellDescriptor->userData = context;
     
     return context;
   }
   
-  PartialMap::Context* PartialMap::CreatePolymorphCell(PixelDescriptor* dest)
+  PixelMap::ObjectContext* PartialMap::CreateCell(PixelDescriptor* dest)
   {
-    return nullptr;
+    komorki::Morphing m;
+    return AddCreature(Vec2(), dest, m, 0.f);
   }
   
-  void PartialMap::Delete(Context* context)
+  void PartialMap::Move(const komorki::Vec2 &source,
+                        const komorki::Vec2 &dest,
+                        PixelMap::ObjectContext *context,
+                        float duration,
+                        int steps,
+                        komorki::Morphing &morphing,
+                        komorki::CellDescriptor *cd)
+  {
+    if (context->GetType() == PixelMap::ContextType::ManyPixels)
+    {
+      static_cast<PixelMap::AmorphCellContext*>(context)->MoveAmorphCells(source, morphing, duration*0.9*(steps + 1));
+      return;
+    }
+    
+    if (context->GetType() == PixelMap::ContextType::SinglePixel)
+    {
+      static_cast<PixelMap::SingleCellContext*>(context)->Move(source, dest, duration*0.9*(steps + 1));
+      return;
+    }
+    
+    assert(0);
+  }
+  
+  void PartialMap::Attack(PixelMap::ObjectContext* context, const Vec2& pos, const Vec2& offset)
+  {
+  }
+  
+  void PartialMap::Delete(PixelMap::ObjectContext* context)
   {
     if (context == nullptr)
     {
       return;
     }
   
-    assert(context->owner == this);
-    if (context->owner == this)
+    assert(context->m_owner == this);
+    if (context->m_owner == this)
     {
       LOG_W("%s, %s [%s]", __FUNCTION__, Description().c_str(), context->Description().c_str());
-      m_cellMap->Delete(context);
-      m_glow->Delete(context);
       context->Destory(this);
     }
   }
   
-  void PartialMap::Move(const Vec2& source, const Vec2& dest, Context* context, int duration, Morphing& morphing, CellDescriptor* cd)
-  {
-    m_cellMap->MoveCreature(context, LocalVector(source), LocalVector(dest), duration, morphing, Vec2(m_a1, m_b1), cd);
-    m_glow->MoveCreature(context, LocalVector(source), LocalVector(dest), duration);
-  }
- 
-  void PartialMap::Attack(Context* context, const Vec2& pos, const Vec2& offset)
-  {
-    m_cellMap->Attack(context, LocalVector(pos), offset, Vec2(m_a1, m_b1));
-  }
-  
+
   inline bool PartialMap::IsInAABB(const Vec2& vec)
   {
     return IsInAABB(vec.x, vec.y);

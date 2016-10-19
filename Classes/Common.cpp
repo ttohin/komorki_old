@@ -7,6 +7,10 @@
 //
 
 #include "Common.h"
+#include <cstdlib>
+#include <cmath>
+#include <assert.h>
+
 
 using namespace komorki;
 
@@ -157,8 +161,8 @@ bool komorki::SplitRectOnChunks(const Rect& rect, const Rect& existingRect, cons
   if (rect.size.x == 0 || rect.size.y == 0)
     return false;
   
-  uint mapSegmentSize = MIN(chunkSize, rect.size.x);
-  mapSegmentSize = MIN(chunkSize, rect.size.y);
+  unsigned int mapSegmentSize = std::min(chunkSize, rect.size.x);
+  mapSegmentSize = std::min(chunkSize, rect.size.y);
   
   int stepsX = rect.size.x/mapSegmentSize + 1;
   int stepsY = rect.size.y/mapSegmentSize + 1;
@@ -167,8 +171,8 @@ bool komorki::SplitRectOnChunks(const Rect& rect, const Rect& existingRect, cons
   {
     for (int j = 0; j < stepsY; ++j)
     {
-      int width = MIN(mapSegmentSize, rect.size.x - i*mapSegmentSize);
-      int height = MIN(mapSegmentSize, rect.size.y - j*mapSegmentSize);
+      int width = std::min(mapSegmentSize, rect.size.x - i*mapSegmentSize);
+      int height = std::min(mapSegmentSize, rect.size.y - j*mapSegmentSize);
       
       if (width <= 0 || height <= 0)
       {

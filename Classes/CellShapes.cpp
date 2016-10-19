@@ -9,6 +9,7 @@
 #include "CellShapes.h"
 #include "PixelDescriptor.h"
 #include "b2Utilites.h"
+#include <assert.h>
 
 using namespace komorki;
 
@@ -47,6 +48,11 @@ unsigned int SinglePixel::Size() const
 Rect SinglePixel::GetAABB() const
 {
   return {m_pd->GetPos(), {1, 1}};
+}
+
+IShape::Ptr SinglePixel::CopyWithBasePixel(PixelDescriptor* pd) const
+{
+  return std::make_shared<SinglePixel>(pd);
 }
 
 PixelDescriptor* SinglePixel::GetOpposite(PixelDescriptor* target) const
@@ -140,6 +146,11 @@ Rect BigCell::GetAABB() const
   return {m_pd->GetPos(), {2, 2}};
 }
 
+IShape::Ptr BigCell::CopyWithBasePixel(PixelDescriptor* pd) const
+{
+  return std::make_shared<BigCell>(pd);
+}
+
 //**************************************************************************************************
 // RectShape
 //**************************************************************************************************
@@ -181,6 +192,7 @@ void RectShape::Around(const PerPixelFunc& op) const
   auto leftDownPd = m_pd->RecOffset(-m_pdOffset.x - 1, -m_pdOffset.y - 1);
   
   int iteration = 0;
+  int totalSteps = 0;
   
   while (iteration != 4)
   {
@@ -202,11 +214,12 @@ void RectShape::Around(const PerPixelFunc& op) const
     }
     if (iteration == 3)
     {
-      xDir = 0; yDir = -1; numberOfSteps = m_size.y;
+      xDir = 0; yDir = -1; numberOfSteps = m_size.y + 1;
     }
     
     for (int i = 0; i < numberOfSteps; ++i)
     {
+      totalSteps += 1;
       op(leftDownPd, stop);
       if (stop) return;
       leftDownPd = leftDownPd->Offset(xDir, yDir);
@@ -248,10 +261,20 @@ Rect RectShape::GetAABB() const
   return {origin, m_size};
 }
 
+IShape::Ptr RectShape::CopyWithBasePixel(PixelDescriptor* pd) const
+{
+  return std::make_shared<RectShape>(pd, m_pdOffset, m_size);
+}
+
 void RectShape::SetAABB(const Vec2& origin, const Vec2& size)
 {
   m_pdOffset = origin;
   m_size = size;
+}
+
+Rect RectShape::GetRect() const
+{
+  return {m_pdOffset, m_size};
 }
 
 
@@ -284,6 +307,12 @@ PolymorphShape::PolymorphShape(PixelDescriptor* pd, int numberOfPixels) : m_pd(p
 
   }
   
+}
+
+PolymorphShape::PolymorphShape(PixelDescriptor* pd, const std::vector<PixelDescriptor*>& pixels)
+{
+  m_pd = pd;
+  m_shape.insert(m_shape.end(), pixels.begin(), pixels.end());
 }
 
 void PolymorphShape::ForEachRandom(const PerPixelFunc& op) const
@@ -378,14 +407,40 @@ bool PolymorphShape::IsInShape(PixelDescriptor* pd)
   return it != m_shape.end();
 }
 
+
+void PolymorphShape::SetPixels(PixelDescriptor* pd, const std::vector<PixelDescriptor*>& pixels)
+{
+  m_pd = pd;
+  m_shape = pixels;
+}
+
 unsigned int PolymorphShape::Size() const
 {
   return m_shape.size();
 }
 
-
 Rect PolymorphShape::GetAABB() const
 {
-  return Rect();
+  return {m_pd->GetPos(), {1, 1}};
+}
+
+IShape::Ptr PolymorphShape::CopyWithBasePixel(PixelDescriptor* pd) const
+{
+  std::vector<Vec2> offsetsList;
+  for (auto& p : m_shape)
+  {
+    offsetsList.emplace_back(p->x - m_pd->x, p->y - m_pd->y);
+  }
+  
+  std::vector<PixelDescriptor*> listOfNewPixels;
+  for (auto& offset : offsetsList)
+  {
+    auto targetPd = pd->RecOffset(offset.x, offset.y);
+    if (targetPd == nullptr) return nullptr;
+    
+    listOfNewPixels.push_back(targetPd);
+  }
+  
+  return std::make_shared<PolymorphShape>(pd, listOfNewPixels);
 }
 

@@ -16,11 +16,12 @@ namespace komorki
 {
   void ProcessCell(CellDescriptor* pd,
                    Vec2 pos,
-                   PixelDescriptorProvider::Config* config,
+                   Config* config,
                    const PixelDescriptorProvider::PixelMap& map, // ugly hack
                    Optional<Movement>& movement,
                    Optional<Action>& action,
-                   Optional<Morphing>& morph);
+                   Optional<Morphing>& morph,
+                   Optional<ChangeRect>& changeRect);
 }
 
 

@@ -20,7 +20,7 @@ namespace komorki
   class AsyncPixelManager
   {
   public:
-    AsyncPixelManager(PixelDescriptorProvider* provider)
+    AsyncPixelManager(IPixelDescriptorProvider* provider)
     : m_provider(provider)
     , m_performUpdate(false)
     , m_shouldStop(false)
@@ -129,7 +129,7 @@ namespace komorki
     }
     
   private:
-    PixelDescriptorProvider* m_provider;
+    IPixelDescriptorProvider* m_provider;
     bool m_performUpdate;
     bool m_shouldStop;
     bool m_inProccess;

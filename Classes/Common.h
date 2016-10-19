@@ -9,6 +9,10 @@
 #ifndef prsv_Common_h
 #define prsv_Common_h
 
+#include <functional>
+#include <string>
+#include <vector>
+
 namespace komorki
 {
   class PixelDescriptor;
@@ -32,11 +36,14 @@ namespace komorki
     inline Vec2 operator-(const Vec2& pos) const {return Vec2(x - pos.x, y - pos.y);}
     inline Vec2 operator+(const Vec2& pos) const {return Vec2(x + pos.x, y + pos.y);}
     inline Vec2 operator-() const {return Vec2(-x, -y);}
+    inline void operator*=(const int& value) {x *= value; y *= value;}
     bool In(const Rect& rect) const;
     Vec2 Normalize() const;
     
     std::string Description()const { return std::to_string(x) + "," + std::to_string(y); }
-  };;
+  };
+  
+  typedef const Vec2& Vec2ConstRef;
   
   struct Rect
   {

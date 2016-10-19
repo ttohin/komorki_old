@@ -9,6 +9,8 @@
 #include "CellDescriptor.h"
 #include <iostream>
 #include <iomanip>
+#include <assert.h>
+#include <sstream>
 
 #define STRICT_CHECK(check) check
 
@@ -18,7 +20,6 @@ using namespace komorki;
 CellDescriptor::CellDescriptor (PixelDescriptor* pd)
 : m_skipFirstStep(false)
 , m_age(0)
-, m_sleepTime(0)
 , m_new(false)
 , userData(nullptr)
 , parent(pd)
@@ -261,28 +262,12 @@ void CellDescriptor::PrintAsciiArt() const
 
 bool CellDescriptor::IsMyFood(CellDescriptor* cd) const
 {
-  return cd != this && cd->m_character & m_foodMask;
+  return cd != this && cd->m_genom.m_groupId & m_genom.m_foodGroupId;
 }
 
 
-CellDescriptor::ShapeType CellDescriptor::GetShapeType() const
+ShapeType CellDescriptor::GetShapeType() const
 {
-  if (m_character == eCellTypeYellow)
-  {
-    return eShapeTypeAmorph;
-  }
-  if (m_character == eCellTypeWhite)
-  {
-    return eShapeTypePolymorph;
-  }
-  if (m_character == eCellTypeBigBlue)
-  {
-    return eShapeTypeSquare;
-  }
-  if (m_character == eCellTypePink)
-  {
-    return eShapeTypeRect;
-  }
-  return eShapeTypeSinglePixel;
+  return m_genom.m_shapeType;
 }
 

@@ -5,7 +5,7 @@
 #include "ConfigManager.h"
 #include "DiamondSquareGenerator.h"
 
-static const float kUpdateTime = 0.4;
+static const float kUpdateTime = 0.5;
 
 static float kMaxMapScale= 3.0;
 static float kMinMapScale = 0.1;

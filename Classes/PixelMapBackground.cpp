@@ -82,14 +82,7 @@ USING_NS_CC;
     s->setOpacity(180);
     s->setLocalZOrder(-1);
     s->setAnchorPoint({0, 0});
-    if(cd->m_character == komorki::eCellTypeBigBlue)
-    {
-      s->setScale(2*kSpriteScale);
-    }
-    else
-    {
-      s->setScale(kSpriteScale);
-    }
+    s->setScale(kSpriteScale);
     
     return s;
   }

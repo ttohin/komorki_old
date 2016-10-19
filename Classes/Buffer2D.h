@@ -10,7 +10,7 @@
 #define __ground__Buffer2D__
 
 #include <vector>
-
+#include <functional>
 
 
 template <typename T, typename S = int>

@@ -133,7 +133,7 @@ void ui::Viewport::Calculate()
 
 ui::Viewport::Viewport(cocos2d::Node* superView,
                        const cocos2d::Size& originalSize,
-                       const std::shared_ptr<komorki::PixelDescriptorProvider>& provider)
+                       const std::shared_ptr<komorki::IPixelDescriptorProvider>& provider)
 
 {
   assert(superView);

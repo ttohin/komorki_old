@@ -55,11 +55,6 @@ namespace komorki
     cocos2d::Rect GlowMapOverlay::OffsetForType(komorki::CellDescriptor* d)
     {
       int index = 0;
-      if (d->m_character == komorki::eCellTypeSalad) index = 2;
-      else if (d->m_character == komorki::eCellTypeBigBlue) index = 1;
-      else if (d->m_character == komorki::eCellTypeImprovedSalad) index = 0;
-      else index = 3;
-      
       return cocos2d::Rect(index*160, 0, 160, 160);
     }
     
@@ -112,74 +107,67 @@ namespace komorki
 //      m_pullSize = PMP_PULL_SIZE;
     }
 
-    void GlowMapOverlay::Delete(PartialMap::Context* context)
-    {
-      if (context->glow)
-      {
-        RemoveSprite(context->glow);
-      }
-    }
-    void GlowMapOverlay::AddCreature(CellDescriptor* cd, PartialMap::Context* context)
-    {
-      if (IsGlowCell(cd))
-      {
-        cocos2d::Rect r = OffsetForType(cd);
-        auto s = CreateSprite();
-        s->setTextureRect(r);
-        
-        if (cd->m_character == eCellTypeBigBlue)
-        {
-          s->setScale(kSpriteScale * 2);
-        }
-        else
-        {
-          s->setScale(kSpriteScale);
-        }
-        
-        s->setPosition(SpriteVector(context->pos));
-        context->glow = s;
-      }
-    }
-    void GlowMapOverlay::AdoptSprite(PartialMap::Context* context)
-    {
-      auto source = context->glow;
-      if (source == nullptr)
-      {
-        return;
-      }
-      source->retain();
-      source->removeFromParentAndCleanup(true);
-      this->addChild(source);
-      source->release();
-      source->setPosition(SpriteVector(context->pos, context->offset));
-    }
-    void GlowMapOverlay::MoveCreature(PartialMap::Context* context, const Vec2& source, const Vec2& dest, int duration)
-    {
-      if (context->glow == nullptr)
-      {
-        return;
-      }
-      
-//      assert(std::abs(source.x - dest.x) <= 2);
-//      assert(std::abs(source.y - dest.y) <= 2);
-      
-      auto randOffset = RandomVectorOffset();
-      cocos2d::Vec2 offset = context->offset;
-      Sprite* s = context->glow;
-      
-      if (kAnimated)
-      {
-        s->stopAllActions();
-        s->setPosition(SpriteVector(source, offset));
-        auto moveTo = MoveTo::create(m_updateTime*0.9*(duration + 1), SpriteVector(dest, randOffset));
-        s->runAction(moveTo);
-      }
-      else
-      {
-        s->setPosition(SpriteVector(dest, randOffset));
-      }
-      
-    }
+//    void GlowMapOverlay::Delete(PartialMap::Context* context)
+//    {
+//      if (context->glow)
+//      {
+//        RemoveSprite(context->glow);
+//      }
+//    }
+//    void GlowMapOverlay::AddCreature(CellDescriptor* cd, PartialMap::Context* context)
+//    {
+//      if (IsGlowCell(cd))
+//      {
+//        cocos2d::Rect r = OffsetForType(cd);
+//        auto s = CreateSprite();
+//        s->setTextureRect(r);
+//        s->setScale(kSpriteScale);
+//        
+//        
+//        s->setPosition(SpriteVector(context->pos));
+//        context->glow = s;
+//      }
+//    }
+//    void GlowMapOverlay::AdoptSprite(PartialMap::Context* context)
+//    {
+//      auto source = context->glow;
+//      if (source == nullptr)
+//      {
+//        return;
+//      }
+//      source->retain();
+//      source->removeFromParentAndCleanup(true);
+//      this->addChild(source);
+//      source->release();
+//      source->setPosition(SpriteVector(context->pos, context->offset));
+//    }
+//    void GlowMapOverlay::MoveCreature(PartialMap::Context* context, const Vec2& source, const Vec2& dest, int duration)
+//    {
+//      if (context->glow == nullptr)
+//      {
+//        return;
+//      }
+//      
+////      assert(std::abs(source.x - dest.x) <= 2);
+////      assert(std::abs(source.y - dest.y) <= 2);
+//      
+//      auto randOffset = RandomVectorOffset();
+//      cocos2d::Vec2 offset = context->offset;
+//      Sprite* s = context->glow;
+//      
+//      if (kAnimated)
+//      {
+//        s->stopAllActions();
+//        s->setPosition(SpriteVector(source, offset));
+//        auto moveTo = MoveTo::create(m_updateTime*0.9*(duration + 1), SpriteVector(dest, randOffset));
+//        s->runAction(moveTo);
+//      }
+//      else
+//      {
+//        s->setPosition(SpriteVector(dest, randOffset));
+//      }
+//      
+//    }
     
   }
 }

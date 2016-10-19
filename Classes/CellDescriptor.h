@@ -9,6 +9,33 @@ namespace komorki
 {
   
 class PixelDescriptor;
+
+enum ShapeType
+{
+  eShapeTypeSinglePixel,
+  eShapeTypePolymorph,
+  eShapeTypeAmorph,
+  eShapeTypeFixed,
+  eShapeTypeRect
+};
+  
+struct Genom
+{
+  unsigned int m_groupId = 0;
+  unsigned int m_dangerGroupId = 0;
+  unsigned int m_foodGroupId = 0;
+  unsigned int m_friendGroupId = 0;
+  ShapeType m_shapeType;
+  int m_health;
+  int m_armor;
+  int m_damage;
+  int m_sleepTime;
+  int m_lifeTime;
+  IShape::Ptr m_shape;
+  int m_lightFood;
+  int m_passiveHealthIncome;
+  int m_healthPerAttach;
+};
   
 struct Transaction
 {
@@ -20,16 +47,6 @@ struct Transaction
 class CellDescriptor
 {
 public:
-  
-  enum ShapeType
-  {
-    eShapeTypeSinglePixel,
-    eShapeTypeSquare,
-    eShapeTypePolymorph,
-    eShapeTypeAmorph,
-    eShapeTypeRect
-  };
-  
   CellDescriptor (PixelDescriptor* pd);
  
   virtual void Shape(const PerPixelFunc& op);
@@ -52,17 +69,12 @@ public:
   virtual ~CellDescriptor () {};
 
   int m_id;
-  int m_baseHealth;
   int m_health;
   int m_armor;
-  int m_baseArmor;
-  int m_damage;
   int m_age;
   bool m_skipFirstStep;
   bool m_new;
   int m_sleepCounter;
-  int m_sleepTime;
-  int m_lifeTime;
   unsigned int m_updateId;
   int m_m1;
   int m_m2;
@@ -70,16 +82,13 @@ public:
   int m_m4;
   int m_volume;
  
-  std::shared_ptr<IShape> m_shape;
-  CellType m_character;
-  CellType m_dangerMask;
-  CellType m_foodMask;
-  CellType m_friendMask;
+  IShape::Ptr m_shape;
   void* userData;
   PixelDescriptor* parent;
   
   std::vector<Transaction> nextTurnTransaction;
   
+  Genom m_genom;
 };
   
 } // namespace komorki;

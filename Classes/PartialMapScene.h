@@ -11,6 +11,7 @@
 #include "SaveConfigMenu.h"
 #include "IFullScreenMenu.h"
 #include "Viewport.h"
+#include "PixelProviderConfig.h"
 
 class PartialMapScene : public cocos2d::Layer, cocos2d::TextFieldDelegate
 {
@@ -145,7 +146,7 @@ private:
   float AspectToFill(const cocos2d::Size& source, const cocos2d::Size& target);
   float AspectToFit(const cocos2d::Size& source, const cocos2d::Size& target);
   
-  std::shared_ptr<komorki::PixelDescriptorProvider::Config> m_config;
+  std::shared_ptr<komorki::Config> m_config;
   
   std::vector<cocos2d::Touch*> zoomToches;
   

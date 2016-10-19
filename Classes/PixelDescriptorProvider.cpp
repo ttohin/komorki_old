@@ -1,13 +1,14 @@
 #include "PixelDescriptorProvider.h"
 #include "b2Utilites.h"
 #include <math.h>
+#include <assert.h>
 #include "CellsLogic.h"
 #include "CellShapes.h"
 #include "CellDescriptor.h"
 #include "Map.h"
 #include "DiamondSquareGenerator.h"
 
-#define COLLECT_POPULATION_METRICS 1
+#define COLLECT_POPULATION_METRICS 0
 
 namespace komorki
 {
@@ -16,6 +17,7 @@ int mapWidth = 0;
 int mapHeight = 0;
   
 int nextId = 0;
+int kMaxNumberOfGroups = 12;
   
 IPixelDescriptorProvider::UpdateResult::UpdateResult(CellDescriptor* desc):
 desc(desc->parent), userData(desc->userData)
@@ -23,7 +25,7 @@ desc(desc->parent), userData(desc->userData)
 //  assert(userData);
 }
 
-PixelDescriptorProvider::Config::Config()
+Config::Config()
 {
 //  this->terrainSize = 8;
 //  this->mapWidth = 150;
@@ -102,18 +104,18 @@ PixelDescriptorProvider::Config::Config()
 //  this->percentOfBlue = 0.2;
   
   this->terrainSize = 8;
-  this->mapWidth = 500;
-  this->mapHeight = 500;
+  this->mapWidth = 100;
+  this->mapHeight = 100;
   
   this->green.health = 501;
   this->green.sleepTime = 2;
   this->green.attack = 25;
   this->green.passiveHealthChunkMin = -1;
-  this->green.passiveHealthChunkMax = -1;
-  this->green.armor = 10;
+  this->green.passiveHealthChunkMax = 0;
+  this->green.armor = 20;
   this->green.lifeTime = 9530;
   this->green.percentOfMutations = 0.0;
-  this->green.healthPerAttack = 180;
+  this->green.healthPerAttack = 190;
   this->green.food = (CellType)(eCellTypeImprovedSalad | eCellTypeSalad);
   this->green.danger = (CellType)(eCellTypeHunter);
   this->green.friends = eCellTypeGreen;
@@ -127,7 +129,7 @@ PixelDescriptorProvider::Config::Config()
   this->orange.lifeTime = 9530;
   this->orange.percentOfMutations = 0.0;
   this->orange.healthPerAttack = 66;
-  this->orange.food = (CellType)(eCellTypeGreen);
+  this->orange.food = (CellType)(eCellTypeGreen | eCellTypeWhite);
   this->orange.danger = (CellType)(eCellTypeUnknown);
   this->orange.friends = (CellType)(eCellTypeHunter);
   
@@ -184,7 +186,7 @@ PixelDescriptorProvider::Config::Config()
   this->yellow.friends = (CellType)(eCellTypeUnknown);
   
   this->pink.health = 501;
-  this->pink.sleepTime = 4;
+  this->pink.sleepTime = 0;
   this->pink.attack = 8;
   this->pink.passiveHealthChunkMin = 0;
   this->pink.passiveHealthChunkMax = 0;
@@ -218,6 +220,11 @@ PixelDescriptorProvider::Config::Config()
   this->percentOfWhite = 0.1;
   
 }
+  
+  PixelDescriptorProvider::PixelDescriptorProvider()
+  {
+    
+  }
 
 void PixelDescriptorProvider::InitWithConfig(Config* config)
 {
@@ -244,37 +251,66 @@ void PixelDescriptorProvider::InitWithConfig(Config* config)
   Init();
 }
   
-  
-bool CreateCell(PixelDescriptor* pd, CellType creatureType, PixelDescriptorProvider::Config::CellConfig* cellConfig)
+void GenerateShape(PixelDescriptor* pd, IShape::Ptr& outShape, ShapeType& outShapeType)
 {
-  if (pd == nullptr || cellConfig == nullptr)
-  {
-    return false;
-  }
-  
   std::shared_ptr<IShape> shape;
-  if (creatureType == eCellTypeBigBlue)
-  {
-    shape = std::make_shared<BigCell>(pd);
-  }
-  else if (creatureType == eCellTypeWhite)
-  {
-    shape = std::make_shared<PolymorphShape>(pd, 1);
-  }
-  else if (creatureType == eCellTypeYellow)
-  {
-    shape = std::make_shared<PolymorphShape>(pd, 4);
-  }
-  else if (creatureType == eCellTypePink)
-  {
-    shape = std::make_shared<RectShape>(pd, Vec2(1, 1), Vec2(3, 4));
-  }
-  else
+  
+  unsigned int numberOfShapes = 3;
+  unsigned int shapeIndex = cRandABInt(0, numberOfShapes);
+  shapeIndex = 2;
+  if (0 == shapeIndex)
   {
     shape = std::make_shared<SinglePixel>(pd);
+    outShapeType = ShapeType::eShapeTypeSinglePixel;
   }
- 
+  else if (1 == shapeIndex)
+  {
+    unsigned int w = cRandABInt(2, 4);
+    unsigned int h = cRandABInt(2, 4);
+    shape = std::make_shared<RectShape>(pd, Vec2(0, 0), Vec2(w, h));
+    outShapeType = ShapeType::eShapeTypeRect;
+  }
+  else if (2 == shapeIndex)
+  {
+    unsigned int numberOfPixels = cRandABInt(10, 12);
+    shape = std::make_shared<PolymorphShape>(pd, numberOfPixels);
+    outShapeType = ShapeType::eShapeTypeAmorph;
+  }
+  else if (3 == shapeIndex)
+  {
+    PixelDescriptor::Vec pixels;
+    pixels.push_back(pd->Offset(cRandAorB(-1, 1), 0));
+    pixels.push_back(pd->Offset(0, cRandAorB(-1, 1)));
+    pixels.push_back(pd);
+    shape = std::make_shared<PolymorphShape>(pd, pixels);
+    outShapeType = ShapeType::eShapeTypeFixed;
+  }
+  else if (4 == shapeIndex)
+  {
+    unsigned int numberOfPixels = cRandABInt(2, 4);
+    shape = std::make_shared<PolymorphShape>(pd, numberOfPixels);
+    outShapeType = ShapeType::eShapeTypePolymorph;
+  }
+
+  else
+  {
+    assert(false);
+  }
+  
+  outShape = shape;
+}
+  
+CellDescriptor* CreateRandomCell(PixelDescriptor* pd, Genom genom)
+{
+  assert(pd);
+
+  
   bool empty = true;
+  auto shape = genom.m_shape->CopyWithBasePixel(pd);
+  if (shape == nullptr) {
+    return nullptr;
+  }
+  
   shape->ForEach([&empty](PixelDescriptor* pixel, bool& stop){
     
     if (pixel == nullptr || pixel->m_type != PixelDescriptor::Empty)
@@ -287,34 +323,28 @@ bool CreateCell(PixelDescriptor* pd, CellType creatureType, PixelDescriptorProvi
       assert(pixel->m_cellDescriptor == nullptr);
     }
   });
- 
+  
   if (empty == false)
   {
-    return false;
+    return nullptr;
   }
   
   CellDescriptor* cd = new CellDescriptor(pd);
   cd->m_shape = shape;
- 
-  pd->m_type = PixelDescriptor::CreatureType;
-  cd->m_character = creatureType;
-  cd->m_id = nextId++;
   
-  cd->m_health = cd->m_baseHealth = cellConfig->health;
-  cd->m_armor = cd->m_baseArmor = cellConfig->armor;
-  cd->m_damage = cellConfig->attack;
+  pd->m_type = PixelDescriptor::CreatureType;
+  cd->m_id = nextId++;
+  cd->m_genom = genom;
+  
+  cd->m_health = genom.m_health;
+  cd->m_armor = genom.m_armor;
   cd->m_age = cRandABInt(0, 50);
-  cd->m_sleepTime = cellConfig->sleepTime;
-  cd->m_sleepCounter =  cRandABInt(0, cd->m_sleepTime);
-  cd->m_lifeTime = cellConfig->lifeTime;
-  cd->m_friendMask = cellConfig->friends;
-  cd->m_foodMask = cellConfig->food;
-  cd->m_dangerMask = cellConfig->danger;
+  cd->m_sleepCounter =  cRandABInt(0, genom.m_sleepTime);
   cd->m_skipFirstStep = true;
   
   cd->Finish();
   
-  return true;
+  return cd;
 }
 
 PixelDescriptorProvider::PixelPtr PixelDescriptorProvider::CreateCell(CellType creatureType, const komorki::Vec2& pos)
@@ -371,41 +401,8 @@ void PixelDescriptorProvider::Init()
     }
   }
   
-  {
-    komorki::DiamondSquareGenerator gen(512, 512, 60.f, -0.5, false);
-    gen.Generate(nullptr);
-    
-    komorki::DiamondSquareGenerator gen1(512, 512, 20.f, -0.5, false);
-    gen1.Generate(nullptr);
-    
-    gen.Multiply(&gen1, nullptr);
-    
-    auto buffer = gen.GetBuffer(0,0, m_config->mapWidth, m_config->mapHeight);
-    auto analizer = std::shared_ptr<TerrainAnalizer>(new TerrainAnalizer(buffer));
-    auto analizedBuffer = analizer->GetLevels();
-    
-    analizedBuffer->ForEach([&](const int& x, const int& y, const TerrainLevel& level)
-                            {
-                              if (x%2 != 0 && y%2 != 0) {
-                                return ;
-                              }
-                              if (level >= TerrainLevel::Ground)
-                              {
-                                m_map[x/2][y/2]->m_type = PixelDescriptor::TerrainType;
-                              }
-                            });
-    
-    m_terrain = analizer->GetResult();
-  }
-  {
-    komorki::DiamondSquareGenerator gen1(512, 512, 10.f, -0.5, false);
-    gen1.Generate(nullptr);
-    auto buffer = gen1.GetBuffer(0,0, m_config->mapWidth, m_config->mapHeight);
-    buffer->ForEach([&](const int& x, const int& y, const float& level)
-                    {
-                      m_map[x][y]->m_physicalDesc.light = level;
-                    });
-  }
+  GenTerrain();
+  GenLights();
   
   for (int i = 0; i < m_config->mapWidth; ++i)
   {
@@ -423,7 +420,68 @@ void PixelDescriptorProvider::Init()
   {
     m_map[m_config->mapWidth - 1][i]->m_type = (PixelDescriptor::TerrainType);
   }
+  
+  PopulateCells();
+}
 
+Genom GenerateGenom(unsigned int groupId, PixelDescriptorProvider::PixelMap& map)
+{
+  Genom g;
+  g.m_groupId = groupId;
+  
+  for (int j = 0; j < kMaxNumberOfGroups; j++)
+  {
+    if (g.m_groupId == (1 << j)) {
+      continue;
+    }
+    g.m_foodGroupId |= cRandAorB(0, 1) ? 1 << j : 0;
+  }
+  
+  for (int j = 0; j < kMaxNumberOfGroups; j++)
+  {
+    if (g.m_groupId == (1 << j)) {
+      continue;
+    }
+    g.m_dangerGroupId = cRandAorB(0, 1, 0.9) ? 1 << j : 0;
+  }
+  
+  for (int j = 0; j < kMaxNumberOfGroups; j++)
+  {
+    if (g.m_groupId == (1 << j)) {
+      continue;
+    }
+    g.m_friendGroupId |= cRandAorB(0, 1) ? 1 << j : 0;
+  }
+  
+  g.m_health = cRandEps(600, 0.1);
+  g.m_armor = cRandEps(10, 0.1);
+  g.m_sleepTime = cRandEps(2, 0.5);
+  g.m_lifeTime = 999999;//cRandEps(800, 0.1);
+  g.m_damage = cRandEps(10, 0.1);
+  g.m_lightFood = 0;//cRandEps(20, 0.1);
+  g.m_passiveHealthIncome = 0;//cRandEps(10, 0.1);
+  g.m_healthPerAttach = cRandEps(100, 0.1);
+  GenerateShape(map[20][20].get(), g.m_shape, g.m_shapeType);
+  
+  return g;
+}
+  
+std::vector<Genom> GenerateGenoms(PixelDescriptorProvider::PixelMap& map)
+{
+  std::vector<Genom> result;
+  for (int i = 0; i < kMaxNumberOfGroups; ++i)
+  {
+    Genom g = GenerateGenom(1 << i, map);
+    result.push_back(g);
+  }
+  
+  return result;
+}
+  
+void PixelDescriptorProvider::PopulateCells()
+{
+  auto groups = GenerateGenoms(m_map);
+  
   for (int i = 0; i < m_config->mapWidth; ++i)
   {
     for (int j = 0; j < m_config->mapHeight; ++j)
@@ -432,42 +490,68 @@ void PixelDescriptorProvider::Init()
       PixelDescriptor::Type type = cBoolRandPercent(m_config->percentOfCreatures) ? PixelDescriptor::CreatureType : PixelDescriptor::Empty;
       if (type == PixelDescriptor::CreatureType)
       {
-        CellType creatureType = eCellTypePink;
-//        CellType creatureType = eCellTypeUnknown;
-//        if (cBoolRandPercent(m_config->percentOfGreen))
-//          creatureType = eCellTypeGreen;
-//        else if (cBoolRandPercent(m_config->percentOfOrange))
-//          creatureType = eCellTypeHunter;
-//        else if (cBoolRandPercent(m_config->percentOfSalad))
-//          creatureType = eCellTypeSalad;
-//        else if (cBoolRandPercent(m_config->percentOfCyan))
-//          creatureType = eCellTypeImprovedSalad;
-//        else if (cBoolRandPercent(m_config->percentOfBlue))
-//          creatureType = eCellTypeBigBlue;
-//        else if (cBoolRandPercent(m_config->percentOfWhite))
-//          creatureType = eCellTypeWhite;
-       
-        static int count = 0;
-        if (creatureType == eCellTypeUnknown)
+        int groupIndex = cRandABInt(0, groups.size());
+        auto genom = groups[groupIndex];
+        
+        static int count = 1000;
+        if (count == 0)
         {
           continue;
         }
         
-//        
-        if (count == 1) {
-          continue;
+        if (CreateRandomCell(pd, genom))
+        {
+          m_groups[genom.m_groupId].genom = genom;
+          m_groups[genom.m_groupId].population += 1;
+          
+          count--;
         }
         
-        if(komorki::CreateCell(pd, creatureType, m_config->ConfigForCell(creatureType)))
-        {
-          count++;
-        }
       }
     }
   }
 }
   
-PixelDescriptorProvider::Config::CellConfig* PixelDescriptorProvider::Config::ConfigForCell(CellType type)
+void PixelDescriptorProvider::GenTerrain()
+{
+  komorki::DiamondSquareGenerator gen(512, 512, 60.f, -0.5, false);
+  gen.Generate(nullptr);
+  
+  komorki::DiamondSquareGenerator gen1(512, 512, 20.f, -0.5, false);
+  gen1.Generate(nullptr);
+  
+  gen.Multiply(&gen1, nullptr);
+  
+  auto buffer = gen.GetBuffer(0,0, m_config->mapWidth, m_config->mapHeight);
+  auto analizer = std::shared_ptr<TerrainAnalizer>(new TerrainAnalizer(buffer));
+  auto analizedBuffer = analizer->GetLevels();
+  
+  analizedBuffer->ForEach([&](const int& x, const int& y, const TerrainLevel& level)
+                          {
+                            if (x%2 != 0 && y%2 != 0) {
+                              return ;
+                            }
+                            if (level >= TerrainLevel::Ground)
+                            {
+                              m_map[x/2][y/2]->m_type = PixelDescriptor::TerrainType;
+                            }
+                          });
+  
+  m_terrain = analizer->GetResult();
+}
+
+void PixelDescriptorProvider::GenLights()
+{
+  komorki::DiamondSquareGenerator gen1(512, 512, 10.f, -0.5, false);
+  gen1.Generate(nullptr);
+  auto buffer = gen1.GetBuffer(0,0, m_config->mapWidth, m_config->mapHeight);
+  buffer->ForEach([&](const int& x, const int& y, const float& level)
+                  {
+                    m_map[x][y]->m_physicalDesc.light = 0.5 + level * 0.5f;
+                  });
+}
+  
+Config::CellConfig* Config::ConfigForCell(CellType type)
 {
   if (type == CellType::eCellTypeGreen)
   {
@@ -522,9 +606,9 @@ PixelDescriptor* PixelDescriptorProvider::GetDescriptor(PixelPos x, PixelPos y) 
 }
   
 TerrainAnalizer::Result PixelDescriptorProvider::GetTerrain() const
-  {
-    return m_terrain;
-  }
+{
+  return m_terrain;
+}
 
 Vec2 PixelDescriptorProvider::GetSize() const
 {
@@ -563,7 +647,7 @@ void PixelDescriptorProvider::ProccessTransaction(bool passUpdateResult, std::li
       
       d->nextTurnTransaction.clear();
       
-      bool shouldBeRemoved = d->m_age > d->m_lifeTime;
+      bool shouldBeRemoved = d->m_age > d->m_genom.m_lifeTime;
       
       if(d->m_armor <= 0 || d->m_health <= 0 || shouldBeRemoved)
       {
@@ -571,13 +655,26 @@ void PixelDescriptorProvider::ProccessTransaction(bool passUpdateResult, std::li
           pd->m_cellDescriptor = nullptr;
           pd->m_type = PixelDescriptor::Empty;
         });
+
+        if (m_groups[d->m_genom.m_groupId].population > 0)
+        {
+          m_groups[d->m_genom.m_groupId].population -= 1;
+        }
+        
+        if (m_groups[d->m_genom.m_groupId].population == 0)
+        {
+          m_groups.erase(d->m_genom.m_groupId);
+        }
+
         
         if (passUpdateResult)
         {
+          
           UpdateResult r(d);
           r.deleteCreature.SetValueFlag(true);
           r.deleteCreature.value.cellDescriptor = std::shared_ptr<CellDescriptor>(d);
           result.push_back(r);
+          
         }
         else
         {
@@ -587,13 +684,13 @@ void PixelDescriptorProvider::ProccessTransaction(bool passUpdateResult, std::li
         continue;
       }
       
-      int maxHealth = d->m_baseHealth;
+      int maxHealth = d->m_genom.m_health;
       if(d->m_health >= maxHealth * 2)
       {
         auto destinationDesc = ProcessMutation(d);
         if (destinationDesc)
         {
-          d->m_health = d->m_baseHealth;
+          d->m_health = d->m_genom.m_health;
           
           if (passUpdateResult)
           {
@@ -628,21 +725,42 @@ CellDescriptor* PixelDescriptorProvider::ProcessMutation(CellDescriptor* source)
 {
   CellDescriptor* result = nullptr;
   
-  auto sourceConfig = m_config->ConfigForCell(source->m_character);
-  
-  CellType newType = source->m_character;
-  if (cBoolRandPercent(sourceConfig->percentOfMutations))
+  if (cBoolRandPercent(0.1))
   {
-    newType = GetRanromCellType();
+    for (int i = 0; i < kMaxNumberOfGroups; ++i)
+    {
+      unsigned int groupId = 1 << i;
+      auto it = m_groups.find(groupId);
+      Genom g;
+      if (it == m_groups.end())
+      {
+        g = GenerateGenom(groupId, m_map);
+        source->AroundRandom([&](PixelDescriptor* pd, bool& stop){
+          
+          if (nullptr != CreateRandomCell(pd, source->m_genom)) {
+            stop = true;
+            result = pd->m_cellDescriptor;
+          }
+          
+        });
+      }
+      
+      if (result) {
+        m_groups[g.m_groupId].genom = g;
+        m_groups[g.m_groupId].population += 1;
+        return result;
+      }
+    }
   }
   
-  auto destConfig = m_config->ConfigForCell(newType);
-  
-  source->AroundRandom([&result, newType, destConfig](PixelDescriptor* pd, bool& stop){
+
+
+  source->AroundRandom([&](PixelDescriptor* pd, bool& stop){
     
-    if (komorki::CreateCell(pd, newType, destConfig)) {
+    if (nullptr != CreateRandomCell(pd, source->m_genom)) {
       stop = true;
       result = pd->m_cellDescriptor;
+      m_groups[source->m_genom.m_groupId].population += 1;
     }
     
   });
@@ -652,7 +770,8 @@ CellDescriptor* PixelDescriptorProvider::ProcessMutation(CellDescriptor* source)
 
 void PixelDescriptorProvider::Update(bool passUpdateResult, std::list<PixelDescriptorProvider::UpdateResult>& result)
 {
-//  if (m_updateId == 4)
+//  return;
+//  if (m_updateId == 0)
 //  {
 //    return;
 //  }
@@ -725,6 +844,7 @@ void PixelDescriptorProvider::Update(bool passUpdateResult, std::list<PixelDescr
         Optional<Action> a;
         Optional<Movement> m;
         Optional<Morphing> morph;
+        Optional<ChangeRect> changeRect;
 
         d->Check();
         
@@ -734,11 +854,12 @@ void PixelDescriptorProvider::Update(bool passUpdateResult, std::list<PixelDescr
                         m_map,
                         m,
                         a,
-                        morph);
+                        morph,
+                        changeRect);
         
         d->Check();
        
-        if (m == false && a == false && morph == false)
+        if (m == false && a == false && morph == false && changeRect == false)
           continue;
         
         UpdateResult updateResult(d);
@@ -746,6 +867,7 @@ void PixelDescriptorProvider::Update(bool passUpdateResult, std::list<PixelDescr
         updateResult.action = a;
         updateResult.movement = m;
         updateResult.morph = morph;
+        updateResult.changeRect = changeRect;
 
         if (passUpdateResult)
         {

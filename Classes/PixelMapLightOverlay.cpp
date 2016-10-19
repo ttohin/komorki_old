@@ -15,7 +15,7 @@ namespace komorki
   {
     USING_NS_CC;
     
-    PixelMapLightOverlay::PixelMapLightOverlay(int a, int b, int width, int height, komorki::PixelDescriptorProvider* provider)
+    PixelMapLightOverlay::PixelMapLightOverlay(int a, int b, int width, int height, komorki::IPixelDescriptorProvider* provider)
       {
         m_a1 = a;
         m_a2 = a + width;
@@ -107,6 +107,7 @@ namespace komorki
         {
           return false;
         }
+        
         getTexture()->setAliasTexParameters();
 
         for (int i = m_a1; i < m_a2; ++i)

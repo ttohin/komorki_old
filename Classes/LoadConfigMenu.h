@@ -44,7 +44,7 @@ private:
   
   cocos2d::ui::Layout* CreateLoadConfigView(const std::string& name);
   void AddParameterViewForSection(const std::string& sectionName,
-                                  komorki::PixelDescriptorProvider::Config::CellConfig* config,
+                                  komorki::Config::CellConfig* config,
                                   cocos2d::ui::ListView* list);
   void addChildFromAnotherNode(cocos2d::Node* node);
   void insertWidgetFromAnotherNode(cocos2d::ui::ListView* listView, cocos2d::ui::Widget* widget);

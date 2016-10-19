@@ -21,7 +21,7 @@ namespace
 {
   const char* kConfigSuffix = ".kmrk.json";
   
-  bool ReadCellConfig(const rapidjson::Value& root, const std::string& key, PixelDescriptorProvider::Config::CellConfig& cellConfig)
+  bool ReadCellConfig(const rapidjson::Value& root, const std::string& key, Config::CellConfig& cellConfig)
   {
     const rapidjson::Value& cellConfigValue = DICTOOL->getSubDictionary_json(root, key.c_str());
     if (!cellConfigValue.IsNull())
@@ -44,7 +44,7 @@ namespace
     return true;
   }
   
-  void WriteCellConfig(const PixelDescriptorProvider::Config::CellConfig& cellConfig,
+  void WriteCellConfig(const Config::CellConfig& cellConfig,
                        rapidjson::PrettyWriter<rapidjson::StringBuffer>& writer)
   {
     writer.StartObject();
@@ -69,7 +69,7 @@ namespace
     writer.EndObject();
   }
   
-  bool WriteConfigToFile(const PixelDescriptorProvider::Config& config, const std::string& filePath)
+  bool WriteConfigToFile(const Config& config, const std::string& filePath)
   {
     rapidjson::StringBuffer buffer;
     rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
@@ -178,7 +178,7 @@ ConfigManager::ConfigNamesList ConfigManager::GetConfigs()
           ConfigPtr configPtr = ReadConfig(fileName);
           if (configPtr)
           {
-            Config config {configPtr, configName};
+            ConfigFile config {configPtr, configName};
             m_configList.push_back(config);
             configNames.push_back(configName);
             
@@ -214,7 +214,7 @@ ConfigPtr ConfigManager::ReadConfig(const std::string& configName)
     return nullptr;
   }
   
-  ConfigPtr config = std::make_shared<PixelDescriptorProvider::Config>();
+  ConfigPtr config = std::make_shared<komorki::Config>();
  
   const rapidjson::Value& map = DICTOOL->getSubDictionary_json(doc, "map");
   if (!map.IsNull())
@@ -282,7 +282,7 @@ bool ConfigManager::SetConfig(const ConfigPtr& config)
 
 bool ConfigManager::ResetPendingConfig()
 {
-  PixelDescriptorProvider::Config defaultConfig;
+  Config defaultConfig;
   
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
   if (Application::getInstance()->getTargetPlatform() == Application::Platform::OS_IPHONE ||
@@ -382,7 +382,7 @@ bool ConfigManager::CreateNewConfig()
 
 bool ConfigManager::CreatePendingConfig()
 {
-  m_pendingConfig.config = std::make_shared<PixelDescriptorProvider::Config>();
+  m_pendingConfig.config = std::make_shared<Config>();
   
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
   if (Application::getInstance()->getTargetPlatform() == Application::Platform::OS_IPHONE ||

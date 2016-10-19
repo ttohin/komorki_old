@@ -25,7 +25,7 @@ class PixelDebugView : public cocos2d::SpriteBatchNode
 {
 public:
   
-  PixelDebugView(int a, int b, int width, int height, komorki::PixelDescriptorProvider* provider);
+  PixelDebugView(int a, int b, int width, int height, komorki::IPixelDescriptorProvider* provider);
   
   cocos2d::Sprite* CreateSprite();
   
@@ -50,7 +50,7 @@ private:
   int m_b2;
   std::list<cocos2d::Sprite*> m_spritesPull;
   unsigned int m_pullSize;
-  komorki::PixelDescriptorProvider* m_provider;
+  komorki::IPixelDescriptorProvider* m_provider;
 };
 }
 }

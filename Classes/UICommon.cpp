@@ -23,5 +23,10 @@ namespace komorki
     {
       return cocos2d::Vec2(RandomOffset(), RandomOffset());
     }
+    
+    cocos2d::Vec2 spriteVector(const komorki::Vec2& vec, const cocos2d::Vec2& vector)
+    {
+      return cocos2d::Vec2(vec.x * kSpritePosition, vec.y * kSpritePosition) + vector;
+    }
   }
 }

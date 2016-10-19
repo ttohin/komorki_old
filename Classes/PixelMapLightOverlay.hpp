@@ -21,7 +21,7 @@ namespace ui
 class PixelMapLightOverlay : public cocos2d::SpriteBatchNode
 {
 public:
-  PixelMapLightOverlay(int a, int b, int width, int height, komorki::PixelDescriptorProvider* provider);
+  PixelMapLightOverlay(int a, int b, int width, int height, komorki::IPixelDescriptorProvider* provider);
   cocos2d::Sprite* CreateSprite();
   
   void RemoveSprite(cocos2d::Sprite* sprite);
@@ -45,7 +45,7 @@ private:
   int m_b2;
   std::list<cocos2d::Sprite*> m_spritesPull;
   unsigned int m_pullSize;
-  komorki::PixelDescriptorProvider* m_provider;
+  komorki::IPixelDescriptorProvider* m_provider;
 };
 }
 }

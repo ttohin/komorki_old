@@ -95,7 +95,7 @@ void OptionsMenu::ShowInView(cocos2d::Node* root)
   m_controlPanel = (ui::Layout*)m_mainLayer->getChildByName("ControlPanel");
   m_confirmationPanel = (ui::Layout*)m_mainLayer->getChildByName("ConfirmationPanel");
   
-  komorki::PixelDescriptorProvider::Config* currentConfig = komorki::ConfigManager::GetInstance()->GetPendingConfig().get();
+  komorki::Config* currentConfig = komorki::ConfigManager::GetInstance()->GetPendingConfig().get();
   if (!currentConfig) {
     komorki::ConfigManager::GetInstance()->CreatePendingConfig();
     currentConfig = komorki::ConfigManager::GetInstance()->GetPendingConfig().get();
@@ -566,7 +566,7 @@ void OptionsMenu::AddParameterView(const std::string& text, float* value, int mi
 }
 
 void OptionsMenu::AddParameterViewForSection(const std::string& sectionName,
-                                             komorki::PixelDescriptorProvider::Config::CellConfig* config)
+                                             komorki::Config::CellConfig* config)
 {
   AddParameterView("Health", &config->health, 1, 9999, sectionName);
   AddParameterView("Sleep time", &config->sleepTime, 0, 9999, sectionName);

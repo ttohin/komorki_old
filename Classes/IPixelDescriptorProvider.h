@@ -11,6 +11,7 @@ namespace komorki
 {
   class CellDescriptor;
   class PixelDescriptor;
+  class Config;
 
   struct AddCreature
   {
@@ -23,6 +24,11 @@ namespace komorki
     Vec2 delta = Vec2(0.f, 0.f);
   };
   
+  struct ChangeRect
+  {
+    Rect rect;
+  };
+  
   struct Morph
   {
     enum MorphDir
@@ -33,7 +39,6 @@ namespace komorki
     };
     Vec2 delta = Vec2(0.f, 0.f);
     Vec2 pos = Vec2(0.f, 0.f);
-    Vec2 offsetFromBase = Vec2(0.f, 0.f);
     MorphDir dir;
   };
   
@@ -102,6 +107,8 @@ public:
   virtual PixelDescriptor* GetDescriptor(komorki::PixelPos x, komorki::PixelPos y) const = 0;
   virtual TerrainAnalizer::Result GetTerrain() const = 0;
   virtual komorki::Vec2 GetSize() const = 0;
+  
+  virtual void InitWithConfig(Config* config) = 0;
 
   struct UpdateResult
   {
@@ -112,6 +119,7 @@ public:
     komorki::Optional<komorki::AddCreature> addCreature;
     komorki::Optional<komorki::DeleteCreature> deleteCreature;
     komorki::Optional<komorki::Morphing> morph;
+    komorki::Optional<komorki::ChangeRect> changeRect;
     UpdateResult(CellDescriptor* desc);
   };
 

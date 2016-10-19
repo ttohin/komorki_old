@@ -12,10 +12,11 @@
 #include <list>
 #include <string>
 #include "PixelDescriptorProvider.h"
+#include "PixelProviderConfig.h"
 
 namespace komorki
 {
-typedef std::shared_ptr<PixelDescriptorProvider::Config> ConfigPtr;
+typedef std::shared_ptr<Config> ConfigPtr;
   
 class ConfigManager
 {
@@ -46,16 +47,16 @@ public:
   bool RequiredDoubleSize();
 private:
   
-  struct Config
+  struct ConfigFile
   {
     ConfigPtr config;
     std::string name;
   };
   
-  Config m_pendingConfig;
-  Config m_currentConfig;
+  ConfigFile m_pendingConfig;
+  ConfigFile m_currentConfig;
   
-  typedef std::list<Config> ConfigsList;
+  typedef std::list<ConfigFile> ConfigsList;
   ConfigsList m_configList;
   bool m_configChanged;
   int m_nextConfigNumber;

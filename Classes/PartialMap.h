@@ -17,6 +17,7 @@
 #include "cocos2d.h"
 #include "TerrainBatchSprite.h"
 #include "TerrainSprite.h"
+#include "PixelMapContext.h"
 
 namespace komorki
 {
@@ -34,61 +35,11 @@ namespace komorki
     {
     public:
       
-      struct PolymorphShapeContext
-      {
-        cocos2d::Sprite* sprite = nullptr;
-        Vec2 pos;
-        Vec2 prevPos;
-        bool animationPlayed = false;
-      };
-      
-      struct Context
-      {
-        enum ContextType
-        {
-          eContextTypeDefault,
-          eContextTypePolymorph,
-          eContextTypeAmorph,
-          eContextTypeRect
-        };
-        
-        typedef std::unordered_map<std::string, PolymorphShapeContext> SpriteMap;
-        typedef std::list<cocos2d::Sprite*> SpriteList;
-        
-        PartialMap* owner;
-        cocos2d::Sprite* sprite = nullptr;
-        cocos2d::Sprite* glow = nullptr;
-        cocos2d::Vec2 offset;
-        Vec2 pos;
-        ContextType type;
-        SpriteMap spriteMap;
-        SpriteList toRemove;
-        
-        void BecomeOwner(PartialMap* _owner);
-        void Free(PartialMap* _owner);
-        void Destory(PartialMap* _owner);
-        void ForceDestory(PartialMap* _owner);
-        PolymorphShapeContext PopSprite(int x, int y);
-        PolymorphShapeContext GetSprite(int x, int y);
-        void SetSprite(cocos2d::Sprite*, int x, int y);
-        
-        bool IsMultiShape() const { return type == eContextTypePolymorph || type == eContextTypeAmorph; }
-       
-        Context(PartialMap *_owner);
-       
-        std::string Description() const;
-        std::string GetKey(int x, int y) const;
-        
-        
-      private:
-        ~Context();
-      };
-      
       PartialMap();
       virtual ~PartialMap();
       
       bool Init(int a, int b, int width, int height,
-                PixelDescriptorProvider* provider,
+                IPixelDescriptorProvider* provider,
                 cocos2d::Node* superView,
                 cocos2d::Node* lightNode,
                 const cocos2d::Vec2& offset);
@@ -119,30 +70,29 @@ namespace komorki
       int m_height;
       int m_a2;
       int m_b2;
+      std::shared_ptr<PixelMapPartial> m_cellMap;
       
     private:
    
       void InitPixel(PixelDescriptor* pd);
-      PartialMap::Context* AddCreature(const Vec2& source, PixelDescriptor* dest, Morphing& morphing);
-      PartialMap::Context* CreateCell(PixelDescriptor* dest);
-      PartialMap::Context* CreatePolymorphCell(PixelDescriptor* dest);
-      void Delete(Context* context);
-      void Move(const Vec2& source, const Vec2& dest, Context* context, int duration, Morphing& morphing, CellDescriptor* cd);
-      void Attack(Context* context, const Vec2& pos, const Vec2& offset);
+      PixelMap::ObjectContext* AddCreature(const Vec2& source, PixelDescriptor* dest, Morphing& morphing, float duration);
+      PixelMap::ObjectContext* CreateCell(PixelDescriptor* dest);
+      PixelMap::ObjectContext* CreatePolymorphCell(PixelDescriptor* dest);
+      void Delete(PixelMap::ObjectContext* context);
+      void Move(const Vec2& source, const Vec2& dest, PixelMap::ObjectContext* context, float duration, int steps, Morphing& morphing, CellDescriptor* cd);
+      void Attack(PixelMap::ObjectContext* context, const Vec2& pos, const Vec2& offset);
       
       inline bool IsInAABB(const Vec2& vec);
       inline bool IsInAABB(const int& x, const int& y);
       inline Vec2 LocalVector(const komorki::Vec2& input) const;
 
-      std::shared_ptr<PixelMapPartial> m_cellMap;
       std::shared_ptr<PixelDebugView> m_debugView;
       std::shared_ptr<PixelMapLightOverlay> m_lightOverlay;
       std::shared_ptr<PixelMapBackground> m_background;
       std::shared_ptr<GlowMapOverlay> m_glow;
-//      std::shared_ptr<TerrainBatchSprite> m_terrain;
       cocos2d::Sprite* m_terrainSprite;
-      PixelDescriptorProvider* m_provider;
-      std::list<Context*> m_upcomingContexts;
+      IPixelDescriptorProvider* m_provider;
+      std::list<PixelMap::ObjectContext*> m_upcomingContexts;
       std::list<CellDescriptor*> m_outgoingCells;
       
     };

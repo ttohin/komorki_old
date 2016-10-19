@@ -7,6 +7,7 @@
 #include "PixelDescriptor.h"
 #include <memory>
 #include <map>
+#include "PixelProviderConfig.h"
 
 namespace komorki
 {
@@ -17,58 +18,25 @@ class PixelDescriptorProvider : public IPixelDescriptorProvider
 {
 public:
   
-  class Config
+  struct Group
   {
-  public:
-    
-    struct CellConfig
-    {
-      int health;
-      int sleepTime;
-      int attack;
-      int passiveHealthChunkMin;
-      int passiveHealthChunkMax;
-      int healthPerAttack;
-      int armor;
-      int lifeTime;
-      float percentOfMutations;
-      CellType danger;
-      CellType food;
-      CellType friends;
-    };
-    
-    int terrainSize;
-    int mapHeight;
-    int mapWidth;
-    
-    float percentOfCreatures;
-    float percentOfOrange;
-    float percentOfGreen;
-    float percentOfSalad;
-    float percentOfCyan;
-    float percentOfBlue;
-    float percentOfWhite;
-    
-    CellConfig orange;
-    CellConfig green;
-    CellConfig salad;
-    CellConfig cyan;
-    CellConfig blue;
-    CellConfig white;
-    CellConfig yellow;
-    CellConfig pink;
-    
-    Config::CellConfig* ConfigForCell(CellType type);
-    
-    Config();
-    ~Config(){}
+    Genom genom;
+    unsigned int population = 0;
   };
+  
+  typedef std::map<unsigned int, Group> GroupMap;
+  
+  PixelDescriptorProvider();
   
   typedef std::shared_ptr<PixelDescriptor> PixelPtr;
   typedef std::vector<std::vector<PixelPtr> > PixelMap;
   
   void Init();
-  void InitWithConfig(Config* config);
+  virtual void InitWithConfig(Config* config) override;
+  
+  virtual void GenTerrain();
+  virtual void GenLights();
+  virtual void PopulateCells();
   
   virtual PixelDescriptor* GetDescriptor(komorki::PixelPos x, komorki::PixelPos y) const;
   virtual TerrainAnalizer::Result GetTerrain() const;
@@ -84,14 +52,15 @@ public:
   PixelPtr CreateCell(CellType type,  const komorki::Vec2& pos);
   
   std::map<int, int> m_population;
-  Config* m_config;
   
-private:
+protected:
+  Config* m_config;
   int CountTypeAroundPosition(komorki::Vec2 pos, int character);
   PixelMap m_map;
   unsigned int m_updateId;
   TerrainAnalizer::Result m_terrain;
   std::vector<std::vector<PixelDescriptor::Type> > m_typeMap;
+  GroupMap m_groups;
 };
   
 }

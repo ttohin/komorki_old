@@ -8,6 +8,7 @@
 
 #include "TerrainAnalizer.h"
 #include <iostream>
+#include <assert.h>
 
 
 TerrainAnalizer::TerrainAnalizer(const Buffer2DPtr<float>& buffer)

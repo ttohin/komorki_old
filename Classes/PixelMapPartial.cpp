@@ -30,23 +30,28 @@
 
 #define SMALL_ANIMATION_TAG 99
 
+#ifdef DEBUG_PARTIAL_MAP
+#define LOG_W(...) KOMORKI_LOG(__VA_ARGS__)
+#else
+#define LOG_W(...) {}
+#endif
+
 USING_NS_CC;
 
 namespace komorki
 {
   namespace ui
   {
-    cocos2d::Vec2 spriteVector(const komorki::Vec2& vec, const cocos2d::Vec2& vector = cocos2d::Vec2())
-    {
-      auto result = cocos2d::Vec2(vec.x * kSpritePosition, vec.y * kSpritePosition) + vector;
-      return result;
-    }
-    
     PixelMapPartial::PixelMapPartial()
     {
       m_hlSprite = nullptr;
       m_pullSize = PMP_PULL_SIZE;
       m_enableSmallAnimations = true;
+    }
+    
+    PixelMapPartial::~PixelMapPartial()
+    {
+      LOG_W("%s, %p", __FUNCTION__, this);
     }
     
     int TagForType(komorki::PixelDescriptor* pd)
@@ -57,30 +62,28 @@ namespace komorki
     cocos2d::Rect PixelMapPartial::OffsetForType(komorki::PixelDescriptor* pd)
     {
       komorki::PixelDescriptor::Type t = pd->m_type;
-      if(t == komorki::PixelDescriptor::CreatureType)
+      if (t == komorki::PixelDescriptor::CreatureType)
       {
         auto d = pd->m_cellDescriptor;
         assert(d);
         int index = cRandABInt(0, 4);
         
-        if (d->m_character == komorki::eCellTypeBigBlue)
-        {
-          return cocos2d::Rect(index*kTileFrameSize*2, 6*kTileFrameSize, kTileFrameSize*2, kTileFrameSize*2);
-        }
-        
         int line = 0;
-        if (d->m_character == komorki::eCellTypeGreen) line = 0;
-        else if (d->m_character == komorki::eCellTypeSalad) line = 1;
-        else if (d->m_character == komorki::eCellTypeHunter) line = 2;
-        else if (d->m_character == komorki::eCellTypeImprovedSalad) line = 3;
-        else if (d->m_character == komorki::eCellTypeWhite) { line = 1; index = 4; }
-        else if (d->m_character == komorki::eCellTypeYellow) { line = 1; index = 5; }
-        else if (d->m_character == komorki::eCellTypePink) { line = 2; index = 4; }
-        else assert(0);
+        
+        int groupIndex = 0;
+        for (; groupIndex < 32; groupIndex++)
+        {
+          if (d->m_genom.m_groupId & (1 << groupIndex)) break;
+        }
+      
+        assert(groupIndex < 12);
+        
+        line = groupIndex/4;
+        index = groupIndex%3;
         
         return cocos2d::Rect(index*kTileFrameSize, line*kTileFrameSize, kTileFrameSize, kTileFrameSize);
       }
-      if(t == komorki::PixelDescriptor::TerrainType)
+      if (t == komorki::PixelDescriptor::TerrainType)
       {
         return cocos2d::Rect(cRandABInt(GROWND_START, GROWND_END)*kTileFrameSize, GROWND_LINE*kTileFrameSize, kTileFrameSize, kTileFrameSize);
       }
@@ -107,7 +110,6 @@ namespace komorki
         return s;
       }
     }
-    
     
     void PixelMapPartial::RemoveSprite(Sprite* sprite)
     {
@@ -203,25 +205,7 @@ namespace komorki
     {
       m_updateTime = updateTime;
     }
-    
-    void PixelMapPartial::Delete(PartialMap::Context* context)
-    {
-      if (context->IsMultiShape())
-      {
-        for (auto& s : context->spriteMap)
-        {
-          assert(s.second.sprite);
-          assert(s.second.sprite->getParent() == this);
-          RemoveSprite(s.second.sprite);
-        }
-        return;
-      }
-      
-      assert(context->sprite);
-      assert(context->sprite->getParent() == this);
-      RemoveSprite(context->sprite);
-    }
-    
+
     void PixelMapPartial::AddSprite(PixelDescriptor* pd, const Vec2& pos)
     {
       auto s = spriteForDescriptor(pd);
@@ -243,321 +227,12 @@ namespace komorki
       
     }
     
-    void PixelMapPartial::AddCreature(CellDescriptor* cd, PartialMap::Context* context, Vec2 partialMapOffset)
+    void PixelMapPartial::AddPolymorphCreature(CellDescriptor* cd, PixelMap::AmorphCellContext* context, Vec2 partialMapOffset)
     {
-      if (context->IsMultiShape())
-      {
-        AddPolymorphCreature(cd, context, partialMapOffset);
-        return;
-      }
-      else if (context->type == PartialMap::Context::eContextTypeRect)
-      {
-        cocos2d::Rect r = OffsetForType(cd->parent);
-        
-        Rect rect = cd->GetShape()->GetAABB();
-        
-        auto s = CreateSprite();
-        s->setTextureRect(r);
-        s->setScale(kSpriteScale * rect.size.x, kSpriteScale * rect.size.y);
-        s->setAnchorPoint({0, 0});
-        
-        context->offset = RandomVectorOffset();
-        
-        s->setPosition(spriteVector(rect.origin, context->offset));
-        s->setTag(static_cast<int>(komorki::PixelDescriptor::CreatureType));
-        
-//        if (m_enableSmallAnimations)
-//        {
-//          PlaySmallAnimation(s);
-//        }
-        
-        context->sprite = s;
-        
-        return;
-      }
-      
-      cocos2d::Rect r = OffsetForType(cd->parent);
-      auto s = CreateSprite();
-      s->setTextureRect(r);
-      s->setScale(kSpriteScale);
-//      s->setOpacity(180);
-      s->setAnchorPoint({0, 0});
-      
-      if (cd->m_character != eCellTypeWhite)
-      {
-        context->offset = RandomVectorOffset();
-      }
-      
-      s->setPosition(spriteVector(context->pos, context->offset));
-      s->setTag(static_cast<int>(komorki::PixelDescriptor::CreatureType));
-     
-      if (m_enableSmallAnimations)
-      {
-        PlaySmallAnimation(s);
-      }
-      
-      context->sprite = s;
-    }
-    
-    void PixelMapPartial::AddPolymorphCreature(CellDescriptor* cd, PartialMap::Context* context, Vec2 partialMapOffset)
-    {
-      assert(context->spriteMap.empty());
-     
-      cocos2d::Rect r = OffsetForType(cd->parent);
-      cd->Shape([&](PixelDescriptor* pd, bool& stop)
-                {
-                  auto s = CreateSprite();
-                  s->setTextureRect(r);
-                  s->setScale(kSpriteScale);
-                  s->setAnchorPoint({0, 0});
-                  s->setPosition(spriteVector(Vec2(pd->x, pd->y) - partialMapOffset, context->offset));
-                  s->setTag(static_cast<int>(komorki::PixelDescriptor::CreatureType + 10));
-                  
-                  if (m_enableSmallAnimations)
-                  {
-                    PlaySmallAnimation(s);
-                  }
-                  
-                  context->SetSprite(s, pd->x, pd->y);
-                  s->setScale(kSpriteScale * 1.2);
-                  
-                });
-      
-    }
-    
-    
-    void PixelMapPartial::MoveAmorphCells(PartialMap::Context* context,
-                                             const Vec2& source,
-                                             komorki::Morphing& morph,
-                                             Vec2 partialMapOffset,
-                                             CellDescriptor* cd)
-    {
-      
-      if (morph.proccessed == false)
-      {
-        context->toRemove.clear();
-      }
-      
-      for (auto& m : morph.vec)
-      {
-        assert(m.dir == Morph::Outside || m.dir == Morph::Inside);
-        
-        Vec2 pos = m.pos;
-        Vec2 offset = m.delta;
-        
-        PartialMap::PolymorphShapeContext polymoprhContext;
-        
-        if (m.dir == Morph::Inside)
-        {
-          if (morph.proccessed)
-          {
-            polymoprhContext.sprite = *context->toRemove.begin();
-            context->toRemove.pop_back();
-            assert(polymoprhContext.sprite);
-          }
-          else
-          {
-            polymoprhContext = context->PopSprite(pos.x,
-                                                  pos.y);
-          }
-        }
-        else
-        {
-          offset = -m.delta;
-          pos = m.pos + m.delta;
-          
-          if (morph.proccessed)
-          {
-            polymoprhContext = context->GetSprite(m.pos.x,
-                                                  m.pos.y);
-            assert(polymoprhContext.sprite);
-          }
-        }
-        
-        if (polymoprhContext.sprite == nullptr)
-        {
-          cocos2d::Rect r = OffsetForType(cd->parent);
-          auto s = CreateSprite();
-          s->setTextureRect(r);
-          s->setScale(kSpriteScale);
-          s->setAnchorPoint({0, 0});
-          s->setPosition(spriteVector(m.pos - partialMapOffset, context->offset));
-          s->setTag(static_cast<int>(komorki::PixelDescriptor::CreatureType + 10));
-          
-          polymoprhContext.sprite = s;
-          polymoprhContext.pos = m.pos;
-          
-          context->SetSprite(s, polymoprhContext.pos.x, polymoprhContext.pos.y);
-        }
-        
-        assert(polymoprhContext.sprite);
-        
-        if (kAnimated)
-        {
-          polymoprhContext.sprite->stopAllActionsByTag(0);
-          polymoprhContext.sprite->setPosition(spriteVector(pos - partialMapOffset));
-          auto moveTo = MoveTo::create(m_updateTime*0.9*(0 + 1), spriteVector(pos + offset - partialMapOffset));
-          
-          if (m.dir == Morph::Inside)
-          {
-            auto removeSelf = CallFunc::create([this, polymoprhContext, context]()
-                                               {
-                                                 this->RemoveSprite(polymoprhContext.sprite);
-                                               });
-            auto removeSeq = Sequence::createWithTwoActions(moveTo, removeSelf);
-            polymoprhContext.sprite->runAction(removeSeq);
-            context->toRemove.push_back(polymoprhContext.sprite);
-            removeSeq->setTag(0);
-          }
-          else
-          {
-            polymoprhContext.sprite->runAction(moveTo);
-            moveTo->setTag(0);
-          }
-          
-          polymoprhContext.sprite->setScale(kSpriteScale * 1.2);
-        }
-        else
-        {
-          polymoprhContext.sprite->setPosition(spriteVector(pos + offset - partialMapOffset));
-          
-        }
-      }
-      
-      if (morph.proccessed)
-      {
-        context->toRemove.clear();
-      }
-      
-      morph.proccessed = true;
-    }
 
-    void PixelMapPartial::MovePolymorphCells(PartialMap::Context* context,
-                                             const Vec2& source,
-                                             komorki::Morphing& morph,
-                                             Vec2 partialMapOffset,
-                                             CellDescriptor* cd)
-    {
-      PartialMap::Context::SpriteMap spriteMap;
-      for (auto& m : morph.vec)
-      {
-        assert(m.dir == Morph::Move);
-        
-        Vec2 pos = m.pos;
-        if (morph.proccessed)
-        {
-          pos = m.pos + m.delta;
-        }
-        
-        auto polymoprhContext = context->PopSprite(pos.x,
-                                                   pos.y);
-
-        polymoprhContext.pos = m.pos + m.delta;
-        
-        if (polymoprhContext.sprite == nullptr)
-        {
-          assert(m.delta == komorki::Vec2());
-          
-          cocos2d::Rect r = OffsetForType(cd->parent);
-          auto s = CreateSprite();
-          s->setTextureRect(r);
-          s->setScale(kSpriteScale);
-          s->setAnchorPoint({0, 0});
-          s->setPosition(spriteVector(m.pos - partialMapOffset, context->offset));
-          s->setTag(static_cast<int>(komorki::PixelDescriptor::CreatureType + 10));
-          
-          polymoprhContext.sprite = s;
-        }
-        
-        spriteMap[context->GetKey(m.pos.x + m.delta.x,
-                                  m.pos.y + m.delta.y)] = polymoprhContext;
-        
-        assert(polymoprhContext.sprite);
-        
-        if (kAnimated)
-        {
-          polymoprhContext.sprite->stopAllActionsByTag(0);
-          polymoprhContext.sprite->setPosition(spriteVector(m.pos - partialMapOffset));
-          auto moveTo = MoveTo::create(m_updateTime*0.9*(0 + 1), spriteVector(m.pos + m.delta - partialMapOffset));
-          moveTo->setTag(0);
-          polymoprhContext.sprite->runAction(moveTo);
-          
-          polymoprhContext.sprite->setScale(kSpriteScale * 1.2);
-        }
-        else
-        {
-          polymoprhContext.sprite->setPosition(spriteVector(m.pos + m.delta - partialMapOffset));
-          
-        }
-      }
-      
-      for (auto& s : spriteMap)
-      {
-        context->spriteMap[s.first] = s.second;
-      }
-      
-      
-      morph.proccessed = true;
     }
     
-    void PixelMapPartial::AdoptSprite(PartialMap::Context* context, Vec2 partialMapOffset)
-    {
-      if (context->IsMultiShape())
-      {
-        for (auto &s : context->spriteMap)
-        {
-          auto source = s.second.sprite;
-          source->retain();
-          source->stopAllActions();
-          source->removeFromParentAndCleanup(true);
-          this->addChild(source);
-          source->release();
-          source->setPosition(spriteVector(s.second.pos - partialMapOffset));
-          
-          source->stopAllActionsByTag(SMALL_ANIMATION_TAG);
-          
-          if (m_enableSmallAnimations)
-          {
-            PlaySmallAnimation(source);
-          }
-        }
-        
-        for (auto &s : context->toRemove)
-        {
-          auto source = s;
-          source->retain();
-          source->stopAllActions();
-          source->removeFromParentAndCleanup(true);
-          this->addChild(source);
-          source->release();
-          
-          source->stopAllActionsByTag(SMALL_ANIMATION_TAG);
-          
-          if (m_enableSmallAnimations)
-          {
-            PlaySmallAnimation(source);
-          }
-        }
-        
-        return;
-      }
-      
-      auto source = context->sprite;
-      source->retain();
-      source->removeFromParentAndCleanup(true);
-      this->addChild(source);
-      source->release();
-      source->setPosition(spriteVector(context->pos, context->offset));
-      
-      source->stopAllActionsByTag(SMALL_ANIMATION_TAG);
-      
-      if (m_enableSmallAnimations)
-      {
-        PlaySmallAnimation(source);
-      }
-    }
-    
-    void PixelMapPartial::MoveCreature(PartialMap::Context* context,
+    void PixelMapPartial::MoveCreature(PixelMap::ObjectContext* context,
                                        const Vec2& source,
                                        const Vec2& dest,
                                        int duration,
@@ -565,41 +240,15 @@ namespace komorki
                                        Vec2 partialMapOffset,
                                        CellDescriptor* cd)
     {
-//      assert(std::abs(source.x - dest.x) <= 2);
-//      assert(std::abs(source.y - dest.y) <= 2);
-      
-      if (context->type == PartialMap::Context::eContextTypePolymorph)
-      {
-        MovePolymorphCells(context, source, morphing, partialMapOffset, cd);
-        return;
-      }
-      
-      if (context->type == PartialMap::Context::eContextTypeAmorph)
-      {
-        MoveAmorphCells(context, source, morphing, partialMapOffset, cd);
-        return;
-      }
-      
-      auto randOffset = RandomVectorOffset();
-      cocos2d::Vec2 offset = context->offset;
-      Sprite* s = context->sprite;
-      context->offset = randOffset;
-      
-      if (kAnimated)
-      {
-        s->stopAllActionsByTag(0);
-        s->setPosition(spriteVector(source, offset));
-        auto moveTo = MoveTo::create(m_updateTime*0.9*(duration + 1), spriteVector(dest, randOffset));
-        moveTo->setTag(0);
-        s->runAction(moveTo);
-      }
-      else
-      {
-        s->setPosition(spriteVector(dest, randOffset));
-      }
+
     }
     
-    void PlayAttackAnimation(cocos2d::Sprite* source, const Vec2& pos, const Vec2& direction, cocos2d::Vec2& offset, float updateTime)
+    void PlayAttackAnimation(cocos2d::Sprite* source,
+                             const Vec2& pos,
+                             const Vec2& direction,
+                             cocos2d::Vec2& offset,
+                             float updateTime,
+                             const Vec2& size)
     {
       offset = RandomVectorOffset();
       
@@ -607,9 +256,9 @@ namespace komorki
       auto destination = spriteVector(pos, cocos2d::Vec2(kSpritePosition/2*direction.x,
                                                          kSpritePosition/2*direction.y) + RandomVectorOffset());
       auto m1 = MoveTo::create(updateTime*0.3, destination);
-      auto s1 = ScaleTo::create(updateTime*0.3, kSpriteScale * 1.5);
+      auto s1 = ScaleTo::create(updateTime*0.3, kSpriteScale * size.x * 1.5, kSpriteScale * size.y * 1.5);
       auto m2 = MoveTo::create(updateTime*0.3, spriteVector(pos, offset));
-      auto s2 = ScaleTo::create(updateTime*0.3, kSpriteScale);
+      auto s2 = ScaleTo::create(updateTime*0.3, kSpriteScale * size.x, kSpriteScale * size.y);
       auto spawn1 = cocos2d::Spawn::createWithTwoActions(m1, s1);
       auto spawn2 = cocos2d::Spawn::createWithTwoActions(m2, s2);
       auto seq = Sequence::createWithTwoActions(spawn1, spawn2);
@@ -617,27 +266,28 @@ namespace komorki
       source->runAction(seq);
     }
     
-    void PixelMapPartial::Attack(PartialMap::Context* context, const Vec2& pos, const Vec2& direction, const Vec2& partialMapOffset)
-    {
-      if (kAnimated == false)
-      {
-        return;
-      }
-      
-      if (context->IsMultiShape())
-      {
-        for (auto& s : context->spriteMap)
-        {
-          auto source = s.second.sprite;
-          PlayAttackAnimation(source, s.second.pos - partialMapOffset, direction, context->offset, m_updateTime);
-        }
-
-        return;
-      }
-      
-      auto source = context->sprite;
-      PlayAttackAnimation(source, pos, direction, context->offset, m_updateTime);
-    }
+//    void PixelMapPartial::Attack(PartialMap::Context* context, const Vec2& pos, const Vec2& direction, const Vec2& partialMapOffset)
+//    {
+//      if (kAnimated == false)
+//      {
+//        return;
+//      }
+//      
+//      if (context->IsMultiShape())
+//      {
+//        for (auto& s : context->spriteMap)
+//        {
+//          auto source = s.second.sprite;
+//          PlayAttackAnimation(source, s.second.pos - partialMapOffset, direction, context->offset, m_updateTime, context->size);
+//        }
+//
+//        return;
+//      }
+//      
+//      auto source = context->sprite;
+//      PlayAttackAnimation(source, pos + context->posOffset, direction, context->offset, m_updateTime, context->size);
+//    }
+    
     
     void PixelMapPartial::StopSmallAnimations()
     {
@@ -664,32 +314,14 @@ namespace komorki
       
       m_enableSmallAnimations = true;
       
-      for(auto it = _children.cbegin(); it != _children.cend(); ++it)
-      {
-        if ((*it)->getTag() == static_cast<int>(komorki::PixelDescriptor::CreatureType))
-        {
-          PlaySmallAnimation(static_cast<Sprite*>(*it));
-        }
-      }
+//      for(auto it = _children.cbegin(); it != _children.cend(); ++it)
+//      {
+//        if ((*it)->getTag() == static_cast<int>(komorki::PixelDescriptor::CreatureType))
+//        {
+//          PlaySmallAnimation(static_cast<Sprite*>(*it));
+//        }
+//      }
     }
     
-    void PixelMapPartial::PlaySmallAnimation(cocos2d::Sprite* s)
-    {
-      if (kAnimated == false)
-      {
-        return;
-      }
-      
-      bool scaleDirection = rand()%2;
-      auto s1 = ScaleTo::create(2, kSpriteScale*0.8);
-      auto s2 = ScaleTo::create(2, kSpriteScale*1.1);
-      ActionInterval* loop = nullptr;
-      if (scaleDirection)
-        loop = RepeatForever::create(Sequence::create(s1, s2, NULL));
-      else
-        loop = RepeatForever::create(Sequence::create(s2, s1, NULL));;
-      loop->setTag(SMALL_ANIMATION_TAG);
-      s->runAction(loop);
-    }
   }
 }

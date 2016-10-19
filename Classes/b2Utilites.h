@@ -41,7 +41,16 @@ inline int cRandABInt(int a, int b)
 }
 
 
+
+
 #define cBoolRandPercent(percent) (RANDOM_0_1() <= percent)
+#define cRandPlusMinus() (rand()%2 == 0 ? -1 : 1)
+
+
+inline int cRandAorB(int a, int b, float percent = 0.5f)
+{
+  return cBoolRandPercent(percent) ? a : b;
+}
 
 #define cccb2(cgp) (CGPointMake(cgp.x * PTM_RATIO, cgp.y  * PTM_RATIO))
 
@@ -52,9 +61,9 @@ inline int cRandABInt(int a, int b)
 #define KOMORKI_LOG(...) {}
 #endif
 
-//#define LOG_UPDATES
+#define LOG_UPDATES
 
-//#define DEBUG_PARTIAL_MAP
+#define DEBUG_PARTIAL_MAP
 //#define DEBUG_VIEWPORT
 
 #endif // Komorki_Utilites_h

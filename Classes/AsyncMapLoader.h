@@ -24,7 +24,7 @@ public:
   std::string GetCurrentJobString();
   
   komorki::ui::Viewport::Ptr GetViewport();
-  std::shared_ptr<komorki::PixelDescriptorProvider> GetProvider();
+  std::shared_ptr<komorki::IPixelDescriptorProvider> GetProvider();
   
 private:
 
@@ -39,8 +39,8 @@ private:
   std::mutex m_lock;
   std::condition_variable m_semaphore;
   std::thread m_thread;
-  std::shared_ptr<komorki::PixelDescriptorProvider::Config> m_config;
-  std::shared_ptr<komorki::PixelDescriptorProvider> m_provider;
+  std::shared_ptr<komorki::Config> m_config;
+  std::shared_ptr<komorki::IPixelDescriptorProvider> m_provider;
   std::string m_currentJob;
   komorki::ui::Viewport::Ptr m_viewport;
 };

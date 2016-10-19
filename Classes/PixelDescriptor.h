@@ -67,6 +67,8 @@ public:
   void SetDirection(PixelPos x, PixelPos y, PixelDescriptor* pd);
   std::string GetAscii() const;
   std::string GetAscii(char cellSymbol) const;
+  int GetDirectionIndex(const Vec2& dir) const;
+  PixelDescriptor* GetPixelByDirectionalindex(int index) const;
   
   inline bool IsEmpty() const { return m_type == Empty; }
   inline bool IsCell(CellDescriptor* cd) const { return m_cellDescriptor == cd; }

@@ -55,7 +55,7 @@ private:
   void AddParameterView(const std::string& text, float* value, int minValue, int maxValue,
                         const std::string& textureName = std::string());
   void AddParameterViewForSection(const std::string& sectionName,
-                                  komorki::PixelDescriptorProvider::Config::CellConfig* config);
+                                  komorki::Config::CellConfig* config);
   void insertWidgetFromAnotherNode(cocos2d::ui::ListView* listView, cocos2d::ui::Widget* widget);
   void ConfigureConfirmationPanel(cocos2d::ui::Layout* confirmationPanel);
   void ConfigureControlPanel(cocos2d::ui::Layout* controlPanel);

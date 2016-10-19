@@ -8,6 +8,8 @@
 
 #include "AsyncMapLoader.h"
 #include "ConfigManager.h"
+#include "TestPixelProvider.h"
+
 USING_NS_CC;
 
 AsyncMapLoader::AsyncMapLoader()
@@ -30,14 +32,18 @@ AsyncMapLoader::~AsyncMapLoader()
 void AsyncMapLoader::WorkerThread()
 {
   SetCurrentJobString("Creating provider");
-  m_provider = std::make_shared<komorki::PixelDescriptorProvider>();
-
+  
+#ifdef USE_TEST_PROVIDER
+  m_provider = std::make_shared<komorki::TestPixelProvider>();
+#else
   komorki::ConfigManager::GetInstance()->CreateNewConfig();
+  m_provider = std::make_shared<komorki::PixelDescriptorProvider>();
   m_provider->InitWithConfig(komorki::ConfigManager::GetInstance()->GetCurrentConfig().get());
+#endif
   
   SetCurrentJobString("Runnig few generations");
   std::list<komorki::PixelDescriptorProvider::UpdateResult> result;
-  for (int i = 0; i < 100; i++)
+  for (int i = 0; i < 0; i++)
   {
     m_provider->Update(false, result);
   }
@@ -70,7 +76,7 @@ void AsyncMapLoader::SetCurrentJobString(const std::string& text)
   m_currentJob = text;
 }
 
-std::shared_ptr<komorki::PixelDescriptorProvider> AsyncMapLoader::GetProvider()
+std::shared_ptr<komorki::IPixelDescriptorProvider> AsyncMapLoader::GetProvider()
 {
   return m_provider;
 }

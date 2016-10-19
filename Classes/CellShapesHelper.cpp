@@ -9,6 +9,9 @@
 #include "CellShapesHelper.h"
 #include "b2Utilites.h"
 #include <iostream>
+#include <assert.h>
+#include <limits>
+#include <cmath>
 
 namespace komorki
 {
@@ -133,8 +136,6 @@ bool MoveCellShape(CellDescriptor* cd,
       }
     }
     
-    m.offsetFromBase = Vec2(pd->offsetX, pd->offsetY);
-    
     if (m.delta.x != 0 || m.delta.y != 0) {
       outMorphing.vec.push_back(m);
     }
@@ -218,7 +219,7 @@ bool MoveCellShape(CellDescriptor* cd,
   void GetMaxMinDistantPixel(Vec2 pos, const IShape* shape, DistanceMeasureResult& result)
   {
     PixelDescriptor* minDistPd = nullptr;
-    float minDist = INFINITY;
+    float minDist = std::numeric_limits<float>::max();
     PixelDescriptor* maxDistPd = nullptr;
     float maxDist = 0.f;
     shape->ForEach([&](PixelDescriptor* pixel, bool& stop)

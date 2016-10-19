@@ -29,10 +29,10 @@ namespace komorki
       void RemoveSprite(cocos2d::Sprite* sprite);
       void Reset();
       
-      void Delete(PartialMap::Context* context);
-      void AddCreature(CellDescriptor* cd, PartialMap::Context* context);
-      void AdoptSprite(PartialMap::Context* context);
-      void MoveCreature(PartialMap::Context* context, const Vec2& source, const Vec2& dest, int duration = 0);
+//      void Delete(PartialMap::Context* context);
+//      void AddCreature(CellDescriptor* cd, PartialMap::Context* context);
+//      void AdoptSprite(PartialMap::Context* context);
+//      void MoveCreature(PartialMap::Context* context, const Vec2& source, const Vec2& dest, int duration = 0);
       
     private:
       std::list<cocos2d::Sprite*> m_spritesPull;

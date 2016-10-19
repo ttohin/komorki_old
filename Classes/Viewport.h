@@ -35,7 +35,7 @@ namespace komorki
       
       Viewport(cocos2d::Node* superView,
                const cocos2d::Size& originalSize,
-               const std::shared_ptr<komorki::PixelDescriptorProvider>& provider);
+               const std::shared_ptr<komorki::IPixelDescriptorProvider>& provider);
       
       ~Viewport();
       void Test();
@@ -100,7 +100,7 @@ namespace komorki
       float m_initialScale;
       bool m_enableSmallAnimations;
      
-      std::shared_ptr<PixelDescriptorProvider> m_provider;
+      std::shared_ptr<IPixelDescriptorProvider> m_provider;
       std::shared_ptr<AsyncPixelManager> m_manager;
       MapList m_maps;
       MapList m_mapsToRemove;

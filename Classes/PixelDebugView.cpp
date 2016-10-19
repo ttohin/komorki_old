@@ -24,7 +24,7 @@ namespace ui
 {
   USING_NS_CC;
 
-  PixelDebugView::PixelDebugView(int a, int b, int width, int height, komorki::PixelDescriptorProvider* provider)
+  PixelDebugView::PixelDebugView(int a, int b, int width, int height, komorki::IPixelDescriptorProvider* provider)
   {
     m_a1 = a;
     m_a2 = a + width;
@@ -94,11 +94,8 @@ namespace ui
     s->setAnchorPoint({0, 0});
     s->setScale(kTileFrameSize, 5);
     
-    float healthRatio = pixelD->m_cellDescriptor->m_health/ (2.0 * pixelD->m_cellDescriptor->m_baseHealth);
+    float healthRatio = pixelD->m_cellDescriptor->m_health/ (2.0 * pixelD->m_cellDescriptor->m_genom.m_health);
     s->setScaleX(healthRatio * kTileFrameSize);
-    if (pixelD->m_cellDescriptor->m_character == komorki::eCellTypeBigBlue) {
-      s->setScaleX(s->getScaleX() * 2);
-    }
     
     return s;
   }
@@ -151,36 +148,7 @@ namespace ui
 //      }
 //    }
     
-//    return;
-    
-    
-    for (int i = m_a1; i < m_a2; ++i)
-    {
-      for (int j = m_b1; j < m_b2; ++j)
-      {
-        auto pixelD = m_provider->GetDescriptor(i, j);
-        if (pixelD->m_cellDescriptor && pixelD->m_cellDescriptor->m_character == komorki::eCellTypePink && pixelD->m_cellDescriptor->parent == pixelD)
-        {
-          int i = 0;
-          auto cd = pixelD->m_cellDescriptor;
-          cd->AroundRandom([this, &i](komorki::PixelDescriptor* pd, bool& stop)
-                           {
-                             if (pd == nullptr)
-                             {
-                               return ;
-                             }
-                             
-                             auto s = this->ColorSprite(i++);
-                             s->setPosition(this->spriteVector(pd));
-                           });
-          
-          auto s = this->ColorSprite(cRandAB(0, 20));
-          s->setPosition(this->spriteVector(komorki::Vec2(cd->m_m1, cd->m_m2)));
-          
-        }
-        
-      }
-    }
+    return;
     
     
   }
@@ -201,30 +169,6 @@ namespace ui
   void PixelDebugView::Reset()
   {
     removeAllChildren();
-    
-    for (int i = m_a1; i < m_a2; ++i)
-    {
-      for (int j = m_b1; j < m_b2; ++j)
-      {
-        auto pixelD = m_provider->GetDescriptor(i, j);
-        if (pixelD->m_cellDescriptor && pixelD->m_cellDescriptor->m_character == komorki::eCellTypePink && pixelD->m_cellDescriptor->parent == pixelD)
-        {
-          int i = 0;
-          auto cd = pixelD->m_cellDescriptor;
-          cd->AroundRandom([this, &i](komorki::PixelDescriptor* pd, bool& stop)
-                           {
-                             if (pd == nullptr)
-                             {
-                               return ;
-                             }
-                             
-                             auto s = this->ColorSprite(i++);
-                             s->setPosition(this->spriteVector(pd));
-                           });
-        }
-        
-      }
-    }
   }
   
 }

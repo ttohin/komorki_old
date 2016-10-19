@@ -15,7 +15,7 @@ namespace komorki
   class PhysicalDescriptor
   {
   public:
-    PhysicalFloat light;
+    PhysicalFloat light = 1.0;
   };
 }
 

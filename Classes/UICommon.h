@@ -10,6 +10,7 @@
 #define __prsv__UICommon__
 
 #include "cocos2d.h"
+#include "Common.h"
 
 namespace komorki
 {
@@ -17,6 +18,7 @@ namespace komorki
   {
     float RandomOffset();
     cocos2d::Vec2 RandomVectorOffset();
+    cocos2d::Vec2 spriteVector(const komorki::Vec2& vec, const cocos2d::Vec2& vector = cocos2d::Vec2());
   }
 }
 

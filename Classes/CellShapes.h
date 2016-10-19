@@ -11,6 +11,7 @@
 
 #include "Common.h"
 #include <vector>
+#include <memory>
 
 namespace komorki
 {
@@ -19,6 +20,7 @@ namespace komorki
   class IShape
   {
   public:
+    typedef std::shared_ptr<IShape> Ptr;
     virtual void ForEach(const PerPixelFunc& op) const = 0;
     virtual void ForEachRandom(const PerPixelFunc& op) const = 0;
     virtual void Around(const PerPixelFunc& op) const = 0;
@@ -28,6 +30,7 @@ namespace komorki
     virtual void Apply(PixelDescriptor* pd) = 0; // applay the shape to corresponding pixel descriptors
     virtual unsigned int Size() const = 0;
     virtual Rect GetAABB() const { return Rect(); }
+    virtual IShape::Ptr CopyWithBasePixel(PixelDescriptor* pd) const { return nullptr; }
     virtual ~IShape(){}
   };
   
@@ -45,6 +48,7 @@ namespace komorki
     virtual void Apply(PixelDescriptor* pd) override;
     virtual unsigned int Size() const override;
     virtual Rect GetAABB() const override;
+    virtual IShape::Ptr CopyWithBasePixel(PixelDescriptor* pd) const override;
   private:
     PixelDescriptor* m_pd;
   };
@@ -63,6 +67,7 @@ namespace komorki
     virtual void Apply(PixelDescriptor* pd) override;
     virtual unsigned int Size() const override;
     virtual Rect GetAABB() const override;
+    virtual IShape::Ptr CopyWithBasePixel(PixelDescriptor* pd) const override;
   private:
     PixelDescriptor* m_pd;
   };
@@ -81,9 +86,11 @@ namespace komorki
     virtual void Apply(PixelDescriptor* pd) override;
     virtual unsigned int Size() const override;
     virtual Rect GetAABB() const override;
+    virtual IShape::Ptr CopyWithBasePixel(PixelDescriptor* pd) const override;
     
     //public
     virtual void SetAABB(const Vec2& origin, const Vec2& size);
+    virtual Rect GetRect() const;
     
     
   private:
@@ -96,6 +103,7 @@ namespace komorki
   {
   public:
     PolymorphShape(PixelDescriptor* pd, int numberOfPixels);
+    PolymorphShape(PixelDescriptor* pd, const std::vector<PixelDescriptor*>& pixels);
     virtual ~PolymorphShape(){}
     
     // IShape
@@ -109,11 +117,13 @@ namespace komorki
     virtual void Apply(PixelDescriptor* pd) override;
     virtual unsigned int Size() const override;
     virtual Rect GetAABB() const override;
+    virtual IShape::Ptr CopyWithBasePixel(PixelDescriptor* pd) const override;
     
     // public
     virtual void RemovePixel(PixelDescriptor* source);
     virtual void AddPixel(PixelDescriptor* source);
     virtual bool IsInShape(PixelDescriptor* pd);
+    virtual void SetPixels(PixelDescriptor* pd, const std::vector<PixelDescriptor*>& pixels);
     
   private:
     PixelDescriptor* m_pd;

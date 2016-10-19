@@ -8,6 +8,8 @@
 
 #include "PixelDescriptor.h"
 #include "b2Utilites.h"
+#include <assert.h>
+#include <cstdlib>
 
 using namespace komorki;
 
@@ -25,7 +27,7 @@ PixelDescriptor::PixelDescriptor(int _x, int _y)
 , rt (nullptr)
 , rc (nullptr)
 , rb (nullptr)
-, directions{&lb, &cb, &rb, &lc, &rc, &lt, &ct, &rt}
+, directions{&lb, &cb, &rb, &rc, &rt, &ct, &lt, &lc}
 , m_cellDescriptor(nullptr)
 , m_type(PixelDescriptor::Empty)
 , x(_x), y(_y)
@@ -85,9 +87,16 @@ PixelDescriptor* PixelDescriptor::Offset(PixelPos x, PixelPos y) const
   assert(!(x > 1) && !(x < -1));
   assert(!(y > 1) && !(y < -1));
   
-  int index = x + 1 + (y + 1) * 3;
-  if (index >= 4) index -= 1;
-  return *directions[index];
+  if (Vec2(-1, 1) == Vec2(x, y)) return lt;
+  if (Vec2(-1, 0) == Vec2(x, y)) return lc;
+  if (Vec2(-1, -1) == Vec2(x, y)) return lb;
+  if (Vec2(0, 1) == Vec2(x, y)) return ct;
+  if (Vec2(0, -1) == Vec2(x, y)) return cb;
+  if (Vec2(1, 1) == Vec2(x, y)) return rt;
+  if (Vec2(1, 0) == Vec2(x, y)) return rc;
+  if (Vec2(1, -1) == Vec2(x, y)) return rb;
+  
+  return nullptr;
 }
 
 PixelDescriptor* PixelDescriptor::RecOffset(PixelPos x, PixelPos y) 
@@ -127,15 +136,43 @@ bool PixelDescriptor::Offset(PixelDescriptor* target, Vec2& offset) const
   return false;
 }
 
+//bool PixelDescriptor::Offset(PixelDescriptor* target, Vec2& offset) const
+//{
+//  if (target == lt) { offset = {-1, 1}; return true; }
+//  if (target == lc) { offset = {-1, 0}; return true; }
+//  if (target == lb) { offset = {-1, -1}; return true; }
+//  if (target == ct) { offset = {0, 1}; return true; }
+//  if (target == cb) { offset = {0, -1}; return true; }
+//  if (target == rt) { offset = {1, 1}; return true; };
+//  if (target == rc) { offset = {1, 0}; return true; }
+//  if (target == rb) { offset = {1, -1}; return true; }
+//  return false;
+//}
+
 void PixelDescriptor::SetDirection(PixelPos x, PixelPos y, PixelDescriptor* pd)
 {
   assert(!(x > 1) && !(x < -1));
   assert(!(y > 1) && !(y < -1));
- 
-  int index = x + 1 + (y + 1) * 3;
-  if (index >= 4) index -= 1;
-  *directions[index] = pd;
+  
+  if (Vec2(-1, 1) == Vec2(x, y)) lt = pd;
+  if (Vec2(-1, 0) == Vec2(x, y)) lc = pd;
+  if (Vec2(-1, -1) == Vec2(x, y)) lb = pd;
+  if (Vec2(0, 1) == Vec2(x, y)) ct = pd;
+  if (Vec2(0, -1) == Vec2(x, y)) cb = pd;
+  if (Vec2(1, 1) == Vec2(x, y)) rt = pd;
+  if (Vec2(1, 0) == Vec2(x, y)) rc = pd;
+  if (Vec2(1, -1) == Vec2(x, y)) rb = pd;
 }
+
+//void PixelDescriptor::SetDirection(PixelPos x, PixelPos y, PixelDescriptor* pd)
+//{
+//  assert(!(x > 1) && !(x < -1));
+//  assert(!(y > 1) && !(y < -1));
+//  
+//  int index = x + 1 + (y + 1) * 3;
+//  if (index >= 4) index -= 1;
+//  *directions[index] = pd;
+//}
 
 std::string PixelDescriptor::GetAscii() const
 {
@@ -154,4 +191,36 @@ std::string PixelDescriptor::GetAscii(char cellSymbol) const
       return ".";
   }
   return "?";
+}
+
+int PixelDescriptor::GetDirectionIndex(const Vec2& dir) const
+{
+  for (int i = 0; i < Const::numberOfDirections; ++i)
+  {
+    Vec2 testOffset;
+    Offset(*directions[i], testOffset);
+    if (testOffset == dir)
+    {
+      return i;
+    }
+  }
+  
+  assert(0);
+  return -1;
+}
+
+PixelDescriptor* PixelDescriptor::GetPixelByDirectionalindex(int index) const
+{
+  if (index < 0)
+  {
+    index = Const::numberOfDirections - std::abs(index)%Const::numberOfDirections;
+  }
+  if (index >= Const::numberOfDirections)
+  {
+    index = index%Const::numberOfDirections;
+  }
+  
+  assert(index >= 0);
+  assert(index < Const::numberOfDirections);
+  return *directions[index];
 }
