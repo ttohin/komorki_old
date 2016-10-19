@@ -146,7 +146,12 @@ namespace komorki
     
     bool PixelMapPartial::init()
     {
-      if ( !SpriteBatchNode::initWithFile ("tile_32x32.png", 10))
+      std::string mapName = "Komorki/tmp/cells.png";
+      
+      mapName = cocos2d::FileUtils::getInstance()->getWritablePath() + mapName;
+      
+      
+      if ( !SpriteBatchNode::initWithFile (mapName, 20))
       {
         return false;
       }

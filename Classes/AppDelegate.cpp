@@ -3,6 +3,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include "LoadingScene.h"
+#include "TestSampleShapesScene.h"
 
 USING_NS_CC;
 
@@ -42,7 +43,8 @@ bool AppDelegate::applicationDidFinishLaunching()
   director->setDisplayStats(true);
   
   director->setAnimationInterval(1.0 / 60);
-  auto scene = LoadingScene::createScene();
+//  auto scene = LoadingScene::createScene();
+  auto scene = TestSampleShapesScene::createScene();
   director->runWithScene(scene);
   
   return true;
