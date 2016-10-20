@@ -3,3 +3,6 @@
 **/xcuserdata/
 **/project.xcworkspace/
 proj.ios_mac/Build
+cocos2d/external
+cocos2d/tools
+cocos2d/*.zip
