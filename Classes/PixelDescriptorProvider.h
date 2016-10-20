@@ -24,7 +24,7 @@ public:
     unsigned int population = 0;
   };
   
-  typedef std::map<unsigned int, Group> GroupMap;
+  typedef std::map<uint64_t, Group> GroupMap;
   
   PixelDescriptorProvider();
   

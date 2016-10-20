@@ -21,10 +21,10 @@ enum ShapeType
   
 struct Genom
 {
-  unsigned int m_groupId = 0;
-  unsigned int m_dangerGroupId = 0;
-  unsigned int m_foodGroupId = 0;
-  unsigned int m_friendGroupId = 0;
+  uint64_t m_groupId = 0;
+  uint64_t m_dangerGroupId = 0;
+  uint64_t m_foodGroupId = 0;
+  uint64_t m_friendGroupId = 0;
   ShapeType m_shapeType;
   int m_health;
   int m_armor;

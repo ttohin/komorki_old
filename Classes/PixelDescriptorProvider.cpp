@@ -17,7 +17,7 @@ int mapWidth = 0;
 int mapHeight = 0;
   
 int nextId = 0;
-int kMaxNumberOfGroups = 32;
+int kMaxNumberOfGroups = 64;
 int kInitialNumberOfGroups = 6;
   
 IPixelDescriptorProvider::UpdateResult::UpdateResult(CellDescriptor* desc):
@@ -425,12 +425,12 @@ void PixelDescriptorProvider::Init()
   PopulateCells();
 }
 
-Genom GenerateGenom(unsigned int groupId, PixelDescriptorProvider::PixelMap& map)
+Genom GenerateGenom(uint64_t groupId, PixelDescriptorProvider::PixelMap& map)
 {
   Genom g;
   g.m_groupId = groupId;
   
-  for (int j = 0; j < kInitialNumberOfGroups; j++)
+  for (int j = 0; j < kMaxNumberOfGroups; j++)
   {
     if (g.m_groupId == (1 << j)) {
       continue;
@@ -438,7 +438,7 @@ Genom GenerateGenom(unsigned int groupId, PixelDescriptorProvider::PixelMap& map
     g.m_foodGroupId |= cRandAorB(0, 1) ? 1 << j : 0;
   }
   
-  for (int j = 0; j < kInitialNumberOfGroups; j++)
+  for (int j = 0; j < kMaxNumberOfGroups; j++)
   {
     if (g.m_groupId == (1 << j)) {
       continue;
@@ -446,7 +446,7 @@ Genom GenerateGenom(unsigned int groupId, PixelDescriptorProvider::PixelMap& map
     g.m_dangerGroupId = cRandAorB(0, 1, 0.9) ? 1 << j : 0;
   }
   
-  for (int j = 0; j < kInitialNumberOfGroups; j++)
+  for (int j = 0; j < kMaxNumberOfGroups; j++)
   {
     if (g.m_groupId == (1 << j)) {
       continue;
@@ -726,11 +726,11 @@ CellDescriptor* PixelDescriptorProvider::ProcessMutation(CellDescriptor* source)
 {
   CellDescriptor* result = nullptr;
   
-  if (cBoolRandPercent(0.1))
+  if (cBoolRandPercent(0.001))
   {
     for (int i = 0; i < kMaxNumberOfGroups; ++i)
     {
-      unsigned int groupId = 1 << i;
+      uint64_t groupId = uint64_t(1) << i;
       auto it = m_groups.find(groupId);
       Genom g;
       if (it == m_groups.end())

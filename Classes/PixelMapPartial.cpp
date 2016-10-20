@@ -71,7 +71,7 @@ namespace komorki
         int line = 0;
         
         int groupIndex = 0;
-        for (; groupIndex < 32; groupIndex++)
+        for (; groupIndex < 64; groupIndex++)
         {
           if (d->m_genom.m_groupId & (1 << groupIndex)) break;
         }
