@@ -18,9 +18,9 @@ namespace komorki
   namespace ui
   {
     class PartialMap;
+    
     namespace PixelMap
     {
-      
       enum class ContextType
       {
         Unknown,
@@ -31,30 +31,38 @@ namespace komorki
       class ObjectContext
       {
       public:
-        virtual ContextType GetType() const { return ContextType::Unknown; }
         ObjectContext(PartialMap *_owner);
         virtual ~ObjectContext();
-        void Free(PartialMap* _owner);
-        void ForceDestory(PartialMap* _owner);
+
         Vec2 GetPosInOwnerBase(Vec2ConstRef pos) const;
         std::string Description() const;
-        std::string GetKey(int x, int y) const;
         
-        PartialMap* m_owner;
+        virtual ContextType GetType() const { return ContextType::Unknown; }
         virtual void BecomeOwner(PartialMap* _owner) = 0;
         virtual void Destory(PartialMap* _owner) = 0;
-        
+        virtual void Free(PartialMap* _owner);
+        virtual void ForceDestory(PartialMap* _owner);
+
+        PartialMap* m_owner;
       };
       
       class SingleCellContext : public ObjectContext
       {
       public:
-        virtual ContextType GetType() const override { return ContextType::SinglePixel; }
+        
 
         SingleCellContext(PartialMap *_owner,
                           const cocos2d::Rect& textureRect,
                           Vec2ConstRef origin,
                           const Rect& rect);
+        
+        void Move(Vec2ConstRef src, Vec2ConstRef dest, float animationDuration);
+        void ChangeRect(CellDescriptor* cd, const Rect& newRect, float animationDuration);
+        void PlaySmallAnimation();
+        
+        virtual ContextType GetType() const override { return ContextType::SinglePixel; }
+        virtual void BecomeOwner(PartialMap* _owner) override;
+        virtual void Destory(PartialMap* _owner) override;
         
         cocos2d::Sprite* m_sprite = nullptr;
         cocos2d::Sprite* m_glow = nullptr;
@@ -63,13 +71,7 @@ namespace komorki
         Vec2 m_posOffset; // for rect shapes
         Vec2 m_size; // for rect shapes
         cocos2d::Rect m_textureRect;
-        
-        void Move(Vec2ConstRef src, Vec2ConstRef dest, float animationDuration);
-        void ChangeRect(CellDescriptor* cd, const Rect& newRect, float animationDuration);
-        void BecomeOwner(PartialMap* _owner);
-        void Destory(PartialMap* _owner);
-        void PlaySmallAnimation();
-        
+      
       };
       
       class AmorphCellContext : public ObjectContext
@@ -107,12 +109,12 @@ namespace komorki
         void SetSprite(cocos2d::Sprite*, int x, int y);
         std::string GetKey(int x, int y) const;
         
-        virtual ContextType GetType() const override { return ContextType::ManyPixels; }
-        
         cocos2d::Sprite* CreateSprite();
         void RemoveSprite(cocos2d::Sprite* sprite);
-        void BecomeOwner(PartialMap* _owner);
-        void Destory(PartialMap* _owner);
+        
+        virtual ContextType GetType() const override { return ContextType::ManyPixels; }
+        virtual void BecomeOwner(PartialMap* _owner) override;
+        virtual void Destory(PartialMap* _owner) override;
       };
     }
   }

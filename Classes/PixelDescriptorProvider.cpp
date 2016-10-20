@@ -17,7 +17,8 @@ int mapWidth = 0;
 int mapHeight = 0;
   
 int nextId = 0;
-int kMaxNumberOfGroups = 12;
+int kMaxNumberOfGroups = 32;
+int kInitialNumberOfGroups = 6;
   
 IPixelDescriptorProvider::UpdateResult::UpdateResult(CellDescriptor* desc):
 desc(desc->parent), userData(desc->userData)
@@ -429,7 +430,7 @@ Genom GenerateGenom(unsigned int groupId, PixelDescriptorProvider::PixelMap& map
   Genom g;
   g.m_groupId = groupId;
   
-  for (int j = 0; j < kMaxNumberOfGroups; j++)
+  for (int j = 0; j < kInitialNumberOfGroups; j++)
   {
     if (g.m_groupId == (1 << j)) {
       continue;
@@ -437,7 +438,7 @@ Genom GenerateGenom(unsigned int groupId, PixelDescriptorProvider::PixelMap& map
     g.m_foodGroupId |= cRandAorB(0, 1) ? 1 << j : 0;
   }
   
-  for (int j = 0; j < kMaxNumberOfGroups; j++)
+  for (int j = 0; j < kInitialNumberOfGroups; j++)
   {
     if (g.m_groupId == (1 << j)) {
       continue;
@@ -445,7 +446,7 @@ Genom GenerateGenom(unsigned int groupId, PixelDescriptorProvider::PixelMap& map
     g.m_dangerGroupId = cRandAorB(0, 1, 0.9) ? 1 << j : 0;
   }
   
-  for (int j = 0; j < kMaxNumberOfGroups; j++)
+  for (int j = 0; j < kInitialNumberOfGroups; j++)
   {
     if (g.m_groupId == (1 << j)) {
       continue;
@@ -453,14 +454,14 @@ Genom GenerateGenom(unsigned int groupId, PixelDescriptorProvider::PixelMap& map
     g.m_friendGroupId |= cRandAorB(0, 1) ? 1 << j : 0;
   }
   
-  g.m_health = cRandEps(600, 0.1);
-  g.m_armor = cRandEps(10, 0.1);
-  g.m_sleepTime = cRandEps(2, 0.5);
-  g.m_lifeTime = cRandEps(800, 0.1);
-  g.m_damage = cRandEps(10, 0.1);
-  g.m_lightFood = cRandEps(20, 0.1);
-  g.m_passiveHealthIncome = cRandEps(10, 0.1);
-  g.m_healthPerAttach = cRandEps(100, 0.1);
+  g.m_health = cRandABInt(100, 1000);
+  g.m_armor = cRandABInt(1, 100);
+  g.m_sleepTime = cRandABInt(0, 10);
+  g.m_lifeTime = cRandABInt(100, 1000);
+  g.m_damage = cRandABInt(1, 50);
+  g.m_lightFood = cRandABInt(1, 50);
+  g.m_passiveHealthIncome = cRandABInt(0, 10);
+  g.m_healthPerAttach = cRandABInt(10, 100);
   GenerateShape(map[20][20].get(), g.m_shape, g.m_shapeType);
   
   return g;
@@ -469,7 +470,7 @@ Genom GenerateGenom(unsigned int groupId, PixelDescriptorProvider::PixelMap& map
 std::vector<Genom> GenerateGenoms(PixelDescriptorProvider::PixelMap& map)
 {
   std::vector<Genom> result;
-  for (int i = 0; i < kMaxNumberOfGroups; ++i)
+  for (int i = 0; i < kInitialNumberOfGroups; ++i)
   {
     Genom g = GenerateGenom(1 << i, map);
     result.push_back(g);

@@ -75,11 +75,9 @@ namespace komorki
         {
           if (d->m_genom.m_groupId & (1 << groupIndex)) break;
         }
-      
-        assert(groupIndex < 12);
         
-        line = groupIndex/4;
-        index = groupIndex%3;
+        line = groupIndex/30;
+        index = groupIndex%30;
         
         return cocos2d::Rect(index*kTileFrameSize, line*kTileFrameSize, kTileFrameSize, kTileFrameSize);
       }
