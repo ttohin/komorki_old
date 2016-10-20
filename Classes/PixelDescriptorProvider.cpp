@@ -257,7 +257,7 @@ void GenerateShape(PixelDescriptor* pd, IShape::Ptr& outShape, ShapeType& outSha
   
   unsigned int numberOfShapes = 3;
   unsigned int shapeIndex = cRandABInt(0, numberOfShapes);
-  shapeIndex = 2;
+//  shapeIndex = 2;
   if (0 == shapeIndex)
   {
     shape = std::make_shared<SinglePixel>(pd);
@@ -456,10 +456,10 @@ Genom GenerateGenom(unsigned int groupId, PixelDescriptorProvider::PixelMap& map
   g.m_health = cRandEps(600, 0.1);
   g.m_armor = cRandEps(10, 0.1);
   g.m_sleepTime = cRandEps(2, 0.5);
-  g.m_lifeTime = 999999;//cRandEps(800, 0.1);
+  g.m_lifeTime = cRandEps(800, 0.1);
   g.m_damage = cRandEps(10, 0.1);
-  g.m_lightFood = 0;//cRandEps(20, 0.1);
-  g.m_passiveHealthIncome = 0;//cRandEps(10, 0.1);
+  g.m_lightFood = cRandEps(20, 0.1);
+  g.m_passiveHealthIncome = cRandEps(10, 0.1);
   g.m_healthPerAttach = cRandEps(100, 0.1);
   GenerateShape(map[20][20].get(), g.m_shape, g.m_shapeType);
   

@@ -444,7 +444,7 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
     PixelMap::ObjectContext* context = nullptr;
     if (dest->m_cellDescriptor->GetShapeType() == eShapeTypeAmorph)
     {
-      auto textureRect = cocos2d::Rect(0*kTileFrameSize, 0*kTileFrameSize, kTileFrameSize, kTileFrameSize);
+      auto textureRect = m_cellMap->OffsetForType(dest);
       auto c = new PixelMap::AmorphCellContext(this, textureRect);
       
       dest->m_cellDescriptor->Shape([&](PixelDescriptor* pd, bool& stop)
@@ -458,8 +458,11 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
     else if (dest->m_cellDescriptor->GetShapeType() == eShapeTypeRect
         || dest->m_cellDescriptor->GetShapeType() == eShapeTypeSinglePixel)
     {
-      auto textureRect = cocos2d::Rect(1*kTileFrameSize, 0*kTileFrameSize, kTileFrameSize, kTileFrameSize);
-      auto c = new PixelMap::SingleCellContext(this, textureRect, dest->m_cellDescriptor->parent->GetPos(), dest->m_cellDescriptor->GetShape()->GetAABB());
+      auto textureRect = m_cellMap->OffsetForType(dest);
+      auto c = new PixelMap::SingleCellContext(this,
+                                               textureRect,
+                                               dest->m_cellDescriptor->parent->GetPos(),
+                                               dest->m_cellDescriptor->GetShape()->GetAABB());
       c->Move(source, dest->GetPos(), duration * 0.9);
       context = c;
     }
