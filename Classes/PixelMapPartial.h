@@ -47,6 +47,9 @@ public:
 //  void Attack(PartialMap::Context* context, const Vec2& pos, const Vec2& offset, const Vec2& partialMapOffset);
   void StopSmallAnimations();
   void StartSmallAnimations();
+  void EnableAnimations(bool enable);
+  
+  bool m_enableAnimations = true;
  
 private:
   
@@ -55,6 +58,7 @@ private:
   unsigned int m_pullSize;
   float m_updateTime;
   bool m_enableSmallAnimations;
+  
 };
 }
 }

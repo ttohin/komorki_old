@@ -99,6 +99,7 @@ namespace komorki
       bool m_performMove;
       float m_initialScale;
       bool m_enableSmallAnimations;
+      bool m_enableAnimations;
      
       std::shared_ptr<IPixelDescriptorProvider> m_provider;
       std::shared_ptr<AsyncPixelManager> m_manager;

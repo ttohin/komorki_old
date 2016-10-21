@@ -533,8 +533,6 @@
 				8FFE7FE11B9F522D008D2289 /* TerrainAnalizer.h */,
 				8FFE7FE21B9F522D008D2289 /* TerrainBatchSprite.cpp */,
 				8FFE7FE31B9F522D008D2289 /* TerrainBatchSprite.h */,
-				8FBF24F01DB8CFBE00AE7991 /* PixelMapContext.cpp */,
-				8FBF24F11DB8CFBE00AE7991 /* PixelMapContext.h */,
 				8FBF24F21DB8CFBE00AE7991 /* PixelMapManager.cpp */,
 				8FBF24F31DB8CFBE00AE7991 /* PixelMapManager.h */,
 				8FBF24F51DB8CFBE00AE7991 /* PixelProviderConfig.cpp */,
@@ -669,6 +667,8 @@
 				8FDE8CD71B237033000EE52C /* PartialMap.cpp */,
 				8FDE8CD81B237033000EE52C /* PartialMap.h */,
 				8FB7C3F11BA4D0CC00194722 /* TerrainSprite.h */,
+				8FBF24F01DB8CFBE00AE7991 /* PixelMapContext.cpp */,
+				8FBF24F11DB8CFBE00AE7991 /* PixelMapContext.h */,
 			);
 			name = PartialMap;
 			sourceTree = "<group>";

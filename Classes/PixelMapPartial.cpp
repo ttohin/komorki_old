@@ -243,7 +243,6 @@ namespace komorki
                                        Vec2 partialMapOffset,
                                        CellDescriptor* cd)
     {
-
     }
     
     void PlayAttackAnimation(cocos2d::Sprite* source,
@@ -307,6 +306,11 @@ namespace komorki
           (*it)->stopAllActionsByTag(SMALL_ANIMATION_TAG);
         }
       }
+    }
+    
+    void PixelMapPartial::EnableAnimations(bool enable)
+    {
+      m_enableAnimations = enable;
     }
     
     void PixelMapPartial::StartSmallAnimations()

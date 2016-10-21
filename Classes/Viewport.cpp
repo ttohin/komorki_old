@@ -148,6 +148,7 @@ ui::Viewport::Viewport(cocos2d::Node* superView,
   
   m_initialScale = 0.2;
   m_enableSmallAnimations = true;
+  m_enableAnimations = true;
   
   m_pixelWorldPos.origin = {0, 0};
   m_pixelWorldPos.size = originalSize;
@@ -642,6 +643,15 @@ void ui::Viewport::Update(float updateTime, float& outUpdateTime)
       m_enableSmallAnimations = true;
     }
     
+    if (upcommingRectSquare > 20 * 50 * 50)
+    {
+      m_enableAnimations = false;
+    }
+    else
+    {
+      m_enableAnimations = true;
+    }
+    
   }
  
   for (const auto& map : m_maps)
@@ -654,6 +664,8 @@ void ui::Viewport::Update(float updateTime, float& outUpdateTime)
     {
       map->StartSmallAnimations();
     }
+    
+    map->EnableAnimations(m_enableAnimations);
     
     map->AdoptIncomingItems();
   }
@@ -912,6 +924,9 @@ bool ui::Viewport::CreatePartialMapsInRects(const std::vector<Rect>& rects,
     {
       map->StartSmallAnimations();
     }
+    
+    map->EnableAnimations(m_enableAnimations);
+    
     maps.push_back(map);
   }
   

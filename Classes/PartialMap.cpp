@@ -368,6 +368,11 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
   {
     m_cellMap->StartSmallAnimations();
   }
+  
+  void PartialMap::EnableAnimations(bool enable)
+  {
+    m_cellMap->EnableAnimations(enable);
+  }
  
   void PartialMap::Transfrorm(const cocos2d::Vec2& pos, float scale)
   {

@@ -104,7 +104,7 @@ namespace PixelMap
     cocos2d::Vec2 offset = m_offset;
     m_offset = randOffset;
     
-    if (kAnimated)
+    if (m_owner->m_cellMap->m_enableAnimations)
     {
       m_sprite->stopAllActionsByTag(0);
       m_sprite->setPosition(spriteVector(localSrc + m_posOffset, offset));
@@ -128,16 +128,23 @@ namespace PixelMap
     
     m_sprite->stopAllActionsByTag(0);
     
-    auto moveTo = cocos2d::MoveTo::create(animationDuration, spriteVector(m_pos + m_posOffset, m_offset));
-    auto scaleAction = cocos2d::ScaleTo::create(animationDuration, kSpriteScale * m_size.x, kSpriteScale * m_size.y);
-    auto playSmallAnimation = cocos2d::CallFunc::create([this]()
-                                               {
-                                               });
-    
-    auto spawn = cocos2d::Spawn::create(moveTo, scaleAction, NULL);
-    auto seq = cocos2d::Sequence::create(spawn, playSmallAnimation, NULL);
-    seq->setTag(0);
-    m_sprite->runAction(seq);
+    if (m_owner->m_cellMap->m_enableAnimations)
+    {
+      auto moveTo = cocos2d::MoveTo::create(animationDuration, spriteVector(m_pos + m_posOffset, m_offset));
+      auto scaleAction = cocos2d::ScaleTo::create(animationDuration, kSpriteScale * m_size.x, kSpriteScale * m_size.y);
+      auto playSmallAnimation = cocos2d::CallFunc::create([this]()
+                                                          {
+                                                          });
+      
+      auto spawn = cocos2d::Spawn::create(moveTo, scaleAction, NULL);
+      auto seq = cocos2d::Sequence::create(spawn, playSmallAnimation, NULL);
+      seq->setTag(0);
+      m_sprite->runAction(seq);
+    }
+    else
+    {
+      m_sprite->setScale(kSpriteScale * m_size.x, kSpriteScale * m_size.y);
+    }
   }
 
   void SingleCellContext::BecomeOwner(PartialMap* _owner)
@@ -166,7 +173,7 @@ namespace PixelMap
   
   void SingleCellContext::PlaySmallAnimation()
   {
-    if (kAnimated == false)
+    if (m_owner->m_cellMap->m_enableAnimations == false)
     {
       return;
     }
@@ -280,7 +287,7 @@ namespace PixelMap
       
       assert(polymoprhContext.sprite);
       
-      if (kAnimated)
+      if (m_owner->m_cellMap->m_enableAnimations)
       {
         polymoprhContext.sprite->stopAllActionsByTag(0);
         polymoprhContext.sprite->setPosition(spriteVector(GetPosInOwnerBase(pos)));
