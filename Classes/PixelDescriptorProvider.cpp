@@ -18,7 +18,7 @@ int mapHeight = 0;
   
 int nextId = 0;
 int kMaxNumberOfGroups = 64;
-int kInitialNumberOfGroups = 6;
+int kInitialNumberOfGroups = 32;
   
 IPixelDescriptorProvider::UpdateResult::UpdateResult(CellDescriptor* desc):
 desc(desc->parent), userData(desc->userData)
@@ -256,7 +256,7 @@ void GenerateShape(PixelDescriptor* pd, IShape::Ptr& outShape, ShapeType& outSha
 {
   std::shared_ptr<IShape> shape;
   
-  unsigned int numberOfShapes = 3;
+  unsigned int numberOfShapes = 2;
   unsigned int shapeIndex = cRandABInt(0, numberOfShapes);
 //  shapeIndex = 2;
   if (0 == shapeIndex)

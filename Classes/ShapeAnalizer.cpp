@@ -13,7 +13,7 @@ namespace komorki
 {
   namespace
   {
-    unsigned int kBufferScale = 3;
+    unsigned int kBufferScale = 4;
   }
   
   ShapeAnalizer::ShapeAnalizer(const Buffer2DPtr<bool>& buffer)
