@@ -54,8 +54,8 @@ namespace komorki
     
     bool operator==(const Rect& rect) const;
     bool operator!=(const Rect& rect) const;
-    inline PixelPos Top() const { return origin.y + size.y; }
-    inline PixelPos Right() const { return origin.x + size.x; }
+    inline PixelPos Top() const { return origin.y + size.y - 1; }
+    inline PixelPos Right() const { return origin.x + size.x - 1; }
     inline PixelPos Bottom() const { return origin.y; }
     inline void MoveBotton(const PixelPos& bottomOffset)
     {

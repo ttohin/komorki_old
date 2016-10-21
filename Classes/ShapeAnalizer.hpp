@@ -58,7 +58,7 @@ namespace komorki
     using ResultBuffer = Buffer2DPtr<Part>;
     using InternalBuffer = Buffer2DPtr<bool>;
     
-    ShapeAnalizer(const Buffer2DPtr<bool>& buffer);
+    ShapeAnalizer(const Buffer2DPtr<bool>& buffer, unsigned int scale);
     
   private:
     

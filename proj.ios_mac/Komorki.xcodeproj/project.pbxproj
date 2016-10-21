@@ -119,6 +119,10 @@
 		8FBF25141DB8D15400AE7991 /* blank.png in Resources */ = {isa = PBXBuildFile; fileRef = 8FBF25101DB8D0C400AE7991 /* blank.png */; };
 		8FBF251C1DB935E100AE7991 /* ShapeAnalizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBF251A1DB935E100AE7991 /* ShapeAnalizer.cpp */; };
 		8FBF251D1DB935E100AE7991 /* ShapeAnalizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBF251A1DB935E100AE7991 /* ShapeAnalizer.cpp */; };
+		8FBF25221DBA882000AE7991 /* GenomsGenerator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBF25201DBA882000AE7991 /* GenomsGenerator.cpp */; };
+		8FBF25231DBA882000AE7991 /* GenomsGenerator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBF25201DBA882000AE7991 /* GenomsGenerator.cpp */; };
+		8FBF25261DBA891E00AE7991 /* PixelMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBF25241DBA891E00AE7991 /* PixelMap.cpp */; };
+		8FBF25271DBA891E00AE7991 /* PixelMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBF25241DBA891E00AE7991 /* PixelMap.cpp */; };
 		8FDE8CC71B1BCFFB000EE52C /* PhysicalDescriptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FDE8CC51B1BCFFB000EE52C /* PhysicalDescriptor.cpp */; };
 		8FDE8CC81B1BCFFB000EE52C /* PhysicalDescriptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FDE8CC51B1BCFFB000EE52C /* PhysicalDescriptor.cpp */; };
 		8FDE8CCB1B232531000EE52C /* ShaderLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FDE8CC91B232531000EE52C /* ShaderLayer.cpp */; };
@@ -320,6 +324,10 @@
 		8FBF25101DB8D0C400AE7991 /* blank.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = blank.png; sourceTree = "<group>"; };
 		8FBF251A1DB935E100AE7991 /* ShapeAnalizer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ShapeAnalizer.cpp; sourceTree = "<group>"; };
 		8FBF251B1DB935E100AE7991 /* ShapeAnalizer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ShapeAnalizer.hpp; sourceTree = "<group>"; };
+		8FBF25201DBA882000AE7991 /* GenomsGenerator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GenomsGenerator.cpp; sourceTree = "<group>"; };
+		8FBF25211DBA882000AE7991 /* GenomsGenerator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GenomsGenerator.hpp; sourceTree = "<group>"; };
+		8FBF25241DBA891E00AE7991 /* PixelMap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PixelMap.cpp; sourceTree = "<group>"; };
+		8FBF25251DBA891E00AE7991 /* PixelMap.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PixelMap.hpp; sourceTree = "<group>"; };
 		8FDE8CC51B1BCFFB000EE52C /* PhysicalDescriptor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PhysicalDescriptor.cpp; sourceTree = "<group>"; };
 		8FDE8CC61B1BCFFB000EE52C /* PhysicalDescriptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhysicalDescriptor.h; sourceTree = "<group>"; };
 		8FDE8CC91B232531000EE52C /* ShaderLayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ShaderLayer.cpp; sourceTree = "<group>"; };
@@ -621,6 +629,10 @@
 				8FDE8CEF1B239560000EE52C /* Utilities.h */,
 				8FDE8CF71B2447BC000EE52C /* Map.cpp */,
 				8FDE8CF81B2447BC000EE52C /* Map.h */,
+				8FBF25201DBA882000AE7991 /* GenomsGenerator.cpp */,
+				8FBF25211DBA882000AE7991 /* GenomsGenerator.hpp */,
+				8FBF25241DBA891E00AE7991 /* PixelMap.cpp */,
+				8FBF25251DBA891E00AE7991 /* PixelMap.hpp */,
 			);
 			name = komorki;
 			sourceTree = "<group>";
@@ -875,6 +887,7 @@
 				8FBF25051DB8CFBE00AE7991 /* SharedUIData.cpp in Sources */,
 				8F48DE711AB676B50075D222 /* PixelDescriptorProvider.cpp in Sources */,
 				8FDE8CC71B1BCFFB000EE52C /* PhysicalDescriptor.cpp in Sources */,
+				8FBF25261DBA891E00AE7991 /* PixelMap.cpp in Sources */,
 				8F108B1F1AF8272100580096 /* CellShapes.cpp in Sources */,
 				8F906BC11ABE186500A8EF90 /* CellsLogic.cpp in Sources */,
 				8FDE8CF21B23AD8A000EE52C /* GlowMapOverlay.cpp in Sources */,
@@ -904,6 +917,7 @@
 				8FBF25071DB8CFBE00AE7991 /* TestSampleShapesScene.cpp in Sources */,
 				8FDE8CE71B237A29000EE52C /* UICommon.cpp in Sources */,
 				503AE10117EB989F00D1A890 /* main.m in Sources */,
+				8FBF25221DBA882000AE7991 /* GenomsGenerator.cpp in Sources */,
 				8FDE8CDC1B23742E000EE52C /* PixelMapPartial.cpp in Sources */,
 				8FDE8CD91B237033000EE52C /* PartialMap.cpp in Sources */,
 				8FDE8CCB1B232531000EE52C /* ShaderLayer.cpp in Sources */,
@@ -926,6 +940,7 @@
 				8F12C2331ADEFF5300C14BBE /* MainMenu.cpp in Sources */,
 				8FDE8CCC1B232531000EE52C /* ShaderLayer.cpp in Sources */,
 				8FDE8CFA1B2447BC000EE52C /* Map.cpp in Sources */,
+				8FBF25231DBA882000AE7991 /* GenomsGenerator.cpp in Sources */,
 				8F12C2491AE3FEC200C14BBE /* SaveConfigMenu.cpp in Sources */,
 				8FDE8CC81B1BCFFB000EE52C /* PhysicalDescriptor.cpp in Sources */,
 				8FFE7FE71B9F522D008D2289 /* TerrainBatchSprite.cpp in Sources */,
@@ -939,6 +954,7 @@
 				8FBF250D1DB8D06600AE7991 /* SharedUIData.cpp in Sources */,
 				8FB7C3E41BA495AE00194722 /* LoadingScene.cpp in Sources */,
 				8F12C23F1AE3ED5D00C14BBE /* LoadConfigMenu.cpp in Sources */,
+				8FBF25271DBA891E00AE7991 /* PixelMap.cpp in Sources */,
 				8FF2213E1B7BDBF700E911ED /* Common.cpp in Sources */,
 				8F8936E01ADDC03200F70A3C /* ConfigManager.cpp in Sources */,
 				8FF3386E1AEC3ABF00CF6F6B /* ListController.cpp in Sources */,

@@ -11,7 +11,95 @@
 #include "LoadingScene.h"
 #include "SharedUIData.h"
 #include "ShapeAnalizer.hpp"
+#include "GenomsGenerator.hpp"
 
+
+CellCanvasSprite* CreateSimpleCanvasWithSqareCells()
+{
+  auto originalBuffer = std::make_shared<Buffer2D<bool>>(1, 1);
+  originalBuffer->Fill(false);
+  
+  originalBuffer->Set(0, 0, true);
+  //  originalBuffer->Set(0, 1, true);
+  //  originalBuffer->Set(1, 1, true);
+  //  originalBuffer->Set(1, 2, true);
+  //  originalBuffer->Set(1, 3, true);
+  //  originalBuffer->Set(2, 4, true);
+  
+  unsigned int scale = 4;
+  
+  komorki::ShapeAnalizer analizer(originalBuffer, scale);
+  
+  //  m_info = CreateLabel("Loading", Vec2(visibleSize.width / 2, visibleSize.height / 2));
+  //  addChild(m_info, 999);
+  
+  auto cellCanvas = new CellCanvasSprite();
+  cellCanvas->init();
+  
+  for (int i = 0; i < 32; ++i) {
+    for (int j = 0; j < 32; ++j) {
+      cellCanvas->SetBuffer(analizer.m_result, komorki::Vec2(i * scale, j * scale));
+    }
+  }
+  
+  return cellCanvas;
+}
+
+CellCanvasSprite* CreateExperimentalCanvas()
+{
+  auto originalBuffer = std::make_shared<Buffer2D<bool>>(3, 5);
+  originalBuffer->Fill(false);
+  
+  originalBuffer->Set(0, 0, true);
+  originalBuffer->Set(0, 1, true);
+  originalBuffer->Set(1, 1, true);
+  originalBuffer->Set(1, 2, true);
+  originalBuffer->Set(1, 3, true);
+  originalBuffer->Set(2, 4, true);
+  
+  unsigned int scale = 4;
+  
+  komorki::ShapeAnalizer analizer(originalBuffer, scale);
+  
+  auto cellCanvas = new CellCanvasSprite();
+  cellCanvas->init();
+  
+  cellCanvas->SetBuffer(analizer.m_result, komorki::Vec2(0, 0));
+  cellCanvas->SetBuffer(analizer.m_result, komorki::Vec2(5 * scale, 0));
+  
+  return cellCanvas;
+}
+
+CellCanvasSprite* CreateCanvasWithGenomsGenerator()
+{
+  komorki::GenomsGenerator gen;
+  auto cellCanvas = new CellCanvasSprite();
+  cellCanvas->init();
+  
+  auto shapesList = gen.Generate();
+  
+  for (auto& shape : shapesList)
+  {
+    komorki::Rect aabb = shape->GetAABB();
+    auto originalBuffer = std::make_shared<Buffer2D<bool>>(aabb.size.x, aabb.size.y);
+    originalBuffer->Fill(false);
+    
+    shape->ForEach([&](komorki::PixelDescriptor* pd, bool& stop)
+                   {
+                     auto pos = pd->GetPos();
+                     pos = pos - aabb.origin;
+                     originalBuffer->Set(pos.x, pos.y, true);
+                   });
+    
+    unsigned int scale = 4;
+    komorki::ShapeAnalizer analizer(originalBuffer, scale);
+    
+    cellCanvas->SetBuffer(analizer.m_result, komorki::Vec2(0, 0));
+  }
+  
+  
+  return cellCanvas;
+}
 
 bool TestSampleShapesScene::init()
 {
@@ -30,30 +118,7 @@ bool TestSampleShapesScene::init()
   Size visibleSize = Director::getInstance()->getVisibleSize();
   Vec2 origin = Director::getInstance()->getVisibleOrigin();
   
-  auto originalBuffer = std::make_shared<Buffer2D<bool>>(1, 1);
-  originalBuffer->Fill(false);
-
-  originalBuffer->Set(0, 0, true);
-//  originalBuffer->Set(0, 1, true);
-//  originalBuffer->Set(1, 1, true);
-//  originalBuffer->Set(1, 2, true);
-//  originalBuffer->Set(1, 3, true);
-//  originalBuffer->Set(2, 4, true);
-  
-  komorki::ShapeAnalizer analizer(originalBuffer);
-  
-  
-//  m_info = CreateLabel("Loading", Vec2(visibleSize.width / 2, visibleSize.height / 2));
-//  addChild(m_info, 999);
-  
-  auto cellCanvas = new CellCanvasSprite();
-  cellCanvas->init();
-  
-  for (int i = 0; i < 32; ++i) {
-    for (int j = 0; j < 32; ++j) {
-      cellCanvas->SetBuffer(analizer.m_result, komorki::Vec2(i * 4, j * 4));
-    }
-  }
+  auto cellCanvas = CreateCanvasWithGenomsGenerator();
   
   addChild(cellCanvas);
   
@@ -74,7 +139,7 @@ bool TestSampleShapesScene::init()
                  {
 //                    m_info->setString("Loading viewport");
 
-                    schedule(schedule_selector(TestSampleShapesScene::CreateViewport), 0, 1, 0);
+//                    schedule(schedule_selector(TestSampleShapesScene::CreateViewport), 0, 1, 0);
                  });
   
 //  cellCanvas->setPosition(Vec2(visibleSize.width/3, visibleSize.height/3));

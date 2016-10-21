@@ -105,8 +105,8 @@ Config::Config()
 //  this->percentOfBlue = 0.2;
   
   this->terrainSize = 8;
-  this->mapWidth = 100;
-  this->mapHeight = 100;
+  this->mapWidth = 400;
+  this->mapHeight = 300;
   
   this->green.health = 501;
   this->green.sleepTime = 2;
@@ -459,7 +459,7 @@ Genom GenerateGenom(uint64_t groupId, PixelDescriptorProvider::PixelMap& map)
   g.m_sleepTime = cRandABInt(0, 10);
   g.m_lifeTime = cRandABInt(100, 1000);
   g.m_damage = cRandABInt(1, 50);
-  g.m_lightFood = cRandABInt(1, 50);
+  g.m_lightFood = cRandABInt(1, 15);
   g.m_passiveHealthIncome = cRandABInt(0, 10);
   g.m_healthPerAttach = cRandABInt(10, 100);
   GenerateShape(map[20][20].get(), g.m_shape, g.m_shapeType);
@@ -495,10 +495,10 @@ void PixelDescriptorProvider::PopulateCells()
         auto genom = groups[groupIndex];
         
         static int count = 1000;
-        if (count == 0)
-        {
-          continue;
-        }
+//        if (count == 0)
+//        {
+//          continue;
+//        }
         
         if (CreateRandomCell(pd, genom))
         {
@@ -548,7 +548,8 @@ void PixelDescriptorProvider::GenLights()
   auto buffer = gen1.GetBuffer(0,0, m_config->mapWidth, m_config->mapHeight);
   buffer->ForEach([&](const int& x, const int& y, const float& level)
                   {
-                    m_map[x][y]->m_physicalDesc.light = 0.5 + level * 0.5f;
+                    //m_map[x][y]->m_physicalDesc.light = 0.5 + level * 0.5f;
+                    m_map[x][y]->m_physicalDesc.light = level;
                   });
 }
   

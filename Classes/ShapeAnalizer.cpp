@@ -11,18 +11,13 @@
 
 namespace komorki
 {
-  namespace
-  {
-    unsigned int kBufferScale = 4;
-  }
-  
-  ShapeAnalizer::ShapeAnalizer(const Buffer2DPtr<bool>& buffer)
-  : m_result(new Buffer2D<Part>(buffer->GetWidth() * kBufferScale, buffer->GetHeight() * kBufferScale))
-  , m_buffer(new Buffer2D<bool>(buffer->GetWidth() * kBufferScale, buffer->GetHeight() * kBufferScale))
+  ShapeAnalizer::ShapeAnalizer(const Buffer2DPtr<bool>& buffer, unsigned int scale)
+  : m_result(new Buffer2D<Part>(buffer->GetWidth() * scale, buffer->GetHeight() * scale))
+  , m_buffer(new Buffer2D<bool>(buffer->GetWidth() * scale, buffer->GetHeight() * scale))
   {
     std::cout << buffer->Description();
     
-    buffer->Scale(kBufferScale, *m_buffer.get());
+    buffer->Scale(scale, *m_buffer.get());
     
     std::cout << m_buffer->Description();
     

@@ -421,7 +421,36 @@ unsigned int PolymorphShape::Size() const
 
 Rect PolymorphShape::GetAABB() const
 {
-  return {m_pd->GetPos(), {1, 1}};
+  Rect result;
+  for (auto& p : m_shape)
+  {
+    auto pos = p->GetPos();
+    if (result.origin == Vec2())
+    {
+      result.origin = pos;
+      result.size = {1, 1};
+      continue;
+    }
+    
+    if (result.Top() < pos.y)
+    {
+      result.size.y += pos.y - result.Top();
+    }
+    if (result.Bottom() > pos.y)
+    {
+      result.MoveBotton(pos.y - result.Bottom());
+    }
+    if (result.Right() < pos.x)
+    {
+      result.size.x += pos.x - result.Right();
+    }
+    if (result.Left() > pos.x)
+    {
+      result.MoveLeft(pos.x - result.Left());
+    }
+  }
+  
+  return result;
 }
 
 IShape::Ptr PolymorphShape::CopyWithBasePixel(PixelDescriptor* pd) const
