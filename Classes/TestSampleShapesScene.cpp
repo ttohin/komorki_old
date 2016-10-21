@@ -10,6 +10,7 @@
 #include "CellCanvasSprite.h"
 #include "LoadingScene.h"
 #include "SharedUIData.h"
+#include "ShapeAnalizer.hpp"
 
 
 bool TestSampleShapesScene::init()
@@ -29,11 +30,25 @@ bool TestSampleShapesScene::init()
   Size visibleSize = Director::getInstance()->getVisibleSize();
   Vec2 origin = Director::getInstance()->getVisibleOrigin();
   
-  m_info = CreateLabel("Loading", Vec2(visibleSize.width / 2, visibleSize.height / 2));
-  addChild(m_info, 999);
+  auto originalBuffer = std::make_shared<Buffer2D<bool>>(5, 5);
+  originalBuffer->Fill(false);
+
+  originalBuffer->Set(0, 0, true);
+  originalBuffer->Set(0, 1, true);
+  originalBuffer->Set(1, 1, true);
+  originalBuffer->Set(1, 2, true);
+  originalBuffer->Set(1, 3, true);
+  originalBuffer->Set(2, 4, true);
+  
+  komorki::ShapeAnalizer analizer(originalBuffer);
+  
+  
+//  m_info = CreateLabel("Loading", Vec2(visibleSize.width / 2, visibleSize.height / 2));
+//  addChild(m_info, 999);
   
   auto cellCanvas = new CellCanvasSprite();
   cellCanvas->init();
+  cellCanvas->SetBuffer(analizer.m_result);
   addChild(cellCanvas);
   
   auto renderer = _director->getRenderer();
@@ -51,12 +66,12 @@ bool TestSampleShapesScene::init()
   
   rt->saveToFile(mapName, true, [&](RenderTexture*, const std::string& image)
                  {
-                    m_info->setString("Loading viewport");
+//                    m_info->setString("Loading viewport");
 
-                    schedule(schedule_selector(TestSampleShapesScene::CreateViewport), 0, 1, 0);
+//                    schedule(schedule_selector(TestSampleShapesScene::CreateViewport), 0, 1, 0);
                  });
   
-//  cellCanvas->setPosition(Vec2(visibleSize.width/3, visibleSize.height/3));
+  cellCanvas->setPosition(Vec2(visibleSize.width/3, visibleSize.height/3));
   
   Director::getInstance()->getTextureCache()->addImage("tile_32x32.png");
   Director::getInstance()->getTextureCache()->addImage("ground.png");

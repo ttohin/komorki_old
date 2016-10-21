@@ -84,6 +84,53 @@ public:
     return true;
   }
   
+  inline void Scale(unsigned int scale, Buffer2D<T>& bufferOut) const
+  {
+    Buffer2D<T> result(width * scale, height * scale);
+    for (int i = 0; i < width; ++i)
+    {
+      for (int j = 0; j < height; ++j)
+      {
+        T value = GetInternal(i, j);
+        
+        for (int iScale = 0; iScale < scale; ++iScale)
+        {
+          for (int jScale = 0; jScale < scale; ++jScale)
+          {
+            bufferOut.Set(i * scale + iScale, j * scale + jScale, value);
+          }
+        }
+      }
+    }
+  }
+  
+  inline void Fill(const T& value)
+  {
+    for (int i = 0; i < width; ++i)
+    {
+      for (int j = 0; j < height; ++j)
+      {
+        SetInternal(i, j, value);
+      }
+    }
+  }
+  
+  inline std::string Description() const
+  {
+    std::stringstream ss;
+    ss << "[" << width << ", "<< height << "]" << std::endl;
+    for (int j = height - 1; j >= 0; --j)
+    {
+      for (int i = 0; i < width; ++i)
+      {
+        ss << GetInternal(i, j);
+      }
+      ss << std::endl;
+    }
+    
+    return ss.str();
+  }
+  
 private:
   
   inline bool IsInside(const S& x, const S& y) const
@@ -102,7 +149,7 @@ private:
     return true;
   }
   
-  inline const T& GetInternal(const S& x, const S& y) const
+  inline T GetInternal(const S& x, const S& y) const
   {
     return buff[x + y * width];
   }

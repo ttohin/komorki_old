@@ -117,6 +117,8 @@
 		8FBF250F1DB8D09600AE7991 /* CellCanvasSprite.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBF24E71DB8CFBE00AE7991 /* CellCanvasSprite.cpp */; };
 		8FBF25121DB8D0C400AE7991 /* blank.png in Resources */ = {isa = PBXBuildFile; fileRef = 8FBF25101DB8D0C400AE7991 /* blank.png */; };
 		8FBF25141DB8D15400AE7991 /* blank.png in Resources */ = {isa = PBXBuildFile; fileRef = 8FBF25101DB8D0C400AE7991 /* blank.png */; };
+		8FBF251C1DB935E100AE7991 /* ShapeAnalizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBF251A1DB935E100AE7991 /* ShapeAnalizer.cpp */; };
+		8FBF251D1DB935E100AE7991 /* ShapeAnalizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBF251A1DB935E100AE7991 /* ShapeAnalizer.cpp */; };
 		8FDE8CC71B1BCFFB000EE52C /* PhysicalDescriptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FDE8CC51B1BCFFB000EE52C /* PhysicalDescriptor.cpp */; };
 		8FDE8CC81B1BCFFB000EE52C /* PhysicalDescriptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FDE8CC51B1BCFFB000EE52C /* PhysicalDescriptor.cpp */; };
 		8FDE8CCB1B232531000EE52C /* ShaderLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FDE8CC91B232531000EE52C /* ShaderLayer.cpp */; };
@@ -316,6 +318,8 @@
 		8FBF24FC1DB8CFBE00AE7991 /* TestSampleShapesScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestSampleShapesScene.cpp; sourceTree = "<group>"; };
 		8FBF24FD1DB8CFBE00AE7991 /* TestSampleShapesScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestSampleShapesScene.h; sourceTree = "<group>"; };
 		8FBF25101DB8D0C400AE7991 /* blank.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = blank.png; sourceTree = "<group>"; };
+		8FBF251A1DB935E100AE7991 /* ShapeAnalizer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ShapeAnalizer.cpp; sourceTree = "<group>"; };
+		8FBF251B1DB935E100AE7991 /* ShapeAnalizer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ShapeAnalizer.hpp; sourceTree = "<group>"; };
 		8FDE8CC51B1BCFFB000EE52C /* PhysicalDescriptor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PhysicalDescriptor.cpp; sourceTree = "<group>"; };
 		8FDE8CC61B1BCFFB000EE52C /* PhysicalDescriptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhysicalDescriptor.h; sourceTree = "<group>"; };
 		8FDE8CC91B232531000EE52C /* ShaderLayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ShaderLayer.cpp; sourceTree = "<group>"; };
@@ -529,8 +533,6 @@
 				8FFE7FE11B9F522D008D2289 /* TerrainAnalizer.h */,
 				8FFE7FE21B9F522D008D2289 /* TerrainBatchSprite.cpp */,
 				8FFE7FE31B9F522D008D2289 /* TerrainBatchSprite.h */,
-				8FBF24E71DB8CFBE00AE7991 /* CellCanvasSprite.cpp */,
-				8FBF24E81DB8CFBE00AE7991 /* CellCanvasSprite.h */,
 				8FBF24F01DB8CFBE00AE7991 /* PixelMapContext.cpp */,
 				8FBF24F11DB8CFBE00AE7991 /* PixelMapContext.h */,
 				8FBF24F21DB8CFBE00AE7991 /* PixelMapManager.cpp */,
@@ -545,8 +547,6 @@
 				8FBF24ED1DB8CFBE00AE7991 /* ParallaxSprite.cpp */,
 				8FBF24EE1DB8CFBE00AE7991 /* ParallaxSprite.h */,
 				8FBF24F41DB8CFBE00AE7991 /* PixelMapPartial.hpp */,
-				8FBF24FC1DB8CFBE00AE7991 /* TestSampleShapesScene.cpp */,
-				8FBF24FD1DB8CFBE00AE7991 /* TestSampleShapesScene.h */,
 				8FDE8CC91B232531000EE52C /* ShaderLayer.cpp */,
 				8FDE8CCA1B232531000EE52C /* ShaderLayer.h */,
 				8F48DE601AB676B50075D222 /* main_statistic.cpp */,
@@ -570,6 +570,7 @@
 				8FDE8CE61B237A29000EE52C /* UICommon.h */,
 				8FB7C3E11BA495AE00194722 /* LoadingScene.cpp */,
 				8FB7C3E21BA495AE00194722 /* LoadingScene.h */,
+				8FBF251E1DBA237B00AE7991 /* ShapeGenerator */,
 			);
 			name = Classes;
 			path = ../Classes;
@@ -633,6 +634,19 @@
 				8FFE7FE91B9F524B008D2289 /* DiamondSquareGenerator.h */,
 			);
 			name = Random;
+			sourceTree = "<group>";
+		};
+		8FBF251E1DBA237B00AE7991 /* ShapeGenerator */ = {
+			isa = PBXGroup;
+			children = (
+				8FBF24E71DB8CFBE00AE7991 /* CellCanvasSprite.cpp */,
+				8FBF24E81DB8CFBE00AE7991 /* CellCanvasSprite.h */,
+				8FBF24FC1DB8CFBE00AE7991 /* TestSampleShapesScene.cpp */,
+				8FBF24FD1DB8CFBE00AE7991 /* TestSampleShapesScene.h */,
+				8FBF251A1DB935E100AE7991 /* ShapeAnalizer.cpp */,
+				8FBF251B1DB935E100AE7991 /* ShapeAnalizer.hpp */,
+			);
+			name = ShapeGenerator;
 			sourceTree = "<group>";
 		};
 		8FFE7FDD1B9F517D008D2289 /* PartialMap */ = {
@@ -873,6 +887,7 @@
 				8F48DE6F1AB676B50075D222 /* PartialMapScene.cpp in Sources */,
 				8F12C2481AE3FEC200C14BBE /* SaveConfigMenu.cpp in Sources */,
 				8FBF25041DB8CFBE00AE7991 /* PixelProviderConfig.cpp in Sources */,
+				8FBF251C1DB935E100AE7991 /* ShapeAnalizer.cpp in Sources */,
 				8FB7C3ED1BA4A69500194722 /* AsyncMapLoader.cpp in Sources */,
 				8FDE8CF91B2447BC000EE52C /* Map.cpp in Sources */,
 				46880B8819C43A87006E1F66 /* AppDelegate.cpp in Sources */,
@@ -931,6 +946,7 @@
 				8FBF250C1DB8D05F00AE7991 /* TestSampleShapesScene.cpp in Sources */,
 				8FBF250E1DB8D07600AE7991 /* CellShapesHelper.cpp in Sources */,
 				8F48DE701AB676B50075D222 /* PartialMapScene.cpp in Sources */,
+				8FBF251D1DB935E100AE7991 /* ShapeAnalizer.cpp in Sources */,
 				8FDE8CD61B236D46000EE52C /* Window.cpp in Sources */,
 				8FDE8CE01B2376D6000EE52C /* PixelMapBackground.cpp in Sources */,
 				8FFE7FEB1B9F524B008D2289 /* DiamondSquareGenerator.cpp in Sources */,
