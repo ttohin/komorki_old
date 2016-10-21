@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <sstream> //for std::stringstream
 #include <string>  //for std::string
+#include "SharedUIData.h"
 
 
 #ifdef DEBUG_PARTIAL_MAP
@@ -449,7 +450,8 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
     PixelMap::ObjectContext* context = nullptr;
     if (dest->m_cellDescriptor->GetShapeType() == eShapeTypeAmorph)
     {
-      auto textureRect = m_cellMap->OffsetForType(dest);
+      auto groupId = dest->m_cellDescriptor->m_genom.m_groupId;
+      auto textureRect = komorki::ui::SharedUIData::getInstance()->m_textureMap[groupId];
       auto c = new PixelMap::AmorphCellContext(this, textureRect);
       
       dest->m_cellDescriptor->Shape([&](PixelDescriptor* pd, bool& stop)
@@ -461,9 +463,11 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
       context = c;
     }
     else if (dest->m_cellDescriptor->GetShapeType() == eShapeTypeRect
-        || dest->m_cellDescriptor->GetShapeType() == eShapeTypeSinglePixel)
+             || dest->m_cellDescriptor->GetShapeType() == eShapeTypeSinglePixel
+             || dest->m_cellDescriptor->GetShapeType() == eShapeTypeFixed)
     {
-      auto textureRect = m_cellMap->OffsetForType(dest);
+      auto groupId = dest->m_cellDescriptor->m_genom.m_groupId;
+      auto textureRect = komorki::ui::SharedUIData::getInstance()->m_textureMap[groupId];
       auto c = new PixelMap::SingleCellContext(this,
                                                textureRect,
                                                dest->m_cellDescriptor->parent->GetPos(),

@@ -300,7 +300,7 @@ void CellCanvasSprite::AddSimpleSprites(int _x, int _y, const komorki::ShapeAnal
     if(cBoolRandPercent(0.1))
     {
       auto a = Sprite::create("blank.png");
-      a->setScale(kSpriteSize * cRandAB(0.2, 0.8));
+      a->setScale(kSpriteSize * cRandAB(0.4, 1.0));
 
       cocos2d::Vec2 offset;
       a->setColor(m_borderColor);

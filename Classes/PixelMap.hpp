@@ -9,14 +9,20 @@
 #ifndef PixelMap_hpp
 #define PixelMap_hpp
 
+#include <memory>
 #include "Common.h"
+
 
 namespace komorki
 {
   class PixelMap
   {
   public:
+    
+    typedef std::shared_ptr<PixelMap> Ptr;
+    
     PixelMap(const Vec2& size);
+    virtual ~PixelMap() {}
     virtual PixelDescriptor* GetDescriptor(PixelPos x, PixelPos y) const;
     virtual Vec2 GetSize() const;
     

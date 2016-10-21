@@ -824,13 +824,6 @@ bool FixShapeStepTo(CellDescriptor* cd,
   PixelDescriptor::Vec newShapePixels;
   cd->Shape([&](PixelDescriptor* pd, bool& stop){
     newShapePixels.push_back(pd->Offset(offset));
-    
-    Morph m;
-    m.dir = Morph::Move;
-    m.pos = pd->GetPos();
-    m.delta = offset;
-    morph.value.vec.push_back(m);
-    morph.SetValueFlag(true);
   });
   
   PolymorphShape* shape = static_cast<PolymorphShape*>(cd->GetShape());

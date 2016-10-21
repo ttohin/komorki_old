@@ -21,10 +21,12 @@ enum ShapeType
   
 struct Genom
 {
-  uint64_t m_groupId = 0;
-  uint64_t m_dangerGroupId = 0;
-  uint64_t m_foodGroupId = 0;
-  uint64_t m_friendGroupId = 0;
+  typedef uint64_t GroupIdType;
+  
+  GroupIdType m_groupId = 0;
+  GroupIdType m_dangerGroupId = 0;
+  GroupIdType m_foodGroupId = 0;
+  GroupIdType m_friendGroupId = 0;
   ShapeType m_shapeType;
   int m_health;
   int m_armor;

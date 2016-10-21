@@ -7,7 +7,7 @@
 //
 
 #ifndef ShapeAnalizer_hpp
-#define ShapeAnalizer_hpp
+#define ShapeAnalizer_hpp
 
 #include "Buffer2D.h"
 

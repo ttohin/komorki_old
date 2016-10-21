@@ -32,7 +32,7 @@ public:
   typedef std::vector<std::vector<PixelPtr> > PixelMap;
   
   void Init();
-  virtual void InitWithConfig(Config* config) override;
+  virtual void InitWithConfig(Config* config, const GenomsGenerator::GenomsList& genoms) override;
   
   virtual void GenTerrain();
   virtual void GenLights();
@@ -51,8 +51,6 @@ public:
   void SetCreatureType(const Vec2& pos, CellType type);
   PixelPtr CreateCell(CellType type,  const komorki::Vec2& pos);
   
-  std::map<int, int> m_population;
-  
 protected:
   Config* m_config;
   int CountTypeAroundPosition(komorki::Vec2 pos, int character);
@@ -61,6 +59,7 @@ protected:
   TerrainAnalizer::Result m_terrain;
   std::vector<std::vector<PixelDescriptor::Type> > m_typeMap;
   GroupMap m_groups;
+  GenomsGenerator::GenomsList m_genoms;
 };
   
 }

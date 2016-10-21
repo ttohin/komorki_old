@@ -59,6 +59,8 @@
 		8F12C23F1AE3ED5D00C14BBE /* LoadConfigMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F12C23C1AE3ED5D00C14BBE /* LoadConfigMenu.cpp */; };
 		8F12C2481AE3FEC200C14BBE /* SaveConfigMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F12C2461AE3FEC200C14BBE /* SaveConfigMenu.cpp */; };
 		8F12C2491AE3FEC200C14BBE /* SaveConfigMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F12C2461AE3FEC200C14BBE /* SaveConfigMenu.cpp */; };
+		8F1B88C11DBAAD9F006F2CAE /* ShapesGenerator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F1B88BF1DBAAD9F006F2CAE /* ShapesGenerator.cpp */; };
+		8F1B88C21DBAAD9F006F2CAE /* ShapesGenerator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F1B88BF1DBAAD9F006F2CAE /* ShapesGenerator.cpp */; };
 		8F48DE6F1AB676B50075D222 /* PartialMapScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F48DE611AB676B50075D222 /* PartialMapScene.cpp */; };
 		8F48DE701AB676B50075D222 /* PartialMapScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F48DE611AB676B50075D222 /* PartialMapScene.cpp */; };
 		8F48DE711AB676B50075D222 /* PixelDescriptorProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F48DE641AB676B50075D222 /* PixelDescriptorProvider.cpp */; };
@@ -105,7 +107,6 @@
 		8FBF24FF1DB8CFBE00AE7991 /* CellShapesHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBF24E91DB8CFBE00AE7991 /* CellShapesHelper.cpp */; };
 		8FBF25001DB8CFBE00AE7991 /* ParallaxSprite.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBF24ED1DB8CFBE00AE7991 /* ParallaxSprite.cpp */; };
 		8FBF25021DB8CFBE00AE7991 /* PixelMapContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBF24F01DB8CFBE00AE7991 /* PixelMapContext.cpp */; };
-		8FBF25031DB8CFBE00AE7991 /* PixelMapManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBF24F21DB8CFBE00AE7991 /* PixelMapManager.cpp */; };
 		8FBF25041DB8CFBE00AE7991 /* PixelProviderConfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBF24F51DB8CFBE00AE7991 /* PixelProviderConfig.cpp */; };
 		8FBF25051DB8CFBE00AE7991 /* SharedUIData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBF24F71DB8CFBE00AE7991 /* SharedUIData.cpp */; };
 		8FBF25071DB8CFBE00AE7991 /* TestSampleShapesScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBF24FC1DB8CFBE00AE7991 /* TestSampleShapesScene.cpp */; };
@@ -259,6 +260,8 @@
 		8F12C2461AE3FEC200C14BBE /* SaveConfigMenu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SaveConfigMenu.cpp; sourceTree = "<group>"; };
 		8F12C2471AE3FEC200C14BBE /* SaveConfigMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SaveConfigMenu.h; sourceTree = "<group>"; };
 		8F12C2561AE444E600C14BBE /* IFullScreenMenu.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IFullScreenMenu.h; sourceTree = "<group>"; };
+		8F1B88BF1DBAAD9F006F2CAE /* ShapesGenerator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ShapesGenerator.cpp; sourceTree = "<group>"; };
+		8F1B88C01DBAAD9F006F2CAE /* ShapesGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShapesGenerator.h; sourceTree = "<group>"; };
 		8F48DE5D1AB676B50075D222 /* b2Utilites.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = b2Utilites.h; sourceTree = "<group>"; };
 		8F48DE5E1AB676B50075D222 /* PixelDescriptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PixelDescriptor.h; sourceTree = "<group>"; };
 		8F48DE5F1AB676B50075D222 /* IPixelDescriptorProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPixelDescriptorProvider.h; sourceTree = "<group>"; };
@@ -309,8 +312,6 @@
 		8FBF24EE1DB8CFBE00AE7991 /* ParallaxSprite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParallaxSprite.h; sourceTree = "<group>"; };
 		8FBF24F01DB8CFBE00AE7991 /* PixelMapContext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PixelMapContext.cpp; sourceTree = "<group>"; };
 		8FBF24F11DB8CFBE00AE7991 /* PixelMapContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PixelMapContext.h; sourceTree = "<group>"; };
-		8FBF24F21DB8CFBE00AE7991 /* PixelMapManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PixelMapManager.cpp; sourceTree = "<group>"; };
-		8FBF24F31DB8CFBE00AE7991 /* PixelMapManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PixelMapManager.h; sourceTree = "<group>"; };
 		8FBF24F41DB8CFBE00AE7991 /* PixelMapPartial.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PixelMapPartial.hpp; sourceTree = "<group>"; };
 		8FBF24F51DB8CFBE00AE7991 /* PixelProviderConfig.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PixelProviderConfig.cpp; sourceTree = "<group>"; };
 		8FBF24F61DB8CFBE00AE7991 /* PixelProviderConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PixelProviderConfig.h; sourceTree = "<group>"; };
@@ -536,13 +537,12 @@
 				8F108B1C1AF826B100580096 /* komorki */,
 				8FFE7FDD1B9F517D008D2289 /* PartialMap */,
 				8FFE7FDE1B9F5192008D2289 /* UI */,
+				8FBF251E1DBA237B00AE7991 /* ShapeGenerator */,
 				8FFE7FDF1B9F522C008D2289 /* Buffer2D.h */,
 				8FFE7FE01B9F522C008D2289 /* TerrainAnalizer.cpp */,
 				8FFE7FE11B9F522D008D2289 /* TerrainAnalizer.h */,
 				8FFE7FE21B9F522D008D2289 /* TerrainBatchSprite.cpp */,
 				8FFE7FE31B9F522D008D2289 /* TerrainBatchSprite.h */,
-				8FBF24F21DB8CFBE00AE7991 /* PixelMapManager.cpp */,
-				8FBF24F31DB8CFBE00AE7991 /* PixelMapManager.h */,
 				8FBF24F51DB8CFBE00AE7991 /* PixelProviderConfig.cpp */,
 				8FBF24F61DB8CFBE00AE7991 /* PixelProviderConfig.h */,
 				8FBF24FA1DB8CFBE00AE7991 /* TestPixelProvider.cpp */,
@@ -576,7 +576,6 @@
 				8FDE8CE61B237A29000EE52C /* UICommon.h */,
 				8FB7C3E11BA495AE00194722 /* LoadingScene.cpp */,
 				8FB7C3E21BA495AE00194722 /* LoadingScene.h */,
-				8FBF251E1DBA237B00AE7991 /* ShapeGenerator */,
 			);
 			name = Classes;
 			path = ../Classes;
@@ -631,6 +630,8 @@
 				8FDE8CF81B2447BC000EE52C /* Map.h */,
 				8FBF25201DBA882000AE7991 /* GenomsGenerator.cpp */,
 				8FBF25211DBA882000AE7991 /* GenomsGenerator.hpp */,
+				8F1B88BF1DBAAD9F006F2CAE /* ShapesGenerator.cpp */,
+				8F1B88C01DBAAD9F006F2CAE /* ShapesGenerator.h */,
 				8FBF25241DBA891E00AE7991 /* PixelMap.cpp */,
 				8FBF25251DBA891E00AE7991 /* PixelMap.hpp */,
 			);
@@ -891,7 +892,6 @@
 				8F108B1F1AF8272100580096 /* CellShapes.cpp in Sources */,
 				8F906BC11ABE186500A8EF90 /* CellsLogic.cpp in Sources */,
 				8FDE8CF21B23AD8A000EE52C /* GlowMapOverlay.cpp in Sources */,
-				8FBF25031DB8CFBE00AE7991 /* PixelMapManager.cpp in Sources */,
 				8FDE8CED1B237DF0000EE52C /* PixelMapLightOverlay.cpp in Sources */,
 				8FBF24FF1DB8CFBE00AE7991 /* CellShapesHelper.cpp in Sources */,
 				8F108B1A1AF8241900580096 /* CellDescriptor.cpp in Sources */,
@@ -922,6 +922,7 @@
 				8FDE8CD91B237033000EE52C /* PartialMap.cpp in Sources */,
 				8FDE8CCB1B232531000EE52C /* ShaderLayer.cpp in Sources */,
 				8F12C2321ADEFF5300C14BBE /* MainMenu.cpp in Sources */,
+				8F1B88C11DBAAD9F006F2CAE /* ShapesGenerator.cpp in Sources */,
 				8F8936DF1ADDC03200F70A3C /* ConfigManager.cpp in Sources */,
 				8FFE7FEA1B9F524B008D2289 /* DiamondSquareGenerator.cpp in Sources */,
 				8FDE8CFD1B2462F4000EE52C /* Viewport.cpp in Sources */,
@@ -954,6 +955,7 @@
 				8FBF250D1DB8D06600AE7991 /* SharedUIData.cpp in Sources */,
 				8FB7C3E41BA495AE00194722 /* LoadingScene.cpp in Sources */,
 				8F12C23F1AE3ED5D00C14BBE /* LoadConfigMenu.cpp in Sources */,
+				8F1B88C21DBAAD9F006F2CAE /* ShapesGenerator.cpp in Sources */,
 				8FBF25271DBA891E00AE7991 /* PixelMap.cpp in Sources */,
 				8FF2213E1B7BDBF700E911ED /* Common.cpp in Sources */,
 				8F8936E01ADDC03200F70A3C /* ConfigManager.cpp in Sources */,

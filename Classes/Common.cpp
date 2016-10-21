@@ -16,7 +16,7 @@ using namespace komorki;
 
 bool Vec2::In(const komorki::Rect &rect) const
 {
-  return !(x < rect.Left() || x >= rect.Right()) && !(y < rect.Bottom() || y >= rect.Top());
+  return !(x < rect.Left() || x > rect.Right()) && !(y < rect.Bottom() || y > rect.Top());
 }
 
 Vec2 Vec2::Normalize() const

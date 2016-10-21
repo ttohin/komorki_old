@@ -7,7 +7,7 @@
 //
 
 #include "ShapeAnalizer.hpp"
-#include <iostream>
+
 
 namespace komorki
 {
@@ -15,11 +15,8 @@ namespace komorki
   : m_result(new Buffer2D<Part>(buffer->GetWidth() * scale, buffer->GetHeight() * scale))
   , m_buffer(new Buffer2D<bool>(buffer->GetWidth() * scale, buffer->GetHeight() * scale))
   {
-    std::cout << buffer->Description();
     
     buffer->Scale(scale, *m_buffer.get());
-    
-    std::cout << m_buffer->Description();
     
     m_buffer->ForEach([&](int x, int y, const bool& value){
       

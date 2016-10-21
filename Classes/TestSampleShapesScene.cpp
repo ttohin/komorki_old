@@ -11,7 +11,8 @@
 #include "LoadingScene.h"
 #include "SharedUIData.h"
 #include "ShapeAnalizer.hpp"
-#include "GenomsGenerator.hpp"
+#include "ShapesGenerator.h"
+#include <iostream>
 
 
 CellCanvasSprite* CreateSimpleCanvasWithSqareCells()
@@ -72,15 +73,33 @@ CellCanvasSprite* CreateExperimentalCanvas()
 
 CellCanvasSprite* CreateCanvasWithGenomsGenerator()
 {
-  komorki::GenomsGenerator gen;
+  komorki::ShapesGenerator gen;
   auto cellCanvas = new CellCanvasSprite();
   cellCanvas->init();
   
-  auto shapesList = gen.Generate();
+  komorki::Vec2 maxTextureSize(16, 16);
+
   
-  for (auto& shape : shapesList)
+  komorki::Vec2 currentPos;
+  komorki::PixelPos line = 0;
+  
+  while (1)
   {
+    auto result = gen.GenerateNext();
+    auto shape = result.shape;
     komorki::Rect aabb = shape->GetAABB();
+    if (currentPos.x + aabb.size.x >= maxTextureSize.x)
+    {
+      currentPos.x = 0;
+      currentPos.y = line;
+    }
+    if (currentPos.y + aabb.size.y >= maxTextureSize.y)
+    {
+      break;
+    }
+    
+    line = std::max(line, currentPos.y + aabb.size.y);
+    
     auto originalBuffer = std::make_shared<Buffer2D<bool>>(aabb.size.x, aabb.size.y);
     originalBuffer->Fill(false);
     
@@ -94,7 +113,26 @@ CellCanvasSprite* CreateCanvasWithGenomsGenerator()
     unsigned int scale = 4;
     komorki::ShapeAnalizer analizer(originalBuffer, scale);
     
-    cellCanvas->SetBuffer(analizer.m_result, komorki::Vec2(0, 0));
+    cellCanvas->SetBuffer(analizer.m_result, komorki::Vec2(currentPos.x * scale, currentPos.y * scale));
+    
+    cocos2d::Rect textureRect((currentPos.x) * scale * CellCanvasSprite::kSpriteSize,
+                              (maxTextureSize.y - currentPos.y - aabb.size.y) * scale * CellCanvasSprite::kSpriteSize,
+                              aabb.size.x * scale * CellCanvasSprite::kSpriteSize,
+                              aabb.size.y * scale * CellCanvasSprite::kSpriteSize);
+    
+    currentPos.x += aabb.size.x;
+   
+    komorki::Genom::GroupIdType groupId;
+    if (komorki::ui::SharedUIData::getInstance()->m_genomsGenerator->AddShape(result, groupId))
+    {
+      komorki::ui::SharedUIData::getInstance()->m_textureMap[groupId] = textureRect;
+    }
+    
+    std::cout << "group " << groupId << " textureRext " <<
+    textureRect.origin.x << ", " << textureRect.origin.y << " " <<
+    textureRect.size.width << ", " << textureRect.size.height <<
+    std::endl << originalBuffer->Description() << std::endl;
+    
   }
   
   
@@ -139,7 +177,7 @@ bool TestSampleShapesScene::init()
                  {
 //                    m_info->setString("Loading viewport");
 
-//                    schedule(schedule_selector(TestSampleShapesScene::CreateViewport), 0, 1, 0);
+                    schedule(schedule_selector(TestSampleShapesScene::CreateViewport), 0, 1, 0);
                  });
   
 //  cellCanvas->setPosition(Vec2(visibleSize.width/3, visibleSize.height/3));

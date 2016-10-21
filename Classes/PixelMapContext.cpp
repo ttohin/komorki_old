@@ -87,7 +87,7 @@ namespace PixelMap
     
     auto s = m_owner->m_cellMap->CreateSprite();
     s->setTextureRect(textureRect);
-    s->setScale(kSpriteScale * m_size.x, kSpriteScale * m_size.y);
+    s->setScale(kSpriteScale);
     s->setAnchorPoint({0, 0});
     
     s->setPosition(spriteVector(m_pos + m_posOffset, m_offset));
@@ -124,6 +124,10 @@ namespace PixelMap
   {
     m_pos = GetPosInOwnerBase(cd->parent->GetPos());
     m_posOffset = newRect.origin - cd->parent->GetPos();
+    
+    cocos2d::Vec2 scaleRatio((float)newRect.size.x / (float)m_size.x,
+                             (float)newRect.size.y / (float)m_size.y);
+    
     m_size = newRect.size;
     
     m_sprite->stopAllActionsByTag(0);
@@ -131,7 +135,7 @@ namespace PixelMap
     if (m_owner->m_cellMap->m_enableAnimations)
     {
       auto moveTo = cocos2d::MoveTo::create(animationDuration, spriteVector(m_pos + m_posOffset, m_offset));
-      auto scaleAction = cocos2d::ScaleTo::create(animationDuration, kSpriteScale * m_size.x, kSpriteScale * m_size.y);
+      auto scaleAction = cocos2d::ScaleTo::create(animationDuration, kSpriteScale * scaleRatio.x, kSpriteScale * scaleRatio.y);
       auto playSmallAnimation = cocos2d::CallFunc::create([this]()
                                                           {
                                                           });
@@ -143,7 +147,7 @@ namespace PixelMap
     }
     else
     {
-      m_sprite->setScale(kSpriteScale * m_size.x, kSpriteScale * m_size.y);
+      m_sprite->setScale(kSpriteScale * scaleRatio.x, kSpriteScale * scaleRatio.y);
     }
   }
 
@@ -178,16 +182,16 @@ namespace PixelMap
       return;
     }
     
-    bool scaleDirection = rand()%2;
-    auto s1 = cocos2d::ScaleTo::create(2, kSpriteScale * m_size.x * 0.8, kSpriteScale * m_size.y * 0.8);
-    auto s2 = cocos2d::ScaleTo::create(2, kSpriteScale * m_size.x * 1.1, kSpriteScale * m_size.y * 1.1);
-    cocos2d::ActionInterval* loop = nullptr;
-    if (scaleDirection)
-      loop = cocos2d::RepeatForever::create(cocos2d::Sequence::create(s1, s2, NULL));
-    else
-      loop = cocos2d::RepeatForever::create(cocos2d::Sequence::create(s2, s1, NULL));;
-    loop->setTag(SMALL_ANIMATION_TAG);
-    m_sprite->runAction(loop);
+//    bool scaleDirection = rand()%2;
+//    auto s1 = cocos2d::ScaleTo::create(2, kSpriteScale * m_size.x * 0.8, kSpriteScale * m_size.y * 0.8);
+//    auto s2 = cocos2d::ScaleTo::create(2, kSpriteScale * m_size.x * 1.1, kSpriteScale * m_size.y * 1.1);
+//    cocos2d::ActionInterval* loop = nullptr;
+//    if (scaleDirection)
+//      loop = cocos2d::RepeatForever::create(cocos2d::Sequence::create(s1, s2, NULL));
+//    else
+//      loop = cocos2d::RepeatForever::create(cocos2d::Sequence::create(s2, s1, NULL));;
+//    loop->setTag(SMALL_ANIMATION_TAG);
+//    m_sprite->runAction(loop);
   }
   
   AmorphCellContext::PolymorphShapeContext AmorphCellContext::GetSprite(int x, int y)

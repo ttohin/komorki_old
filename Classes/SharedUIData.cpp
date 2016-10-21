@@ -24,5 +24,12 @@ namespace ui
     
     return s_SharedDirector;
   }
+  
+  
+  SharedUIData::SharedUIData()
+  : m_genomsGenerator(new GenomsGenerator())
+  {
+  }
+  
 }
 }

@@ -9,6 +9,7 @@
 #include "AsyncMapLoader.h"
 #include "ConfigManager.h"
 #include "TestPixelProvider.h"
+#include "SharedUIData.h"
 
 USING_NS_CC;
 
@@ -38,7 +39,8 @@ void AsyncMapLoader::WorkerThread()
 #else
   komorki::ConfigManager::GetInstance()->CreateNewConfig();
   m_provider = std::make_shared<komorki::PixelDescriptorProvider>();
-  m_provider->InitWithConfig(komorki::ConfigManager::GetInstance()->GetCurrentConfig().get());
+  m_provider->InitWithConfig(komorki::ConfigManager::GetInstance()->GetCurrentConfig().get(),
+                             komorki::ui::SharedUIData::getInstance()->m_genomsGenerator->m_genomsList);
 #endif
   
   SetCurrentJobString("Runnig few generations");

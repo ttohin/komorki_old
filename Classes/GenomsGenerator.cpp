@@ -11,68 +11,67 @@
 
 namespace komorki
 {
-  void GenomsGenerator::GenerateShape(PixelDescriptor* pd, IShape::Ptr& outShape, ShapeType& outShapeType)
+  namespace
   {
-    std::shared_ptr<IShape> shape;
-    
-    unsigned int numberOfShapes = 2;
-    unsigned int shapeIndex = cRandABInt(0, numberOfShapes);
-    shapeIndex = 3;
-    if (0 == shapeIndex)
-    {
-      shape = std::make_shared<SinglePixel>(pd);
-      outShapeType = ShapeType::eShapeTypeSinglePixel;
-    }
-    else if (1 == shapeIndex)
-    {
-      unsigned int w = cRandABInt(2, 4);
-      unsigned int h = cRandABInt(2, 4);
-      shape = std::make_shared<RectShape>(pd, Vec2(0, 0), Vec2(w, h));
-      outShapeType = ShapeType::eShapeTypeRect;
-    }
-    else if (2 == shapeIndex)
-    {
-      unsigned int numberOfPixels = cRandABInt(10, 12);
-      shape = std::make_shared<PolymorphShape>(pd, numberOfPixels);
-      outShapeType = ShapeType::eShapeTypeAmorph;
-    }
-    else if (3 == shapeIndex)
-    {
-      PixelDescriptor::Vec pixels;
-      pixels.push_back(pd->Offset(cRandAorB(-1, 1), 0));
-      pixels.push_back(pd->Offset(0, cRandAorB(-1, 1)));
-      pixels.push_back(pd);
-      shape = std::make_shared<PolymorphShape>(pd, pixels);
-      outShapeType = ShapeType::eShapeTypeFixed;
-    }
-    else if (4 == shapeIndex)
-    {
-      unsigned int numberOfPixels = cRandABInt(2, 4);
-      shape = std::make_shared<PolymorphShape>(pd, numberOfPixels);
-      outShapeType = ShapeType::eShapeTypePolymorph;
-    }
-    else
-    {
-      assert(false);
-    }
-    
-    outShape = shape;
+    int kMaxNumberOfGroups = 64;
   }
   
-  GenomsGenerator::GenomsGenerator()
-  : m_internalMap({100, 100})
+  Genom GenomsGenerator::GenerateGenom(Genom::GroupIdType groupId, const ShapesGenerator::ResultItem &shape) const
   {
+    Genom g;
+    g.m_groupId = groupId;
+    
+    for (int j = 0; j < kMaxNumberOfGroups; j++)
+    {
+      if (g.m_groupId == (1 << j)) {
+        continue;
+      }
+      g.m_foodGroupId |= cRandAorB(0, 1) ? 1 << j : 0;
+    }
+    
+    for (int j = 0; j < kMaxNumberOfGroups; j++)
+    {
+      if (g.m_groupId == (1 << j)) {
+        continue;
+      }
+      g.m_dangerGroupId = cRandAorB(0, 1, 0.9) ? 1 << j : 0;
+    }
+    
+    for (int j = 0; j < kMaxNumberOfGroups; j++)
+    {
+      if (g.m_groupId == (1 << j)) {
+        continue;
+      }
+      g.m_friendGroupId |= cRandAorB(0, 1) ? 1 << j : 0;
+    }
+    
+    g.m_health = cRandABInt(100, 1000);
+    g.m_armor = cRandABInt(1, 100);
+    g.m_sleepTime = cRandABInt(0, 10);
+    g.m_lifeTime = cRandABInt(100, 1000);
+    g.m_damage = cRandABInt(1, 50);
+    g.m_lightFood = cRandABInt(1, 15);
+    g.m_passiveHealthIncome = cRandABInt(0, 10);
+    g.m_healthPerAttach = cRandABInt(10, 100);
+    g.m_shape = shape.shape;
+    g.m_shapeType = shape.type;
+    
+    return g;
   }
   
-  GenomsGenerator::ShapesList GenomsGenerator::Generate()
+  bool GenomsGenerator::AddShape(const ShapesGenerator::ResultItem &shape, Genom::GroupIdType& outGroupId)
   {
-    ShapesList result;
-    IShape::Ptr shape;
-    ShapeType shapeType;
-    GenerateShape(m_internalMap.GetDescriptor(5, 5), shape, shapeType);
+    if (m_genomsList.size() == kMaxNumberOfGroups)
+    {
+      return false;
+    }
     
-    result.push_back(shape);
+    outGroupId = (Genom::GroupIdType)1 << m_genomsList.size();
+    auto genom = GenerateGenom(outGroupId, shape);
+    m_genomsList.push_back(genom);
     
-    return result;
+    m_internalMap = shape.map;
+    
+    return true;
   }
 }

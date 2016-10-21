@@ -10,8 +10,8 @@
 #define GenomsGenerator_hpp
 
 #include <list>
-#include "PixelMap.hpp"
-#include "CellShapes.h"
+#include <memory>
+#include "ShapesGenerator.h"
 #include "CellDescriptor.h"
 
 namespace komorki
@@ -20,13 +20,14 @@ namespace komorki
   {
   public:
     
-    typedef std::list<IShape::Ptr> ShapesList;
+    typedef std::shared_ptr<GenomsGenerator> Ptr;
+    typedef std::list<Genom> GenomsList;
     
-    GenomsGenerator();
-    ShapesList Generate();
-  private:
-    void GenerateShape(PixelDescriptor* pd, IShape::Ptr& outShape, ShapeType& outShapeType);
-    PixelMap m_internalMap;
+    Genom GenerateGenom(Genom::GroupIdType groupId, const ShapesGenerator::ResultItem &shape) const;
+    bool AddShape(const ShapesGenerator::ResultItem& shape, Genom::GroupIdType& outGroupId);
+    
+    GenomsList m_genomsList;
+    PixelMap::Ptr m_internalMap;
   };
 }
 

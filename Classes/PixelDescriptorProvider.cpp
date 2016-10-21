@@ -105,8 +105,8 @@ Config::Config()
 //  this->percentOfBlue = 0.2;
   
   this->terrainSize = 8;
-  this->mapWidth = 400;
-  this->mapHeight = 300;
+  this->mapWidth = 300;
+  this->mapHeight = 200;
   
   this->green.health = 501;
   this->green.sleepTime = 2;
@@ -227,9 +227,10 @@ Config::Config()
     
   }
 
-void PixelDescriptorProvider::InitWithConfig(Config* config)
+void PixelDescriptorProvider::InitWithConfig(Config* config, const GenomsGenerator::GenomsList& genoms)
 {
   m_config = config;
+  m_genoms = genoms;
   
   if (m_config->terrainSize <= 0 || m_config->terrainSize >= m_config->mapHeight || m_config->terrainSize >= m_config->mapWidth)
     m_config->terrainSize = 1;
@@ -258,7 +259,7 @@ void GenerateShape(PixelDescriptor* pd, IShape::Ptr& outShape, ShapeType& outSha
   
   unsigned int numberOfShapes = 2;
   unsigned int shapeIndex = cRandABInt(0, numberOfShapes);
-//  shapeIndex = 2;
+  shapeIndex = 3;
   if (0 == shapeIndex)
   {
     shape = std::make_shared<SinglePixel>(pd);
@@ -280,8 +281,10 @@ void GenerateShape(PixelDescriptor* pd, IShape::Ptr& outShape, ShapeType& outSha
   else if (3 == shapeIndex)
   {
     PixelDescriptor::Vec pixels;
-    pixels.push_back(pd->Offset(cRandAorB(-1, 1), 0));
-    pixels.push_back(pd->Offset(0, cRandAorB(-1, 1)));
+    pixels.push_back(pd->Offset(-1, 0));
+    pixels.push_back(pd->Offset(0, 1));
+    pixels.push_back(pd->Offset(0, -1));
+    pixels.push_back(pd->Offset(1, 0));
     pixels.push_back(pd);
     shape = std::make_shared<PolymorphShape>(pd, pixels);
     outShapeType = ShapeType::eShapeTypeFixed;
@@ -481,7 +484,8 @@ std::vector<Genom> GenerateGenoms(PixelDescriptorProvider::PixelMap& map)
   
 void PixelDescriptorProvider::PopulateCells()
 {
-  auto groups = GenerateGenoms(m_map);
+  std::vector<Genom> groups;
+  groups.insert(groups.begin(), m_genoms.begin(), m_genoms.end());
   
   for (int i = 0; i < m_config->mapWidth; ++i)
   {
@@ -494,7 +498,7 @@ void PixelDescriptorProvider::PopulateCells()
         int groupIndex = cRandABInt(0, groups.size());
         auto genom = groups[groupIndex];
         
-        static int count = 1000;
+        static int count = 1;
 //        if (count == 0)
 //        {
 //          continue;
@@ -727,33 +731,33 @@ CellDescriptor* PixelDescriptorProvider::ProcessMutation(CellDescriptor* source)
 {
   CellDescriptor* result = nullptr;
   
-  if (cBoolRandPercent(0.001))
-  {
-    for (int i = 0; i < kMaxNumberOfGroups; ++i)
-    {
-      uint64_t groupId = uint64_t(1) << i;
-      auto it = m_groups.find(groupId);
-      Genom g;
-      if (it == m_groups.end())
-      {
-        g = GenerateGenom(groupId, m_map);
-        source->AroundRandom([&](PixelDescriptor* pd, bool& stop){
-          
-          if (nullptr != CreateRandomCell(pd, source->m_genom)) {
-            stop = true;
-            result = pd->m_cellDescriptor;
-          }
-          
-        });
-      }
-      
-      if (result) {
-        m_groups[g.m_groupId].genom = g;
-        m_groups[g.m_groupId].population += 1;
-        return result;
-      }
-    }
-  }
+//  if (cBoolRandPercent(0.001))
+//  {
+//    for (int i = 0; i < kMaxNumberOfGroups; ++i)
+//    {
+//      uint64_t groupId = uint64_t(1) << i;
+//      auto it = m_groups.find(groupId);
+//      Genom g;
+//      if (it == m_groups.end())
+//      {
+//        g = GenerateGenom(groupId, m_map);
+//        source->AroundRandom([&](PixelDescriptor* pd, bool& stop){
+//          
+//          if (nullptr != CreateRandomCell(pd, source->m_genom)) {
+//            stop = true;
+//            result = pd->m_cellDescriptor;
+//          }
+//          
+//        });
+//      }
+//      
+//      if (result) {
+//        m_groups[g.m_groupId].genom = g;
+//        m_groups[g.m_groupId].population += 1;
+//        return result;
+//      }
+//    }
+//  }
   
 
 

@@ -6,6 +6,7 @@
 #include "Common.h"
 #include "CellDescriptor.h"
 #include "TerrainAnalizer.h"
+#include "GenomsGenerator.hpp"
 
 namespace komorki
 {
@@ -105,10 +106,10 @@ class IPixelDescriptorProvider
 {
 public:
   virtual PixelDescriptor* GetDescriptor(komorki::PixelPos x, komorki::PixelPos y) const = 0;
+  virtual void InitWithConfig(Config* config, const GenomsGenerator::GenomsList& genoms) = 0;
   virtual TerrainAnalizer::Result GetTerrain() const = 0;
   virtual komorki::Vec2 GetSize() const = 0;
-  
-  virtual void InitWithConfig(Config* config) = 0;
+
 
   struct UpdateResult
   {
