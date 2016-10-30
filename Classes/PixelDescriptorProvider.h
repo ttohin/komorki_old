@@ -24,7 +24,7 @@ public:
     unsigned int population = 0;
   };
   
-  typedef std::map<uint64_t, Group> GroupMap;
+  typedef std::map<Genom::GroupIdType, Group> GroupMap;
   
   PixelDescriptorProvider();
   
@@ -49,6 +49,7 @@ public:
   void ProccessTransaction(bool passUpdateResult, std::list<UpdateResult>& result);
   bool CheckBounds(int x, int y);
   void SetCreatureType(const Vec2& pos, CellType type);
+  CellDescriptor* CreateRandomCell(PixelDescriptor* pd, Group& group);
   PixelPtr CreateCell(CellType type,  const komorki::Vec2& pos);
   
 protected:
@@ -59,7 +60,7 @@ protected:
   TerrainAnalizer::Result m_terrain;
   std::vector<std::vector<PixelDescriptor::Type> > m_typeMap;
   GroupMap m_groups;
-  GenomsGenerator::GenomsList m_genoms;
+  unsigned int m_numberOfLiveGroups = 0;
 };
   
 }

@@ -230,7 +230,12 @@ Config::Config()
 void PixelDescriptorProvider::InitWithConfig(Config* config, const GenomsGenerator::GenomsList& genoms)
 {
   m_config = config;
-  m_genoms = genoms;
+  for (auto& g : genoms)
+  {
+    Group group;
+    group.genom = g;
+    m_groups[g.m_groupId] = group;
+  }
   
   if (m_config->terrainSize <= 0 || m_config->terrainSize >= m_config->mapHeight || m_config->terrainSize >= m_config->mapWidth)
     m_config->terrainSize = 1;
@@ -304,13 +309,13 @@ void GenerateShape(PixelDescriptor* pd, IShape::Ptr& outShape, ShapeType& outSha
   outShape = shape;
 }
   
-CellDescriptor* CreateRandomCell(PixelDescriptor* pd, Genom genom)
+CellDescriptor* PixelDescriptorProvider::CreateRandomCell(PixelDescriptor* pd, Group& group)
 {
   assert(pd);
 
   
   bool empty = true;
-  auto shape = genom.m_shape->CopyWithBasePixel(pd);
+  auto shape = group.genom.m_shape->CopyWithBasePixel(pd);
   if (shape == nullptr) {
     return nullptr;
   }
@@ -338,15 +343,20 @@ CellDescriptor* CreateRandomCell(PixelDescriptor* pd, Genom genom)
   
   pd->m_type = PixelDescriptor::CreatureType;
   cd->m_id = nextId++;
-  cd->m_genom = genom;
+  cd->m_genom = group.genom;
   
-  cd->m_health = genom.m_health;
-  cd->m_armor = genom.m_armor;
+  cd->m_health = group.genom.m_health;
+  cd->m_armor = group.genom.m_armor;
   cd->m_age = cRandABInt(0, 50);
-  cd->m_sleepCounter =  cRandABInt(0, genom.m_sleepTime);
+  cd->m_sleepCounter =  cRandABInt(0, group.genom.m_sleepTime);
   cd->m_skipFirstStep = true;
   
   cd->Finish();
+  
+  if (group.population == 0) {
+    m_numberOfLiveGroups += 1;
+  }
+  group.population += 1;
   
   return cd;
 }
@@ -484,8 +494,11 @@ std::vector<Genom> GenerateGenoms(PixelDescriptorProvider::PixelMap& map)
   
 void PixelDescriptorProvider::PopulateCells()
 {
-  std::vector<Genom> groups;
-  groups.insert(groups.begin(), m_genoms.begin(), m_genoms.end());
+  std::vector<GroupMap::key_type> groups;
+  for (const auto& it : m_groups)
+  {
+    groups.push_back(it.first);
+  }
   
   for (int i = 0; i < m_config->mapWidth; ++i)
   {
@@ -496,7 +509,7 @@ void PixelDescriptorProvider::PopulateCells()
       if (type == PixelDescriptor::CreatureType)
       {
         int groupIndex = cRandABInt(0, groups.size());
-        auto genom = groups[groupIndex];
+        auto groupId = groups[groupIndex];
         
         static int count = 1;
 //        if (count == 0)
@@ -504,14 +517,10 @@ void PixelDescriptorProvider::PopulateCells()
 //          continue;
 //        }
         
-        if (CreateRandomCell(pd, genom))
+        if (CreateRandomCell(pd, m_groups[groupId]))
         {
-          m_groups[genom.m_groupId].genom = genom;
-          m_groups[genom.m_groupId].population += 1;
-          
           count--;
         }
-        
       }
     }
   }
@@ -668,21 +677,23 @@ void PixelDescriptorProvider::ProccessTransaction(bool passUpdateResult, std::li
         {
           m_groups[d->m_genom.m_groupId].population -= 1;
         }
+        else if (m_groups[d->m_genom.m_groupId].population == 0)
+        {
+          assert(0);
+        }
         
         if (m_groups[d->m_genom.m_groupId].population == 0)
         {
-          m_groups.erase(d->m_genom.m_groupId);
+          m_numberOfLiveGroups -= 1;
+          GenomsGenerator::UpdateGenomState(m_groups[d->m_genom.m_groupId].genom);
         }
-
         
         if (passUpdateResult)
         {
-          
           UpdateResult r(d);
           r.deleteCreature.SetValueFlag(true);
           r.deleteCreature.value.cellDescriptor = std::shared_ptr<CellDescriptor>(d);
           result.push_back(r);
-          
         }
         else
         {
@@ -733,42 +744,34 @@ CellDescriptor* PixelDescriptorProvider::ProcessMutation(CellDescriptor* source)
 {
   CellDescriptor* result = nullptr;
   
-//  if (cBoolRandPercent(0.001))
-//  {
-//    for (int i = 0; i < kMaxNumberOfGroups; ++i)
-//    {
-//      uint64_t groupId = uint64_t(1) << i;
-//      auto it = m_groups.find(groupId);
-//      Genom g;
-//      if (it == m_groups.end())
-//      {
-//        g = GenerateGenom(groupId, m_map);
-//        source->AroundRandom([&](PixelDescriptor* pd, bool& stop){
-//          
-//          if (nullptr != CreateRandomCell(pd, source->m_genom)) {
-//            stop = true;
-//            result = pd->m_cellDescriptor;
-//          }
-//          
-//        });
-//      }
-//      
-//      if (result) {
-//        m_groups[g.m_groupId].genom = g;
-//        m_groups[g.m_groupId].population += 1;
-//        return result;
-//      }
-//    }
-//  }
-  
-
+  if (cBoolRandPercent(0.001))
+  {
+    for (auto& g : m_groups)
+    {
+      if (g.second.population != 0)
+      {
+        continue;
+      }
+      
+      source->AroundRandom([&](PixelDescriptor* pd, bool& stop){
+        if (nullptr != CreateRandomCell(pd, g.second)) {
+          stop = true;
+          result = pd->m_cellDescriptor;
+        }
+      });
+      
+      if (result)
+      {
+        return result;
+      }
+    }
+  }
 
   source->AroundRandom([&](PixelDescriptor* pd, bool& stop){
     
-    if (nullptr != CreateRandomCell(pd, source->m_genom)) {
+    if (nullptr != CreateRandomCell(pd, m_groups[source->m_genom.m_groupId])) {
       stop = true;
       result = pd->m_cellDescriptor;
-      m_groups[source->m_genom.m_groupId].population += 1;
     }
     
   });

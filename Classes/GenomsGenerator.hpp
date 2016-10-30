@@ -23,6 +23,8 @@ namespace komorki
     typedef std::shared_ptr<GenomsGenerator> Ptr;
     typedef std::list<Genom> GenomsList;
     
+    static void UpdateGenomState(Genom& genom);
+    
     Genom GenerateGenom(Genom::GroupIdType groupId, const ShapesGenerator::ResultItem &shape) const;
     bool AddShape(const ShapesGenerator::ResultItem& shape, Genom::GroupIdType& outGroupId);
     

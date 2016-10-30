@@ -16,10 +16,11 @@ namespace komorki
     int kMaxNumberOfGroups = 64;
   }
   
-  Genom GenomsGenerator::GenerateGenom(Genom::GroupIdType groupId, const ShapesGenerator::ResultItem &shape) const
+  void GenomsGenerator::UpdateGenomState(Genom& g)
   {
-    Genom g;
-    g.m_groupId = groupId;
+    g.m_foodGroupId = 0;
+    g.m_dangerGroupId = 0;
+    g.m_friendGroupId = 0;
     
     for (int j = 0; j < kMaxNumberOfGroups; j++)
     {
@@ -53,6 +54,14 @@ namespace komorki
     g.m_lightFood = cRandABInt(1, 15);
     g.m_passiveHealthIncome = cRandABInt(0, 10);
     g.m_healthPerAttach = cRandABInt(10, 100);
+  }
+  
+  Genom GenomsGenerator::GenerateGenom(Genom::GroupIdType groupId, const ShapesGenerator::ResultItem &shape) const
+  {
+    Genom g;
+    g.m_groupId = groupId;
+    UpdateGenomState(g);
+    
     g.m_shape = shape.shape;
     g.m_shapeType = shape.type;
     
