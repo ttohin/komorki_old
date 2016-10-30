@@ -78,7 +78,6 @@ CellCanvasSprite* CreateCanvasWithGenomsGenerator()
   cellCanvas->init();
   
   komorki::Vec2 maxTextureSize(16, 16);
-
   
   komorki::Vec2 currentPos;
   komorki::PixelPos line = 0;
@@ -132,9 +131,7 @@ CellCanvasSprite* CreateCanvasWithGenomsGenerator()
     textureRect.origin.x << ", " << textureRect.origin.y << " " <<
     textureRect.size.width << ", " << textureRect.size.height <<
     std::endl << originalBuffer->Description() << std::endl;
-    
   }
-  
   
   return cellCanvas;
 }
@@ -153,7 +150,7 @@ bool TestSampleShapesScene::init()
   bool ok = sharedFileUtils->createDirectory(mapDir);
   assert(ok && sharedFileUtils->isDirectoryExist(mapDir));
   
-  Size visibleSize = Director::getInstance()->getVisibleSize();
+//  Size visibleSize = Director::getInstance()->getVisibleSize();
   Vec2 origin = Director::getInstance()->getVisibleOrigin();
   
   auto cellCanvas = CreateCanvasWithGenomsGenerator();
@@ -175,13 +172,8 @@ bool TestSampleShapesScene::init()
   
   rt->saveToFile(mapName, true, [&](RenderTexture*, const std::string& image)
                  {
-//                    m_info->setString("Loading viewport");
-
                     schedule(schedule_selector(TestSampleShapesScene::CreateViewport), 0, 1, 0);
                  });
-  
-//  cellCanvas->setPosition(Vec2(visibleSize.width/3, visibleSize.height/3));
-//  cellCanvas->setPosition(Vec2(visibleSize.width/3, visibleSize.height/3));
   
   Director::getInstance()->getTextureCache()->addImage("tile_32x32.png");
   Director::getInstance()->getTextureCache()->addImage("ground.png");
@@ -196,9 +188,6 @@ void TestSampleShapesScene::timerForUpdate(float dt)
 
 void TestSampleShapesScene::CreateViewport(float dt)
 {
-//  auto sharedUIData = komorki::ui::SharedUIData::getInstance();
-//  sharedUIData->cellsTexture =
-  
   auto mapScene = LoadingScene::createScene();
   Director::getInstance()->replaceScene(mapScene);
 }

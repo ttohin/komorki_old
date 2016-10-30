@@ -20,5 +20,6 @@ namespace komorki
     const bool kAnimated = true;
     const bool kRedrawEachUpdate = false;
     const bool kSimpleDraw = false;
+    const float kLightMapScale = 4.f;
   }
 }

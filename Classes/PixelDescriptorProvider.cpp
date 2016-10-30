@@ -552,8 +552,10 @@ void PixelDescriptorProvider::GenLights()
   auto buffer = gen1.GetBuffer(0,0, m_config->mapWidth, m_config->mapHeight);
   buffer->ForEach([&](const int& x, const int& y, const float& level)
                   {
-                    //m_map[x][y]->m_physicalDesc.light = 0.5 + level * 0.5f;
-                    m_map[x][y]->m_physicalDesc.light = level;
+                    float resultlevel = 0.5 + level * 0.5f;
+                    float heightLevel = ((float)y/(float)m_config->mapHeight);
+                    resultlevel = resultlevel * 0.8 + heightLevel * 0.2;
+                    m_map[x][y]->m_physicalDesc.light = resultlevel;
                   });
 }
   

@@ -42,6 +42,8 @@ namespace komorki
         virtual void Destory(PartialMap* _owner) = 0;
         virtual void Free(PartialMap* _owner);
         virtual void ForceDestory(PartialMap* _owner);
+        virtual void Attack(const Vec2& pos, const Vec2& offset, float animationTime) {}
+        virtual void EnableSmallAnimations(bool enable) {}
 
         PartialMap* m_owner;
       };
@@ -58,11 +60,12 @@ namespace komorki
         
         void Move(Vec2ConstRef src, Vec2ConstRef dest, float animationDuration);
         void ChangeRect(CellDescriptor* cd, const Rect& newRect, float animationDuration);
-        void PlaySmallAnimation();
         
         virtual ContextType GetType() const override { return ContextType::SinglePixel; }
         virtual void BecomeOwner(PartialMap* _owner) override;
         virtual void Destory(PartialMap* _owner) override;
+        virtual void Attack(const Vec2& pos, const Vec2& offset, float animationTime) override;
+        virtual void EnableSmallAnimations(bool enable) override;
         
         cocos2d::Sprite* m_sprite = nullptr;
         cocos2d::Sprite* m_glow = nullptr;

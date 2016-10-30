@@ -46,7 +46,6 @@ namespace komorki
     {
       m_hlSprite = nullptr;
       m_pullSize = PMP_PULL_SIZE;
-      m_enableSmallAnimations = true;
     }
     
     PixelMapPartial::~PixelMapPartial()
@@ -227,108 +226,6 @@ namespace komorki
       {
         s->setPosition(spriteVector(pos));
       }
-      
     }
-    
-    void PixelMapPartial::AddPolymorphCreature(CellDescriptor* cd, PixelMap::AmorphCellContext* context, Vec2 partialMapOffset)
-    {
-
-    }
-    
-    void PixelMapPartial::MoveCreature(PixelMap::ObjectContext* context,
-                                       const Vec2& source,
-                                       const Vec2& dest,
-                                       int duration,
-                                       Morphing& morphing,
-                                       Vec2 partialMapOffset,
-                                       CellDescriptor* cd)
-    {
-    }
-    
-    void PlayAttackAnimation(cocos2d::Sprite* source,
-                             const Vec2& pos,
-                             const Vec2& direction,
-                             cocos2d::Vec2& offset,
-                             float updateTime,
-                             const Vec2& size)
-    {
-      offset = RandomVectorOffset();
-      
-      source->stopAllActionsByTag(10);
-      auto destination = spriteVector(pos, cocos2d::Vec2(kSpritePosition/2*direction.x,
-                                                         kSpritePosition/2*direction.y) + RandomVectorOffset());
-      auto m1 = MoveTo::create(updateTime*0.3, destination);
-      auto s1 = ScaleTo::create(updateTime*0.3, kSpriteScale * size.x * 1.5, kSpriteScale * size.y * 1.5);
-      auto m2 = MoveTo::create(updateTime*0.3, spriteVector(pos, offset));
-      auto s2 = ScaleTo::create(updateTime*0.3, kSpriteScale * size.x, kSpriteScale * size.y);
-      auto spawn1 = cocos2d::Spawn::createWithTwoActions(m1, s1);
-      auto spawn2 = cocos2d::Spawn::createWithTwoActions(m2, s2);
-      auto seq = Sequence::createWithTwoActions(spawn1, spawn2);
-      seq->setTag(10);
-      source->runAction(seq);
-    }
-    
-//    void PixelMapPartial::Attack(PartialMap::Context* context, const Vec2& pos, const Vec2& direction, const Vec2& partialMapOffset)
-//    {
-//      if (kAnimated == false)
-//      {
-//        return;
-//      }
-//      
-//      if (context->IsMultiShape())
-//      {
-//        for (auto& s : context->spriteMap)
-//        {
-//          auto source = s.second.sprite;
-//          PlayAttackAnimation(source, s.second.pos - partialMapOffset, direction, context->offset, m_updateTime, context->size);
-//        }
-//
-//        return;
-//      }
-//      
-//      auto source = context->sprite;
-//      PlayAttackAnimation(source, pos + context->posOffset, direction, context->offset, m_updateTime, context->size);
-//    }
-    
-    
-    void PixelMapPartial::StopSmallAnimations()
-    {
-      if (!m_enableSmallAnimations) {
-        return;
-      }
-      
-      m_enableSmallAnimations = false;
-      
-      for(auto it = _children.cbegin(); it != _children.cend(); ++it)
-      {
-        if ((*it)->getTag() == static_cast<int>(komorki::PixelDescriptor::CreatureType))
-        {
-          (*it)->stopAllActionsByTag(SMALL_ANIMATION_TAG);
-        }
-      }
-    }
-    
-    void PixelMapPartial::EnableAnimations(bool enable)
-    {
-      m_enableAnimations = enable;
-    }
-    
-    void PixelMapPartial::StartSmallAnimations()
-    {
-      if (m_enableSmallAnimations) {
-        return;
-      }
-      
-      m_enableSmallAnimations = true;
-      
-//      for(auto it = _children.cbegin(); it != _children.cend(); ++it)
-//      {
-//        if ((*it)->getTag() == static_cast<int>(komorki::PixelDescriptor::CreatureType))
-//        {
-//          PlaySmallAnimation(static_cast<Sprite*>(*it));
-//        }
-//      }
-    }
-    
   }
 }

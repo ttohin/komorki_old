@@ -39,7 +39,12 @@ public:
   
   cocos2d::Label* CreateLabel(const char* text, const cocos2d::Vec2& offset) const;
   void timerForUpdate(float dt);
+  void SaveTerrain(const TerrainAnalizer::Result& terrainAnalizerResult,
+                   const komorki::Rect& rect,
+                   const std::string& prefix,
+                   const std::string& mapDirName);
   void LoadTerrainMaps(float dt);
+  void LoadLightMaps(float dt);
   void CreateViewport(float dt);
  
 private:

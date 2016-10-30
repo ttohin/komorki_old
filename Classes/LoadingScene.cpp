@@ -11,7 +11,7 @@
 #include "Common.h"
 #include "UIConfig.h"
 #include "TerrainBatchSprite.h"
-
+#include "StaticLightsSprite.h"
 
 bool LoadingScene::init()
 {
@@ -58,6 +58,52 @@ void LoadingScene::timerForUpdate(float dt)
   }
 }
 
+
+void LoadingScene::SaveTerrain(const TerrainAnalizer::Result& terrainAnalizerResult,
+                               const komorki::Rect& rect,
+                               const std::string& prefix,
+                               const std::string& mapDirName)
+{
+  auto terrainBatch = new TerrainBatchSprite();
+  terrainBatch->init(terrainAnalizerResult);
+  terrainBatch->autorelease();
+  
+  auto renderer = _director->getRenderer();
+  auto& parentTransform = _director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
+  
+  int aspect = 4;
+  
+  auto rt = RenderTexture::create(32.f * komorki::ui::kSegmentSize / aspect,
+                                  32.f * komorki::ui::kSegmentSize / aspect);
+  
+  terrainBatch->setScale(1.f / float(aspect));
+  
+  rt->begin();
+  terrainBatch->visit(renderer, parentTransform, true);
+  rt->end();
+  
+  std::string mapName = mapDirName + "/map";
+  mapName += prefix + "_";
+  mapName += std::to_string(rect.origin.x / 2) + "_" + std::to_string(rect.origin.y / 2);
+  mapName += "_";
+  mapName += std::to_string(rect.size.x / 2) + "_" + std::to_string(rect.size.y / 2);
+  mapName += ".png";
+  
+  m_mapList.push_back(mapName);
+  
+  rt->saveToFile(mapName, true, [&](RenderTexture*, const std::string& image)
+                 {
+                   m_mapList.pop_back();
+                   
+                   if (m_mapList.empty())
+                   {
+                     m_info->setString("Loading light map");
+                     schedule(schedule_selector(LoadingScene::LoadLightMaps), 0, 1, 0);
+                   }
+                   
+                 });
+}
+
 void LoadingScene::LoadTerrainMaps(float dt)
 {
   auto terrain = m_provider->GetTerrain();
@@ -81,32 +127,64 @@ void LoadingScene::LoadTerrainMaps(float dt)
     terrainAnalizerResult.ground = std::make_shared<Buffer2D<TerrainInfo>>(rect.size.x, rect.size.y);
     terrainAnalizerResult.foreground = std::make_shared<Buffer2D<TerrainInfo>>(rect.size.x, rect.size.y);
     
-    terrain.background->SubSet(rect.origin.x, rect.origin.y, *terrainAnalizerResult.background.get());
     terrain.ground->SubSet(rect.origin.x, rect.origin.y, *terrainAnalizerResult.ground.get());
     terrain.foreground->SubSet(rect.origin.x, rect.origin.y, *terrainAnalizerResult.foreground.get());
     
-    auto terrainBatch = new TerrainBatchSprite();
-    terrainBatch->init(terrainAnalizerResult);
-    terrainBatch->autorelease();
+    SaveTerrain(terrainAnalizerResult, rect, "fg", mapDirName);
+  }
+  
+  for (const auto& rect : mapRects)
+  {
+    TerrainAnalizer::Result terrainAnalizerResult;
     
+    terrainAnalizerResult.background = std::make_shared<Buffer2D<TerrainInfo>>(rect.size.x, rect.size.y);
+    terrainAnalizerResult.ground = std::make_shared<Buffer2D<TerrainInfo>>(rect.size.x, rect.size.y);
+    terrainAnalizerResult.foreground = std::make_shared<Buffer2D<TerrainInfo>>(rect.size.x, rect.size.y);
+    
+    terrain.background->SubSet(rect.origin.x, rect.origin.y, *terrainAnalizerResult.background.get());
+    
+    SaveTerrain(terrainAnalizerResult, rect, "bg", mapDirName);
+  }
+
+}
+
+void LoadingScene::LoadLightMaps(float dt)
+{
+  komorki::Rect totalSize = {{0, 0}, {m_provider->GetSize().x, m_provider->GetSize().y}};
+  std::vector<komorki::Rect> mapRects;
+  komorki::SplitRectOnChunks(totalSize, {{0, 0}, {0, 0}}, komorki::ui::kSegmentSize, mapRects);
+  
+  auto sharedFileUtils = FileUtils::getInstance();
+  
+  const std::string mapDirName = "Komorki/tmp/light_maps";
+  const std::string mapDir = sharedFileUtils->getWritablePath() + mapDirName;
+  bool ok = sharedFileUtils->createDirectory(mapDir);
+  assert(ok && sharedFileUtils->isDirectoryExist(mapDir));
+  
+  for (const auto& rect : mapRects)
+  {
+    auto staticLights = new StaticLightsSprite();
+    staticLights->init(m_provider.get(), rect);
+    staticLights->autorelease();
+   
     auto renderer = _director->getRenderer();
     auto& parentTransform = _director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
     
-    int aspect = 4;
+    int aspect = komorki::ui::kLightMapScale;
     
-    auto rt = RenderTexture::create(32.f * komorki::ui::kSegmentSize / aspect,
-                                    32.f * komorki::ui::kSegmentSize / aspect);
+    auto rt = RenderTexture::create(staticLights->textureSize().width / aspect,
+                                    staticLights->textureSize().height / aspect);
     
-    terrainBatch->setScale(1.f / float(aspect));
+    staticLights->setScale(1.f / float(aspect));
     
     rt->begin();
-    terrainBatch->visit(renderer, parentTransform, true);
+    staticLights->visit(renderer, parentTransform, true);
     rt->end();
     
-    std::string mapName = mapDirName + "/map";
-    mapName += std::to_string(rect.origin.x / 2) + "_" + std::to_string(rect.origin.y / 2);
+    std::string mapName = mapDirName + "/light_map_";
+    mapName += std::to_string(rect.origin.x) + "_" + std::to_string(rect.origin.y);
     mapName += "_";
-    mapName += std::to_string(rect.size.x / 2) + "_" + std::to_string(rect.size.y / 2);
+    mapName += std::to_string(rect.size.x) + "_" + std::to_string(rect.size.y);
     mapName += ".png";
     
     m_mapList.push_back(mapName);
@@ -122,9 +200,10 @@ void LoadingScene::LoadTerrainMaps(float dt)
                      }
                      
                    });
+    
+    
+    
   }
-  
-
 }
 
 void LoadingScene::CreateViewport(float dt)

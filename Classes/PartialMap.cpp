@@ -86,10 +86,14 @@ PartialMap::~PartialMap()
   m_debugView->removeFromParentAndCleanup(true);
   m_glow->removeFromParentAndCleanup(true);
   m_terrainSprite->removeFromParentAndCleanup(true);
+  m_terrainBgSprite->removeFromParentAndCleanup(true);
 }
   
 bool PartialMap::Init(int a, int b, int width, int height,
-                      IPixelDescriptorProvider* provider, cocos2d::Node* superView, cocos2d::Node* lightNode, const cocos2d::Vec2& offset)
+                      IPixelDescriptorProvider* provider,
+                      cocos2d::Node* superView,
+                      cocos2d::Node* lightNode,
+                      const cocos2d::Vec2& offset)
 {
   ChangeAABB(a, b, width, height);
   m_width = width;
@@ -98,14 +102,14 @@ bool PartialMap::Init(int a, int b, int width, int height,
   
   m_cellMap = std::make_shared<PixelMapPartial>();
   m_debugView = std::make_shared<PixelDebugView>(a, b, width, height, provider);
-  m_lightOverlay = std::make_shared<PixelMapLightOverlay>(a, b, width, height, provider);
   m_background = std::make_shared<PixelMapBackground>(a, b, width, height);
   m_glow = std::make_shared<GlowMapOverlay>();
-  m_terrainSprite = TerrainSprite::create(a, b, width, height);
+  m_terrainSprite = TerrainSprite::create(a, b, width, height, "fg");
+  m_terrainBgSprite = TerrainSprite::create(a, b, width, height, "bg");
+  m_lightOverlay = PixelMapLightOverlay::create(a, b, width, height, "light_map");
   
   m_cellMap->init();
   m_debugView->init();
-  m_lightOverlay->init();
   m_background->init();
   m_glow->init();
   
@@ -115,13 +119,15 @@ bool PartialMap::Init(int a, int b, int width, int height,
   m_background->setPosition(offset);
   m_glow->setPosition(offset);
   m_terrainSprite->setPosition(offset);
+  m_terrainBgSprite->setPosition(offset);
   
   superView->addChild(m_background.get(), -1);
-  superView->addChild(m_terrainSprite, 0);
+  superView->addChild(m_terrainBgSprite, 0);
   superView->addChild(m_cellMap.get(), 1);
-  lightNode->addChild(m_lightOverlay.get(), 2);
-  lightNode->addChild(m_glow.get(), 3);
-  superView->addChild(m_debugView.get(), 4);
+  superView->addChild(m_terrainSprite, 2);
+  lightNode->addChild(m_lightOverlay, 3);
+  lightNode->addChild(m_glow.get(), 4);
+  superView->addChild(m_debugView.get(), 5);
  
   m_cellMap->SetUpdateTime(0.2);
   m_glow->SetUpdateTime(0.2);
@@ -332,7 +338,7 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
         continue;
       }
       assert(context);
-      Attack(context, initialPos, a.value.delta);
+      Attack(context, initialPos, a.value.delta, updateTime);
     }
     else
     {
@@ -360,19 +366,38 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
     m_glow->Reset();
   }
   
-  void PartialMap::StopSmallAnimations()
+  void PartialMap::EnableSmallAnimations(bool enable)
   {
-    m_cellMap->StopSmallAnimations();
-  }
-  
-  void PartialMap::StartSmallAnimations()
-  {
-    m_cellMap->StartSmallAnimations();
+    if (m_enableSmallAnimations == enable) {
+      return;
+    }
+    
+    m_enableSmallAnimations = enable;
+    
+    for (int i = m_a1; i < m_a2; ++i)
+    {
+      for (int j = m_b1; j < m_b2; ++j)
+      {
+        auto pd = m_provider->GetDescriptor(i, j);
+        if (pd->m_type == PixelDescriptor::CreatureType)
+        {
+          if (pd->m_cellDescriptor->parent == pd)
+          {
+            // We are creating map current cell is incomming
+            if (pd->m_cellDescriptor->userData != nullptr)
+            {
+              auto context = static_cast<PixelMap::ObjectContext*>(pd->m_cellDescriptor->userData);
+              context->EnableSmallAnimations(m_enableSmallAnimations);
+            }
+          }
+        }
+      }
+    }
   }
   
   void PartialMap::EnableAnimations(bool enable)
   {
-    m_cellMap->EnableAnimations(enable);
+    m_enableAnimations = enable;
   }
  
   void PartialMap::Transfrorm(const cocos2d::Vec2& pos, float scale)
@@ -384,14 +409,16 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
     m_glow->setPosition(pos);
 //    m_terrain->setPosition(pos);
     m_terrainSprite->setPosition(pos);
+    m_terrainBgSprite->setPosition(pos);
     
     m_cellMap->setScale(scale);
     m_background->setScale(scale);
     m_debugView->setScale(scale);
-    m_lightOverlay->setScale(scale);
+    m_lightOverlay->setScale(scale * kLightMapScale);
     m_glow->setScale(scale);
 //    m_terrain->setScale(scale);
     m_terrainSprite->setScale(scale * 4.f);
+    m_terrainBgSprite->setScale(scale * 4.f);
   }
  
   void PartialMap::ChangeAABB(int a, int b, int width, int height)
@@ -460,6 +487,7 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
                 });
       
       c->MoveAmorphCells(source, morphing, duration * 0.9);
+      c->EnableSmallAnimations(m_enableSmallAnimations);
       context = c;
     }
     else if (dest->m_cellDescriptor->GetShapeType() == eShapeTypeRect
@@ -473,6 +501,7 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
                                                dest->m_cellDescriptor->parent->GetPos(),
                                                dest->m_cellDescriptor->GetShape()->GetAABB());
       c->Move(source, dest->GetPos(), duration * 0.9);
+      c->EnableSmallAnimations(m_enableSmallAnimations);
       context = c;
     }
     else
@@ -514,8 +543,9 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
     assert(0);
   }
   
-  void PartialMap::Attack(PixelMap::ObjectContext* context, const Vec2& pos, const Vec2& offset)
+  void PartialMap::Attack(PixelMap::ObjectContext* context, const Vec2& pos, const Vec2& offset, float animationDuration)
   {
+    context->Attack(pos, offset, animationDuration);
   }
   
   void PartialMap::Delete(PixelMap::ObjectContext* context)

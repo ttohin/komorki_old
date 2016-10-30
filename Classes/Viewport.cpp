@@ -656,14 +656,7 @@ void ui::Viewport::Update(float updateTime, float& outUpdateTime)
  
   for (const auto& map : m_maps)
   {
-    if (!m_enableSmallAnimations)
-    {
-      map->StopSmallAnimations();
-    }
-    else
-    {
-      map->StartSmallAnimations();
-    }
+    map->EnableSmallAnimations(m_enableSmallAnimations);
     
     map->EnableAnimations(m_enableAnimations);
     
@@ -916,14 +909,8 @@ bool ui::Viewport::CreatePartialMapsInRects(const std::vector<Rect>& rects,
     offsetPoints += offset;
     map->Transfrorm(offsetPoints,
                     m_initialScale * scale);
-    if (!m_enableSmallAnimations)
-    {
-      map->StopSmallAnimations();
-    }
-    else
-    {
-      map->StartSmallAnimations();
-    }
+    
+    map->EnableSmallAnimations(m_enableSmallAnimations);
     
     map->EnableAnimations(m_enableAnimations);
     

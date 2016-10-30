@@ -85,12 +85,14 @@ namespace PixelMap
     m_size = rect.size;
     m_pos = GetPosInOwnerBase(origin);
     
+    cocos2d::Vec2 rectOffset = spriteVector(m_size) * 0.5;
+    
     auto s = m_owner->m_cellMap->CreateSprite();
     s->setTextureRect(textureRect);
     s->setScale(kSpriteScale);
-    s->setAnchorPoint({0, 0});
+    s->setAnchorPoint({0.5, 0.5});
     
-    s->setPosition(spriteVector(m_pos + m_posOffset, m_offset));
+    s->setPosition(spriteVector(m_pos + m_posOffset, m_offset + rectOffset));
     s->setTag(static_cast<int>(komorki::PixelDescriptor::CreatureType));
     m_sprite = s;
   }
@@ -103,18 +105,19 @@ namespace PixelMap
     auto randOffset = RandomVectorOffset();
     cocos2d::Vec2 offset = m_offset;
     m_offset = randOffset;
+    cocos2d::Vec2 rectOffset = spriteVector(m_size) * 0.5;
     
-    if (m_owner->m_cellMap->m_enableAnimations)
+    if (m_owner->m_enableAnimations)
     {
       m_sprite->stopAllActionsByTag(0);
-      m_sprite->setPosition(spriteVector(localSrc + m_posOffset, offset));
-      auto moveTo = cocos2d::MoveTo::create(animationTime, spriteVector(localDest + m_posOffset, randOffset));
+      m_sprite->setPosition(spriteVector(localSrc + m_posOffset, offset + rectOffset));
+      auto moveTo = cocos2d::MoveTo::create(animationTime, spriteVector(localDest + m_posOffset, randOffset + rectOffset));
       moveTo->setTag(0);
       m_sprite->runAction(moveTo);
     }
     else
     {
-      m_sprite->setPosition(spriteVector(localDest + m_posOffset, randOffset));
+      m_sprite->setPosition(spriteVector(localDest + m_posOffset, randOffset + rectOffset));
     }
     
     m_pos = GetPosInOwnerBase(dest);
@@ -130,11 +133,13 @@ namespace PixelMap
     
     m_size = newRect.size;
     
+    cocos2d::Vec2 rectOffset = spriteVector(m_size) * 0.5;
+    
     m_sprite->stopAllActionsByTag(0);
     
-    if (m_owner->m_cellMap->m_enableAnimations)
+    if (m_owner->m_enableAnimations)
     {
-      auto moveTo = cocos2d::MoveTo::create(animationDuration, spriteVector(m_pos + m_posOffset, m_offset));
+      auto moveTo = cocos2d::MoveTo::create(animationDuration, spriteVector(m_pos + m_posOffset, m_offset + rectOffset));
       auto scaleAction = cocos2d::ScaleTo::create(animationDuration, kSpriteScale * scaleRatio.x, kSpriteScale * scaleRatio.y);
       auto playSmallAnimation = cocos2d::CallFunc::create([this]()
                                                           {
@@ -147,6 +152,7 @@ namespace PixelMap
     }
     else
     {
+      m_sprite->setPosition(spriteVector(m_pos + m_posOffset, m_offset + rectOffset));
       m_sprite->setScale(kSpriteScale * scaleRatio.x, kSpriteScale * scaleRatio.y);
     }
   }
@@ -175,23 +181,54 @@ namespace PixelMap
     delete this;
   }
   
-  void SingleCellContext::PlaySmallAnimation()
+  void SingleCellContext::Attack(const Vec2& pos, const Vec2& attackOffset, float animationDuration)
   {
-    if (m_owner->m_cellMap->m_enableAnimations == false)
+    Vec2 localSrc = GetPosInOwnerBase(pos);
+    Vec2 localDest = GetPosInOwnerBase(pos + attackOffset);
+    
+    cocos2d::Vec2 offset = m_offset;
+    cocos2d::Vec2 rectOffset = spriteVector(m_size) * 0.5;
+    
+    if (m_owner->m_enableAnimations)
+    {
+      m_sprite->stopAllActionsByTag(10);
+      m_sprite->setPosition(spriteVector(localSrc + m_posOffset, offset + rectOffset));
+      auto m1 = cocos2d::MoveTo::create(animationDuration * 0.3, spriteVector(localDest + m_posOffset, offset + rectOffset));
+      auto m2 = cocos2d::MoveTo::create(animationDuration * 0.3, spriteVector(localSrc + m_posOffset, offset + rectOffset));
+      auto s1 = cocos2d::ScaleTo::create(animationDuration*0.3, kSpriteScale * 1.5, kSpriteScale * 1.5);
+      auto s2 = cocos2d::ScaleTo::create(animationDuration*0.3, kSpriteScale, kSpriteScale);
+      auto spawn1 = cocos2d::Spawn::createWithTwoActions(m1, s1);
+      auto spawn2 = cocos2d::Spawn::createWithTwoActions(m2, s2);
+      auto seq = cocos2d::Sequence::createWithTwoActions(spawn1, spawn2);
+      seq->setTag(10);
+      m_sprite->runAction(seq);
+    }
+  }
+  
+  void SingleCellContext::EnableSmallAnimations(bool enable)
+  {
+    if (enable == false)
+    {
+      m_sprite->stopAllActionsByTag(SMALL_ANIMATION_TAG);
+      return;
+    }
+    
+    if (m_owner->m_enableAnimations == false)
     {
       return;
     }
     
-//    bool scaleDirection = rand()%2;
-//    auto s1 = cocos2d::ScaleTo::create(2, kSpriteScale * m_size.x * 0.8, kSpriteScale * m_size.y * 0.8);
-//    auto s2 = cocos2d::ScaleTo::create(2, kSpriteScale * m_size.x * 1.1, kSpriteScale * m_size.y * 1.1);
-//    cocos2d::ActionInterval* loop = nullptr;
-//    if (scaleDirection)
-//      loop = cocos2d::RepeatForever::create(cocos2d::Sequence::create(s1, s2, NULL));
-//    else
-//      loop = cocos2d::RepeatForever::create(cocos2d::Sequence::create(s2, s1, NULL));;
-//    loop->setTag(SMALL_ANIMATION_TAG);
-//    m_sprite->runAction(loop);
+    m_sprite->stopAllActionsByTag(SMALL_ANIMATION_TAG);
+    bool scaleDirection = rand()%2;
+    auto s1 = cocos2d::ScaleTo::create(2, kSpriteScale * 0.8, kSpriteScale * 0.8);
+    auto s2 = cocos2d::ScaleTo::create(2, kSpriteScale * 1.1, kSpriteScale * 1.1);
+    cocos2d::ActionInterval* loop = nullptr;
+    if (scaleDirection)
+      loop = cocos2d::RepeatForever::create(cocos2d::Sequence::create(s1, s2, NULL));
+    else
+      loop = cocos2d::RepeatForever::create(cocos2d::Sequence::create(s2, s1, NULL));;
+    loop->setTag(SMALL_ANIMATION_TAG);
+    m_sprite->runAction(loop);
   }
   
   AmorphCellContext::PolymorphShapeContext AmorphCellContext::GetSprite(int x, int y)
@@ -291,7 +328,7 @@ namespace PixelMap
       
       assert(polymoprhContext.sprite);
       
-      if (m_owner->m_cellMap->m_enableAnimations)
+      if (m_owner->m_enableAnimations)
       {
         polymoprhContext.sprite->stopAllActionsByTag(0);
         polymoprhContext.sprite->setPosition(spriteVector(GetPosInOwnerBase(pos)));

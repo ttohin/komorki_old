@@ -13,39 +13,33 @@
 #include "PixelDescriptorProvider.h"
 #include "b2Utilites.h"
 #include "CellDescriptor.h"
+#include "UIConfig.h"
 
 namespace komorki
 {
 namespace ui
 {
-class PixelMapLightOverlay : public cocos2d::SpriteBatchNode
+class PixelMapLightOverlay
 {
 public:
-  PixelMapLightOverlay(int a, int b, int width, int height, komorki::IPixelDescriptorProvider* provider);
-  cocos2d::Sprite* CreateSprite();
-  
-  void RemoveSprite(cocos2d::Sprite* sprite);
-  
-  cocos2d::Sprite* SpriteForLight(int value);
-
-  bool IsInAABB(const Vec2& vec);
-  
-  bool IsInAABB(const int& x, const int& y);
-  cocos2d::Vec2 spriteVector(const komorki::Vec2& vec, const cocos2d::Vec2& vector = cocos2d::Vec2());
-  bool init();
-  
-  void Reset();
- 
-private:
-  int m_a1;
-  int m_b1;
-  int m_width;
-  int m_height;
-  int m_a2;
-  int m_b2;
-  std::list<cocos2d::Sprite*> m_spritesPull;
-  unsigned int m_pullSize;
-  komorki::IPixelDescriptorProvider* m_provider;
+  static cocos2d::Sprite* create(int a, int b, int width, int height, const std::string& prefix)
+  {
+    std::string mapName = "Komorki/tmp/light_maps/";
+    mapName += prefix + "_";
+    mapName += std::to_string(a) + "_" + std::to_string(b);
+    mapName += "_";
+    mapName += std::to_string(width) + "_" + std::to_string(height);
+    mapName += ".png";
+    
+    mapName = cocos2d::FileUtils::getInstance()->getWritablePath() + mapName;
+    
+    auto s = cocos2d::Sprite::create(mapName);
+    s->getTexture()->setAliasTexParameters();
+    s->setScale(kLightMapScale);
+    s->setAnchorPoint({0,0});
+    
+    return s;
+  }
 };
 }
 }

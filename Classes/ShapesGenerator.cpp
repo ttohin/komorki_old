@@ -15,7 +15,7 @@ namespace komorki
   {
     PixelDescriptor::Vec pixels;
 
-    int numberOfPixels = 4;
+    int numberOfPixels = 3;
     PixelDescriptor* currentPd = pd;
     pixels.push_back(pd);
     pd->m_type = PixelDescriptor::CreatureType;
@@ -44,11 +44,50 @@ namespace komorki
     return shape;
   }
   
+  IShape::Ptr CompactShape(PixelDescriptor* pd)
+  {
+    PixelDescriptor::Vec pixels;
+    
+    int numberOfPixels = cRandABInt(4, 8);
+    pixels.push_back(pd);
+    
+    pd->AroundRandom([&](PixelDescriptor* p, bool& stop){
+      if (p->IsEmpty() && cBoolRandPercent(0.6) && pixels.size() < numberOfPixels)
+
+      {
+        p->m_type = PixelDescriptor::CreatureType;
+        pixels.push_back(p);
+      }
+    });
+    
+    int stepNumber = cRandABInt(1, 4);
+    
+    for (int i = 0; i < stepNumber; ++i)
+    {
+      int randomPixelIndex = cRandABInt(0, pixels.size());
+      auto randomPixel = pixels[randomPixelIndex];
+      randomPixel->AroundRandom([&](PixelDescriptor* p, bool& stop){
+        if (p->IsEmpty() && cBoolRandPercent(0.6) && pixels.size() < numberOfPixels)
+        {
+          p->m_type = PixelDescriptor::CreatureType;
+          pixels.push_back(p);
+        }
+      });
+    }
+    
+    auto shape = std::make_shared<PolymorphShape>(pd, pixels);
+    shape->ForEach([](PixelDescriptor* p, bool& stop){
+      p->m_type = PixelDescriptor::Empty;
+    });
+    
+    return shape;
+  }
+  
   void ShapesGenerator::GenerateShape(PixelDescriptor* pd, IShape::Ptr& outShape, ShapeType& outShapeType)
   {
     std::shared_ptr<IShape> shape;
     
-    unsigned int numberOfShapes = 3;
+    unsigned int numberOfShapes = 4;
     unsigned int shapeIndex = cRandABInt(0, numberOfShapes);
 //    shapeIndex = 2;
     if (0 == shapeIndex)
@@ -66,6 +105,11 @@ namespace komorki
     else if (2 == shapeIndex)
     {
       shape = ContinousShape(pd);
+      outShapeType = ShapeType::eShapeTypeFixed;
+    }
+    else if (3 == shapeIndex)
+    {
+      shape = CompactShape(pd);
       outShapeType = ShapeType::eShapeTypeFixed;
     }
     else

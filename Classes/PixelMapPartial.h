@@ -44,12 +44,7 @@ public:
   void AddCreature(CellDescriptor* cd, PixelMap::SingleCellContext* context, Vec2 partialMapOffset);
   void AddPolymorphCreature(CellDescriptor* cd, PixelMap::AmorphCellContext* context, Vec2 partialMapOffset);
   void MoveCreature(PixelMap::ObjectContext* context, const Vec2& source, const Vec2& dest, int duration, Morphing& morphing, Vec2 partialMapOffset,CellDescriptor* cd);
-//  void Attack(PartialMap::Context* context, const Vec2& pos, const Vec2& offset, const Vec2& partialMapOffset);
-  void StopSmallAnimations();
-  void StartSmallAnimations();
-  void EnableAnimations(bool enable);
   
-  bool m_enableAnimations = true;
  
 private:
   
@@ -57,7 +52,6 @@ private:
   std::list<cocos2d::Sprite*> m_spritesPull;
   unsigned int m_pullSize;
   float m_updateTime;
-  bool m_enableSmallAnimations;
   
 };
 }

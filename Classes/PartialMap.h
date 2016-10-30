@@ -56,8 +56,7 @@ namespace komorki
       
       void Reset();
       
-      void StopSmallAnimations();
-      void StartSmallAnimations();
+      void EnableSmallAnimations(bool enable);
       void EnableAnimations(bool enable);
       
       void Transfrorm(const cocos2d::Vec2& pos, float scale);
@@ -72,6 +71,7 @@ namespace komorki
       int m_a2;
       int m_b2;
       std::shared_ptr<PixelMapPartial> m_cellMap;
+      bool m_enableAnimations = true;
       
     private:
    
@@ -81,21 +81,22 @@ namespace komorki
       PixelMap::ObjectContext* CreatePolymorphCell(PixelDescriptor* dest);
       void Delete(PixelMap::ObjectContext* context);
       void Move(const Vec2& source, const Vec2& dest, PixelMap::ObjectContext* context, float duration, int steps, Morphing& morphing, CellDescriptor* cd);
-      void Attack(PixelMap::ObjectContext* context, const Vec2& pos, const Vec2& offset);
+      void Attack(PixelMap::ObjectContext* context, const Vec2& pos, const Vec2& offset, float animationDuration);
       
       inline bool IsInAABB(const Vec2& vec);
       inline bool IsInAABB(const int& x, const int& y);
       inline Vec2 LocalVector(const komorki::Vec2& input) const;
 
       std::shared_ptr<PixelDebugView> m_debugView;
-      std::shared_ptr<PixelMapLightOverlay> m_lightOverlay;
+      cocos2d::Sprite* m_lightOverlay;
       std::shared_ptr<PixelMapBackground> m_background;
       std::shared_ptr<GlowMapOverlay> m_glow;
       cocos2d::Sprite* m_terrainSprite;
+      cocos2d::Sprite* m_terrainBgSprite;
       IPixelDescriptorProvider* m_provider;
       std::list<PixelMap::ObjectContext*> m_upcomingContexts;
       std::list<CellDescriptor*> m_outgoingCells;
-      
+      bool m_enableSmallAnimations = false;
     };
   }
 }

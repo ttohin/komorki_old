@@ -23,6 +23,7 @@ namespace komorki
     extern const bool kAnimated;
     extern const bool kRedrawEachUpdate;
     extern const bool kSimpleDraw;
+    extern const float kLightMapScale;
   }
 }
 

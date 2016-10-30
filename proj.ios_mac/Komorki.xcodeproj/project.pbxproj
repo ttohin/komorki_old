@@ -68,6 +68,10 @@
 		8F48DE7A1AB678B40075D222 /* tile_32x32.png in Resources */ = {isa = PBXBuildFile; fileRef = 8F48DE791AB678B40075D222 /* tile_32x32.png */; };
 		8F48DE7B1AB678B40075D222 /* tile_32x32.png in Resources */ = {isa = PBXBuildFile; fileRef = 8F48DE791AB678B40075D222 /* tile_32x32.png */; };
 		8F48DE7D1AB7797B0075D222 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8F48DE7C1AB7797B0075D222 /* Images.xcassets */; };
+		8F4991FC1DBC0C2D00480F13 /* glow_white.png in Resources */ = {isa = PBXBuildFile; fileRef = 8F4991FB1DBC0C2D00480F13 /* glow_white.png */; };
+		8F4991FD1DBC0C2D00480F13 /* glow_white.png in Resources */ = {isa = PBXBuildFile; fileRef = 8F4991FB1DBC0C2D00480F13 /* glow_white.png */; };
+		8F4992001DBC0CCB00480F13 /* StaticLightsSprite.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F4991FE1DBC0CCB00480F13 /* StaticLightsSprite.cpp */; };
+		8F4992011DBC0CCB00480F13 /* StaticLightsSprite.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F4991FE1DBC0CCB00480F13 /* StaticLightsSprite.cpp */; };
 		8F62882A1AD19D8600526404 /* speed1_hl.png in Resources */ = {isa = PBXBuildFile; fileRef = 8F62881D1AD19D8600526404 /* speed1_hl.png */; };
 		8F62882B1AD19D8600526404 /* speed1_hl.png in Resources */ = {isa = PBXBuildFile; fileRef = 8F62881D1AD19D8600526404 /* speed1_hl.png */; };
 		8F62882C1AD19D8600526404 /* speed1_sel.png in Resources */ = {isa = PBXBuildFile; fileRef = 8F62881E1AD19D8600526404 /* speed1_sel.png */; };
@@ -275,6 +279,9 @@
 		8F48DE6C1AB676B50075D222 /* Statistic.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Statistic.hpp; sourceTree = "<group>"; };
 		8F48DE791AB678B40075D222 /* tile_32x32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = tile_32x32.png; sourceTree = "<group>"; };
 		8F48DE7C1AB7797B0075D222 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = "prsv Mac/Images.xcassets"; sourceTree = SOURCE_ROOT; };
+		8F4991FB1DBC0C2D00480F13 /* glow_white.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = glow_white.png; sourceTree = "<group>"; };
+		8F4991FE1DBC0CCB00480F13 /* StaticLightsSprite.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StaticLightsSprite.cpp; sourceTree = "<group>"; };
+		8F4991FF1DBC0CCB00480F13 /* StaticLightsSprite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StaticLightsSprite.h; sourceTree = "<group>"; };
 		8F62881D1AD19D8600526404 /* speed1_hl.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = speed1_hl.png; sourceTree = "<group>"; };
 		8F62881E1AD19D8600526404 /* speed1_sel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = speed1_sel.png; sourceTree = "<group>"; };
 		8F62881F1AD19D8600526404 /* speed1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = speed1.png; sourceTree = "<group>"; };
@@ -495,6 +502,7 @@
 		46880B7519C43A67006E1F66 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				8F4991FB1DBC0C2D00480F13 /* glow_white.png */,
 				8FBF25101DB8D0C400AE7991 /* blank.png */,
 				8F0E4B281BB09B1D00705159 /* example_MultiTexture.fsh */,
 				8FB7C3E81BA49E3D00194722 /* font.png */,
@@ -541,8 +549,6 @@
 				8FFE7FDF1B9F522C008D2289 /* Buffer2D.h */,
 				8FFE7FE01B9F522C008D2289 /* TerrainAnalizer.cpp */,
 				8FFE7FE11B9F522D008D2289 /* TerrainAnalizer.h */,
-				8FFE7FE21B9F522D008D2289 /* TerrainBatchSprite.cpp */,
-				8FFE7FE31B9F522D008D2289 /* TerrainBatchSprite.h */,
 				8FBF24F51DB8CFBE00AE7991 /* PixelProviderConfig.cpp */,
 				8FBF24F61DB8CFBE00AE7991 /* PixelProviderConfig.h */,
 				8FBF24FA1DB8CFBE00AE7991 /* TestPixelProvider.cpp */,
@@ -574,6 +580,10 @@
 				8FDE8CE21B23793E000EE52C /* UIConfig.cpp */,
 				8FDE8CE51B237A29000EE52C /* UICommon.cpp */,
 				8FDE8CE61B237A29000EE52C /* UICommon.h */,
+				8FFE7FE21B9F522D008D2289 /* TerrainBatchSprite.cpp */,
+				8FFE7FE31B9F522D008D2289 /* TerrainBatchSprite.h */,
+				8F4991FE1DBC0CCB00480F13 /* StaticLightsSprite.cpp */,
+				8F4991FF1DBC0CCB00480F13 /* StaticLightsSprite.h */,
 				8FB7C3E11BA495AE00194722 /* LoadingScene.cpp */,
 				8FB7C3E21BA495AE00194722 /* LoadingScene.h */,
 			);
@@ -829,6 +839,7 @@
 				521A8EA919F11F5000D177D7 /* fonts in Resources */,
 				8F6288381AD19D8600526404 /* speed10_sel.png in Resources */,
 				8F12C2281ADEFF3100C14BBE /* button.png in Resources */,
+				8F4991FC1DBC0C2D00480F13 /* glow_white.png in Resources */,
 				8F62882C1AD19D8600526404 /* speed1_sel.png in Resources */,
 				8FEFC7661AD07542001E97A7 /* restartButton_hl.png in Resources */,
 				8F906BBD1ABE099600A8EF90 /* mapBackground.png in Resources */,
@@ -873,6 +884,7 @@
 				8F12C22B1ADEFF3100C14BBE /* buttonDis.png in Resources */,
 				8F62882D1AD19D8600526404 /* speed1_sel.png in Resources */,
 				8F0E4B2A1BB09B1D00705159 /* example_MultiTexture.fsh in Resources */,
+				8F4991FD1DBC0C2D00480F13 /* glow_white.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -918,6 +930,7 @@
 				8FDE8CE71B237A29000EE52C /* UICommon.cpp in Sources */,
 				503AE10117EB989F00D1A890 /* main.m in Sources */,
 				8FBF25221DBA882000AE7991 /* GenomsGenerator.cpp in Sources */,
+				8F4992001DBC0CCB00480F13 /* StaticLightsSprite.cpp in Sources */,
 				8FDE8CDC1B23742E000EE52C /* PixelMapPartial.cpp in Sources */,
 				8FDE8CD91B237033000EE52C /* PartialMap.cpp in Sources */,
 				8FDE8CCB1B232531000EE52C /* ShaderLayer.cpp in Sources */,
@@ -973,6 +986,7 @@
 				8FDE8CFE1B2462F4000EE52C /* Viewport.cpp in Sources */,
 				8FDE8CDD1B23742E000EE52C /* PixelMapPartial.cpp in Sources */,
 				8FDE8CE81B237A29000EE52C /* UICommon.cpp in Sources */,
+				8F4992011DBC0CCB00480F13 /* StaticLightsSprite.cpp in Sources */,
 				8FDE8CE41B23793E000EE52C /* UIConfig.cpp in Sources */,
 				8F108B1B1AF8241900580096 /* CellDescriptor.cpp in Sources */,
 				8FDE8CF31B23AD8A000EE52C /* GlowMapOverlay.cpp in Sources */,
