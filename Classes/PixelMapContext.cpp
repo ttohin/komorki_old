@@ -84,6 +84,7 @@ namespace PixelMap
     m_offset = RandomVectorOffset();
     m_size = rect.size;
     m_pos = GetPosInOwnerBase(origin);
+    m_textureRect = textureRect;
     
     cocos2d::Vec2 rectOffset = spriteVector(m_size) * 0.5;
     

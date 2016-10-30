@@ -1023,8 +1023,8 @@ void ProcessUniversalCell(CellDescriptor* cd,
   if ((cd->parent->x == cd->m_m1 &&
        cd->parent->y == cd->m_m2) || cd->m_m1 == 0 || cd->m_m2 == 0 || cd->m_m3 == 0)
   {
-    cd->m_m1 = cRandABInt(0, map[0].size());
-    cd->m_m2 = cRandABInt(0, map[0].size());
+    cd->m_m1 = cRandABInt(pos.x - 10, pos.x + 10);
+    cd->m_m2 = cRandABInt(pos.y - 10, pos.y + 10);
     cd->m_m3 = 50;
   }
   

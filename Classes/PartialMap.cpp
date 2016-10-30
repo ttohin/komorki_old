@@ -121,8 +121,8 @@ bool PartialMap::Init(int a, int b, int width, int height,
   m_terrainSprite->setPosition(offset);
   m_terrainBgSprite->setPosition(offset);
   
-  superView->addChild(m_background.get(), -1);
-  superView->addChild(m_terrainBgSprite, 0);
+  superView->addChild(m_terrainBgSprite, -1);
+  superView->addChild(m_background.get(), 0);
   superView->addChild(m_cellMap.get(), 1);
   superView->addChild(m_terrainSprite, 2);
   lightNode->addChild(m_lightOverlay, 3);
@@ -205,8 +205,11 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
     return;
   }
   
+  m_background->Update(updateResult,updateTime);
+  m_debugView->Update(updateResult,updateTime);
   m_cellMap->SetUpdateTime(updateTime);
   m_glow->SetUpdateTime(updateTime);
+
   
   for (auto& u : updateResult)
   {
@@ -346,8 +349,7 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
     }
   }
   
-  m_background->Update(updateResult,updateTime);
-  m_debugView->Update(updateResult,updateTime);
+
 }
   
   void PartialMap::HightlightCellOnPos(int x, int y, komorki::CellType type)

@@ -109,6 +109,12 @@ USING_NS_CC;
     return result;
   }
   
+  cocos2d::Vec2 spriteVectorWithOutOffset(const komorki::Vec2& vec, const cocos2d::Vec2& vector)
+  {
+    auto result = cocos2d::Vec2(((int)vec.x) * kSpritePosition, ((int)vec.y ) * kSpritePosition) + vector;
+    return result;
+  }
+  
   cocos2d::Vec2 PixelMapBackground::spriteVector(komorki::PixelDescriptor* pd, const cocos2d::Vec2& vector)
   {
     auto result = cocos2d::Vec2(((int)pd->x - m_a1) * kSpritePosition, ((int)pd->y - m_b1) * kSpritePosition) + vector;
@@ -132,18 +138,36 @@ USING_NS_CC;
       {
         if (ANIMATED && ANIMATE_DEAD_CELLS)
         {
-          auto deadCellSprite = spriteDeadCell(u.deleteCreature.value.cellDescriptor.get());
-          
-          auto offset = RandomVectorOffset();
-          deadCellSprite->setPosition(spriteVector(pos, offset));
-          
-          auto fade = FadeTo::create(10, 0);
-          auto removeSelf = CallFunc::create([this, deadCellSprite]()
-                                             {
-                                               this->RemoveSprite(deadCellSprite);
-                                             });
-          
-          deadCellSprite->runAction(Sequence::createWithTwoActions(fade, removeSelf));
+          auto context = static_cast<PixelMap::ObjectContext*>(u.deleteCreature.value.cellDescriptor->userData);
+          if (context && context->GetType() == PixelMap::ContextType::SinglePixel)
+          {
+            auto singleCellContext = static_cast<PixelMap::SingleCellContext*>(context);
+            
+            auto posOffset = singleCellContext->m_posOffset;
+            auto offset = singleCellContext->m_offset;
+            auto size = singleCellContext->m_size;
+            auto pos = singleCellContext->m_pos;
+            
+            cocos2d::Vec2 rectOffset = spriteVectorWithOutOffset(size, {0, 0}) * 0.5;
+            
+            auto s = CreateSprite();
+            s->setTextureRect(singleCellContext->m_textureRect);
+            s->setScale(kSpriteScale);
+            s->setAnchorPoint({0.5, 0.5});
+            
+            s->setPosition(spriteVectorWithOutOffset(pos + posOffset, offset + rectOffset));
+            s->setTag(static_cast<int>(komorki::PixelDescriptor::CreatureType));
+            s->setColor(cocos2d::Color3B(20, 20, 20));
+            s->setOpacity(110);
+            
+            auto fade = FadeTo::create(5, 0);
+            auto removeSelf = CallFunc::create([this, s]()
+                                               {
+                                                 this->RemoveSprite(s);
+                                               });
+            
+            s->runAction(Sequence::createWithTwoActions(fade, removeSelf));
+          }
         }
         
         continue;
@@ -154,12 +178,16 @@ USING_NS_CC;
   
   bool PixelMapBackground::init()
   {
-    if ( !SpriteBatchNode::initWithFile ("tile_32x32.png", 10))
+    std::string mapName = "Komorki/tmp/cells.png";
+    
+    mapName = cocos2d::FileUtils::getInstance()->getWritablePath() + mapName;
+    
+    if ( !SpriteBatchNode::initWithFile (mapName, 20))
     {
       return false;
     }
     
-    Reset();
+    getTexture()->setAliasTexParameters();
     
     return true;
   }
