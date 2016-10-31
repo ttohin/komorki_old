@@ -10,6 +10,7 @@
 #define prsv_UIConfig_h
 
 #include "cocos2d.h"
+#include "Common.h"
 
 namespace komorki
 {
@@ -25,6 +26,8 @@ namespace komorki
     extern const bool kSimpleDraw;
     extern const float kLightMapScale;
     extern const unsigned int kNumberOfUpdatesOnStartup;
+    extern const komorki::Vec2 kCellsTextureSizeInPixels;
+    extern const unsigned int kCellShapeSegments;
   }
 }
 

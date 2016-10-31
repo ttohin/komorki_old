@@ -13,6 +13,11 @@
 #include "TerrainBatchSprite.h"
 #include "StaticLightsSprite.h"
 
+#include "SharedUIData.h"
+#include "CellCanvasSprite.h"
+#include "ShapeAnalizer.hpp"
+#include "ShapesGenerator.h"
+
 bool LoadingScene::init()
 {
   if ( !Layer::init() )
@@ -25,17 +30,14 @@ bool LoadingScene::init()
   Size visibleSize = Director::getInstance()->getVisibleSize();
   Vec2 origin = Director::getInstance()->getVisibleOrigin();
   
- 
   m_info = CreateLabel("Loading", Vec2(visibleSize.width / 2, visibleSize.height / 2));
   addChild(m_info, 999);
-  
-  m_mapLoader = std::make_shared<AsyncMapLoader>();
   
   Director::getInstance()->getTextureCache()->addImage("tile_32x32.png");
   Director::getInstance()->getTextureCache()->addImage("ground.png");
   Director::getInstance()->getTextureCache()->addImage("debugFrames.png");
-  
-  schedule(schedule_selector(LoadingScene::timerForUpdate), 0, kRepeatForever, 0);
+
+  schedule(schedule_selector(LoadingScene::LoadCellShapes), 0, 0, 0);
   
   return true;
 }
@@ -98,7 +100,7 @@ void LoadingScene::SaveTerrain(const TerrainAnalizer::Result& terrainAnalizerRes
                    if (m_mapList.empty())
                    {
                      m_info->setString("Loading light map");
-                     schedule(schedule_selector(LoadingScene::LoadLightMaps), 0, 1, 0);
+                     schedule(schedule_selector(LoadingScene::LoadLightMaps), 0, 0, 0);
                    }
                    
                  });
@@ -114,7 +116,7 @@ void LoadingScene::LoadTerrainMaps(float dt)
   
   auto sharedFileUtils = FileUtils::getInstance();
   
-  const std::string mapDirName = "Komorki/tmp";
+  const std::string mapDirName = "Komorki/tmp/terrain";
   const std::string mapDir = sharedFileUtils->getWritablePath() + mapDirName;
   bool ok = sharedFileUtils->createDirectory(mapDir);
   assert(ok && sharedFileUtils->isDirectoryExist(mapDir));
@@ -145,7 +147,6 @@ void LoadingScene::LoadTerrainMaps(float dt)
     
     SaveTerrain(terrainAnalizerResult, rect, "bg", mapDirName);
   }
-
 }
 
 void LoadingScene::LoadLightMaps(float dt)
@@ -196,14 +197,103 @@ void LoadingScene::LoadLightMaps(float dt)
                      if (m_mapList.empty())
                      {
                        m_info->setString("Loading viewport");
-                       schedule(schedule_selector(LoadingScene::CreateViewport), 0, 1, 0);
+                       schedule(schedule_selector(LoadingScene::CreateViewport), 0, 0, 0);
                      }
                      
                    });
-    
-    
-    
   }
+}
+
+void DrawCellShapes(cocos2d::Renderer* renderer, const Mat4& parentTransform)
+{
+  komorki::ShapesGenerator gen;
+  const komorki::Vec2 maxTextureSize = komorki::ui::kCellsTextureSizeInPixels;
+  
+  komorki::Vec2 currentPos;
+  komorki::PixelPos line = 0;
+  
+  while (1)
+  {
+    auto result = gen.GenerateNext();
+    auto shape = result.shape;
+    komorki::Rect aabb = shape->GetAABB();
+    if (currentPos.x + aabb.size.x >= maxTextureSize.x)
+    {
+      currentPos.x = 0;
+      currentPos.y = line;
+    }
+    if (currentPos.y + aabb.size.y >= maxTextureSize.y)
+    {
+      break;
+    }
+    
+    auto cellCanvas = new CellCanvasSprite();
+    cellCanvas->init();
+    
+    line = std::max(line, currentPos.y + aabb.size.y);
+    
+    auto originalBuffer = std::make_shared<Buffer2D<bool>>(aabb.size.x, aabb.size.y);
+    originalBuffer->Fill(false);
+    
+    shape->ForEach([&](komorki::PixelDescriptor* pd, bool& stop)
+                   {
+                     auto pos = pd->GetPos();
+                     pos = pos - aabb.origin;
+                     originalBuffer->Set(pos.x, pos.y, true);
+                   });
+    
+    unsigned int scale = komorki::ui::kCellShapeSegments;
+    komorki::ShapeAnalizer analizer(originalBuffer, scale);
+    
+    cellCanvas->SetBuffer(analizer.m_result, komorki::Vec2(currentPos.x * scale, currentPos.y * scale));
+    
+    cocos2d::Rect textureRect((currentPos.x) * scale * CellCanvasSprite::kSpriteSize,
+                              (maxTextureSize.y - currentPos.y - aabb.size.y) * scale * CellCanvasSprite::kSpriteSize,
+                              aabb.size.x * scale * CellCanvasSprite::kSpriteSize,
+                              aabb.size.y * scale * CellCanvasSprite::kSpriteSize);
+    
+    currentPos.x += aabb.size.x;
+    
+    komorki::Genom::GroupIdType groupId;
+    if (komorki::ui::SharedUIData::getInstance()->m_genomsGenerator->AddShape(result, groupId))
+    {
+      komorki::ui::SharedUIData::getInstance()->m_textureMap[groupId] = textureRect;
+    }
+    
+    cellCanvas->visit(renderer, parentTransform, true);
+    cellCanvas->release();
+  }
+}
+
+void LoadingScene::LoadCellShapes(float dt)
+{
+  auto sharedFileUtils = FileUtils::getInstance();
+  
+  const std::string mapDirName = "Komorki/tmp";
+  const std::string mapDir = sharedFileUtils->getWritablePath() + mapDirName;
+  bool ok = sharedFileUtils->createDirectory(mapDir);
+  assert(ok && sharedFileUtils->isDirectoryExist(mapDir));
+  
+  Vec2 origin = Director::getInstance()->getVisibleOrigin();
+  
+  auto renderer = _director->getRenderer();
+  auto& parentTransform = _director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
+  
+  auto rt = RenderTexture::create(komorki::ui::kCellShapeSegments * komorki::ui::kCellsTextureSizeInPixels.x * CellCanvasSprite::kSpriteSize,
+                                  komorki::ui::kCellShapeSegments * komorki::ui::kCellsTextureSizeInPixels.y * CellCanvasSprite::kSpriteSize);
+  
+  rt->begin();
+  DrawCellShapes(renderer, parentTransform);
+  rt->end();
+  
+  std::string mapName = mapDirName + "/cells";
+  mapName += ".png";
+  
+  rt->saveToFile(mapName, true, [&](RenderTexture*, const std::string& image)
+                 {
+                     m_mapLoader = std::make_shared<AsyncMapLoader>();
+                     schedule(schedule_selector(LoadingScene::timerForUpdate), 0, kRepeatForever, 0);
+                 });
 }
 
 void LoadingScene::CreateViewport(float dt)

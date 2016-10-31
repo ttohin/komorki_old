@@ -7,12 +7,13 @@
 //
 
 #include "TestSampleShapesScene.h"
-#include "CellCanvasSprite.h"
 #include "LoadingScene.h"
 #include "SharedUIData.h"
+#include "CellCanvasSprite.h"
 #include "ShapeAnalizer.hpp"
 #include "ShapesGenerator.h"
 #include <iostream>
+#include "UIConfig.h"
 
 
 CellCanvasSprite* CreateSimpleCanvasWithSqareCells()
@@ -77,7 +78,7 @@ CellCanvasSprite* CreateCanvasWithGenomsGenerator()
   auto cellCanvas = new CellCanvasSprite();
   cellCanvas->init();
   
-  komorki::Vec2 maxTextureSize(16, 16);
+  const komorki::Vec2 maxTextureSize = komorki::ui::kCellsTextureSizeInPixels;
   
   komorki::Vec2 currentPos;
   komorki::PixelPos line = 0;
@@ -109,7 +110,7 @@ CellCanvasSprite* CreateCanvasWithGenomsGenerator()
                      originalBuffer->Set(pos.x, pos.y, true);
                    });
     
-    unsigned int scale = 4;
+    unsigned int scale = komorki::ui::kCellShapeSegments;
     komorki::ShapeAnalizer analizer(originalBuffer, scale);
     
     cellCanvas->SetBuffer(analizer.m_result, komorki::Vec2(currentPos.x * scale, currentPos.y * scale));
@@ -160,8 +161,8 @@ bool TestSampleShapesScene::init()
   auto renderer = _director->getRenderer();
   auto& parentTransform = _director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
   
-  auto rt = RenderTexture::create(512,
-                                  512);
+  auto rt = RenderTexture::create(komorki::ui::kCellShapeSegments * komorki::ui::kCellsTextureSizeInPixels.x * CellCanvasSprite::kSpriteSize,
+                                  komorki::ui::kCellShapeSegments * komorki::ui::kCellsTextureSizeInPixels.y * CellCanvasSprite::kSpriteSize);
   
   rt->begin();
   cellCanvas->visit(renderer, parentTransform, true);

@@ -45,6 +45,7 @@ public:
                    const std::string& mapDirName);
   void LoadTerrainMaps(float dt);
   void LoadLightMaps(float dt);
+  void LoadCellShapes(float dt);
   void CreateViewport(float dt);
  
 private:

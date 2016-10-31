@@ -43,8 +43,8 @@ bool AppDelegate::applicationDidFinishLaunching()
   director->setDisplayStats(true);
   
   director->setAnimationInterval(1.0 / 60);
-//  auto scene = LoadingScene::createScene();
-  auto scene = TestSampleShapesScene::createScene();
+  auto scene = LoadingScene::createScene();
+//  auto scene = TestSampleShapesScene::createScene();
   director->runWithScene(scene);
   
   return true;

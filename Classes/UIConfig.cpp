@@ -22,5 +22,7 @@ namespace komorki
     const bool kSimpleDraw = false;
     const float kLightMapScale = 4.f;
     const unsigned int kNumberOfUpdatesOnStartup = 100;
+    const komorki::Vec2 kCellsTextureSizeInPixels = komorki::Vec2(32, 32);
+    const unsigned int kCellShapeSegments = 4;
   }
 }
