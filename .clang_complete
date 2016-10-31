@@ -1,0 +1,6 @@
+-IClasses
+-Icocos2d/cocos/2d
+-Icocos2d/cocos/renderer
+-Icocos2d/cocos/platform
+-std=c++11
+-stdlib=libc++
