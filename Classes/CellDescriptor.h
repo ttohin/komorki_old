@@ -37,6 +37,7 @@ struct Genom
   int m_lightFood;
   int m_passiveHealthIncome;
   int m_healthPerAttach;
+  int m_volume = 1;
 };
   
 struct Transaction

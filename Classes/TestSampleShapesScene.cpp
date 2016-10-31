@@ -40,7 +40,7 @@ CellCanvasSprite* CreateSimpleCanvasWithSqareCells()
   
   for (int i = 0; i < 32; ++i) {
     for (int j = 0; j < 32; ++j) {
-      cellCanvas->SetBuffer(analizer.m_result, komorki::Vec2(i * scale, j * scale));
+      cellCanvas->SetBuffer(analizer.m_result, komorki::Vec2(i * scale, j * scale), true);
     }
   }
   
@@ -66,8 +66,8 @@ CellCanvasSprite* CreateExperimentalCanvas()
   auto cellCanvas = new CellCanvasSprite();
   cellCanvas->init();
   
-  cellCanvas->SetBuffer(analizer.m_result, komorki::Vec2(0, 0));
-  cellCanvas->SetBuffer(analizer.m_result, komorki::Vec2(5 * scale, 0));
+  cellCanvas->SetBuffer(analizer.m_result, komorki::Vec2(0, 0), true);
+  cellCanvas->SetBuffer(analizer.m_result, komorki::Vec2(5 * scale, 0), true);
   
   return cellCanvas;
 }
@@ -113,7 +113,7 @@ CellCanvasSprite* CreateCanvasWithGenomsGenerator()
     unsigned int scale = komorki::ui::kCellShapeSegments;
     komorki::ShapeAnalizer analizer(originalBuffer, scale);
     
-    cellCanvas->SetBuffer(analizer.m_result, komorki::Vec2(currentPos.x * scale, currentPos.y * scale));
+    cellCanvas->SetBuffer(analizer.m_result, komorki::Vec2(currentPos.x * scale, currentPos.y * scale), true);
     
     cocos2d::Rect textureRect((currentPos.x) * scale * CellCanvasSprite::kSpriteSize,
                               (maxTextureSize.y - currentPos.y - aabb.size.y) * scale * CellCanvasSprite::kSpriteSize,

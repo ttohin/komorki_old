@@ -54,16 +54,21 @@ namespace komorki
     g.m_lightFood = cRandABInt(1, 15);
     g.m_passiveHealthIncome = cRandABInt(0, 10);
     g.m_healthPerAttach = cRandABInt(10, 100);
+    
+    if (g.m_shapeType == ShapeType::eShapeTypeAmorph)
+    {
+      g.m_volume = cRandABInt(4, 8);
+    }
   }
   
   Genom GenomsGenerator::GenerateGenom(Genom::GroupIdType groupId, const ShapesGenerator::ResultItem &shape) const
   {
     Genom g;
     g.m_groupId = groupId;
-    UpdateGenomState(g);
-    
     g.m_shape = shape.shape;
     g.m_shapeType = shape.type;
+    
+    UpdateGenomState(g);
     
     return g;
   }

@@ -87,9 +87,9 @@ namespace komorki
   {
     std::shared_ptr<IShape> shape;
     
-    unsigned int numberOfShapes = 4;
+    unsigned int numberOfShapes = 5;
     unsigned int shapeIndex = cRandABInt(0, numberOfShapes);
-//    shapeIndex = 2;
+//    shapeIndex = 4;
     if (0 == shapeIndex)
     {
       shape = std::make_shared<SinglePixel>(pd);
@@ -111,6 +111,11 @@ namespace komorki
     {
       shape = CompactShape(pd);
       outShapeType = ShapeType::eShapeTypeFixed;
+    }
+    else if (4 == shapeIndex)
+    {
+      shape = std::make_shared<PolymorphShape>(pd, 1);
+      outShapeType = ShapeType::eShapeTypeAmorph;
     }
     else
     {

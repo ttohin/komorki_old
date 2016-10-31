@@ -21,7 +21,9 @@ public:
   
   virtual ~CellCanvasSprite() {}
   virtual bool init();
-  void SetBuffer(const komorki::ShapeAnalizer::ResultBuffer& buffer, komorki::Vec2ConstRef offset);
+  void SetBuffer(const komorki::ShapeAnalizer::ResultBuffer& buffer,
+                 komorki::Vec2ConstRef offset,
+                 bool drowCorner);
   
 private:
   void AddDebugSprites(int x, int y, const komorki::ShapeAnalizer::Part& value);

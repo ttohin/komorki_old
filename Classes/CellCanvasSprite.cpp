@@ -329,12 +329,21 @@ void CellCanvasSprite::AddSimpleSprites(int _x, int _y, const komorki::ShapeAnal
   }
 }
 
-void CellCanvasSprite::SetBuffer(const komorki::ShapeAnalizer::ResultBuffer& buffer, komorki::Vec2ConstRef offset)
+void CellCanvasSprite::SetBuffer(const komorki::ShapeAnalizer::ResultBuffer& buffer,
+                                 komorki::Vec2ConstRef offset,
+                                 bool drowCorner)
 {
   m_bodyColor = BodyColor();
-  m_borderColor.r = m_bodyColor.r * 0.3;
-  m_borderColor.g = m_bodyColor.g * 0.3;
-  m_borderColor.b = m_bodyColor.b * 0.3;
+  
+  if (drowCorner)
+  {
+    m_borderColor.r = m_bodyColor.r * 0.3;
+    m_borderColor.g = m_bodyColor.g * 0.3;
+    m_borderColor.b = m_bodyColor.b * 0.3;
+  }
+  else{
+    m_borderColor = m_bodyColor;
+  }
   
   buffer->ForEach([&](int _x, int _y, const komorki::ShapeAnalizer::Part& value){
     this->AddSimpleSprites(offset.x + _x, offset.y + _y, value);

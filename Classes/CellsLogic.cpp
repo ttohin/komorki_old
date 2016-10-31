@@ -945,7 +945,6 @@ bool AmorphShapeStepTo(CellDescriptor* cd,
   
   PolymorphShape* shape = static_cast<PolymorphShape*>(cd->GetShape());
   
-  
   for (auto& pd : toInsert)
   {
     shape->AddPixel(pd);
@@ -1000,6 +999,50 @@ bool StepTo(CellDescriptor* cd,
   return false;
 }
   
+bool GrowAmorphCellIfNeeded(CellDescriptor* cd,
+                            Optional<Morphing>& morph)
+{
+  if (cd->m_genom.m_shapeType == ShapeType::eShapeTypeAmorph
+      && cd->m_genom.m_volume != cd->GetShape()->Size())
+  {
+    cd->AroundRandom([&](PixelDescriptor* targetPd, bool& stop) {
+      
+      Morph m;
+      m.dir = Morph::Outside;
+      m.pos = targetPd->GetPos();
+      
+      if (targetPd->IsEmpty())
+      {
+        targetPd->Around([&](PixelDescriptor* findCellTargetPd, bool& stop) {
+          if (findCellTargetPd->m_cellDescriptor == cd)
+          {
+            stop = true;
+            targetPd->Offset(findCellTargetPd, m.delta); // calculate offset for closer cell pixel
+          }
+        });
+        
+        targetPd->m_cellDescriptor = cd;
+        
+        PolymorphShape* shape = static_cast<PolymorphShape*>(cd->GetShape());
+        shape->AddPixel(targetPd);
+        targetPd->m_type = PixelDescriptor::CreatureType;
+        
+        morph.value.vec.push_back(m);
+        morph.SetValueFlag(true);
+        
+        stop = true;
+      }
+    });
+    
+    if (morph == true)
+    {
+      return true;
+    }
+  }
+  
+  return false;
+}
+  
 void ProcessUniversalCell(CellDescriptor* cd,
                          Vec2 pos,
                          Config* config,
@@ -1019,6 +1062,11 @@ void ProcessUniversalCell(CellDescriptor* cd,
     cd->m_sleepCounter = cd->m_genom.m_sleepTime;
   }
   
+  if (GrowAmorphCellIfNeeded(cd, morph))
+  {
+    return;
+  }
+  
   // using memory to store destination (1, 2) and number of steps (2)
   if ((cd->parent->x == cd->m_m1 &&
        cd->parent->y == cd->m_m2) || cd->m_m1 == 0 || cd->m_m2 == 0 || cd->m_m3 == 0)
@@ -1029,7 +1077,6 @@ void ProcessUniversalCell(CellDescriptor* cd,
   }
   
   cd->m_m3 -= 1;
-  
   
   PixelDescriptor* enemyPd = nullptr;
   PixelDescriptor* frientPd = nullptr;
@@ -1147,7 +1194,6 @@ void ProcessCell(CellDescriptor* d,
                        a,
                        morph,
                        changeRect);
-
 }
 
 } // namespace komorki;

@@ -295,6 +295,7 @@ void PolymorphShape::ForEach(const PerPixelFunc& op) const
 //***************************************************************
 PolymorphShape::PolymorphShape(PixelDescriptor* pd, int numberOfPixels) : m_pd(pd)
 {
+  m_pd = pd;
   m_shape.push_back(pd);
   
   if (numberOfPixels > 1)
@@ -306,7 +307,6 @@ PolymorphShape::PolymorphShape(PixelDescriptor* pd, int numberOfPixels) : m_pd(p
                });
 
   }
-  
 }
 
 PolymorphShape::PolymorphShape(PixelDescriptor* pd, const std::vector<PixelDescriptor*>& pixels)

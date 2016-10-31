@@ -102,7 +102,7 @@ void LoadingScene::SaveTerrain(const TerrainAnalizer::Result& terrainAnalizerRes
                      m_info->setString("Loading light map");
                      schedule(schedule_selector(LoadingScene::LoadLightMaps), 0, 0, 0);
                    }
-                   
+
                  });
 }
 
@@ -245,7 +245,9 @@ void DrawCellShapes(cocos2d::Renderer* renderer, const Mat4& parentTransform)
     unsigned int scale = komorki::ui::kCellShapeSegments;
     komorki::ShapeAnalizer analizer(originalBuffer, scale);
     
-    cellCanvas->SetBuffer(analizer.m_result, komorki::Vec2(currentPos.x * scale, currentPos.y * scale));
+    bool drowCorner = result.type != komorki::ShapeType::eShapeTypeAmorph;
+    
+    cellCanvas->SetBuffer(analizer.m_result, komorki::Vec2(currentPos.x * scale, currentPos.y * scale), drowCorner);
     
     cocos2d::Rect textureRect((currentPos.x) * scale * CellCanvasSprite::kSpriteSize,
                               (maxTextureSize.y - currentPos.y - aabb.size.y) * scale * CellCanvasSprite::kSpriteSize,

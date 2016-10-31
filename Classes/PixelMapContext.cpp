@@ -273,12 +273,15 @@ namespace PixelMap
     auto s = m_owner->m_cellMap->CreateSprite();
     s->setTextureRect(m_textureRect);
     s->setScale(kSpriteScale);
-    s->setAnchorPoint({0, 0});
-    s->setPosition(spriteVector(GetPosInOwnerBase(pos), m_offset));
+    s->setAnchorPoint({0.5, 0.5});
+    s->setScale(kSpriteScale);
+    
+    cocos2d::Vec2 rectOffset = spriteVector({1, 1}) * 0.5;
+    s->setPosition(rectOffset + spriteVector(GetPosInOwnerBase(pos), m_offset));
     s->setTag(static_cast<int>(komorki::PixelDescriptor::CreatureType + 10));
     
     SetSprite(s, pos.x, pos.y);
-    s->setScale(kSpriteScale * 1.2);
+    
   }
   
   void AmorphCellContext::MoveAmorphCells(Vec2ConstRef source,
@@ -309,6 +312,7 @@ namespace PixelMap
                                      m.pos.y);
       }
      
+      cocos2d::Vec2 rectOffset = spriteVector({1, 1}) * 0.5;
       bool isNewSprite = false;
       if (polymoprhContext.sprite == nullptr)
       {
@@ -316,8 +320,9 @@ namespace PixelMap
         auto s = CreateSprite();
         s->setTextureRect(m_textureRect);
         s->setScale(kSpriteScale);
-        s->setAnchorPoint({0, 0});
-        s->setPosition(spriteVector(GetPosInOwnerBase(m.pos), m_offset));
+        s->setAnchorPoint({0.5, 0.5});
+        
+        s->setPosition(rectOffset + spriteVector(GetPosInOwnerBase(m.pos), m_offset));
         s->setTag(static_cast<int>(komorki::PixelDescriptor::CreatureType + 10));
         
         polymoprhContext.sprite = s;
@@ -331,13 +336,13 @@ namespace PixelMap
       if (m_owner->m_enableAnimations)
       {
         polymoprhContext.sprite->stopAllActionsByTag(0);
-        polymoprhContext.sprite->setPosition(spriteVector(GetPosInOwnerBase(pos)));
-        auto moveTo = cocos2d::MoveTo::create(animationDuration, spriteVector(GetPosInOwnerBase(pos + offset)));
+        polymoprhContext.sprite->setPosition(rectOffset + spriteVector(GetPosInOwnerBase(pos)));
+        auto moveTo = cocos2d::MoveTo::create(animationDuration, rectOffset + spriteVector(GetPosInOwnerBase(pos + offset)));
         
         if (m.dir == Morph::Inside)
         {
           auto removeSelf = cocos2d::FadeOut::create(animationDuration);
-          auto removeSeq = cocos2d::Sequence::createWithTwoActions(moveTo, removeSelf);
+          auto removeSeq = cocos2d::Spawn::createWithTwoActions(moveTo, removeSelf);
           polymoprhContext.sprite->runAction(removeSeq);
           removeSeq->setTag(0);
           if (!isNewSprite) {
@@ -350,11 +355,11 @@ namespace PixelMap
           moveTo->setTag(0);
         }
         
-        polymoprhContext.sprite->setScale(kSpriteScale * 1.2);
+        polymoprhContext.sprite->setScale(kSpriteScale);
       }
       else
       {
-        polymoprhContext.sprite->setPosition(spriteVector(GetPosInOwnerBase(pos + offset)));
+        polymoprhContext.sprite->setPosition(rectOffset + spriteVector(GetPosInOwnerBase(pos + offset)));
       }
     }
     
@@ -434,7 +439,9 @@ namespace PixelMap
       m_owner->m_cellMap->addChild(source);
       source->release();
       
-      source->setPosition(spriteVector(GetPosInOwnerBase(s.second.pos), m_offset));
+      cocos2d::Vec2 rectOffset = spriteVector({1, 1}) * 0.5;
+      
+      source->setPosition(rectOffset + spriteVector(GetPosInOwnerBase(s.second.pos), m_offset));
     }
   }
   
