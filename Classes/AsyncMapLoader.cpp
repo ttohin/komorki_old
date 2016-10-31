@@ -10,6 +10,7 @@
 #include "ConfigManager.h"
 #include "TestPixelProvider.h"
 #include "SharedUIData.h"
+#include "UIConfig.h"
 
 USING_NS_CC;
 
@@ -45,7 +46,7 @@ void AsyncMapLoader::WorkerThread()
   
   SetCurrentJobString("Runnig few generations");
   std::list<komorki::PixelDescriptorProvider::UpdateResult> result;
-  for (int i = 0; i < 0; i++)
+  for (int i = 0; i < komorki::ui::kNumberOfUpdatesOnStartup; i++)
   {
     m_provider->Update(false, result);
   }

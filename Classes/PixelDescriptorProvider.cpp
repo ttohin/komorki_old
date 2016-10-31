@@ -105,8 +105,8 @@ Config::Config()
 //  this->percentOfBlue = 0.2;
   
   this->terrainSize = 8;
-  this->mapWidth = 300;
-  this->mapHeight = 200;
+  this->mapWidth = 500;
+  this->mapHeight = 300;
   
   this->green.health = 501;
   this->green.sleepTime = 2;

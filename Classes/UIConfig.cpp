@@ -21,5 +21,6 @@ namespace komorki
     const bool kRedrawEachUpdate = false;
     const bool kSimpleDraw = false;
     const float kLightMapScale = 4.f;
+    const unsigned int kNumberOfUpdatesOnStartup = 100;
   }
 }

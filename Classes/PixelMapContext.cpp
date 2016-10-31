@@ -185,7 +185,6 @@ namespace PixelMap
   void SingleCellContext::Attack(const Vec2& pos, const Vec2& attackOffset, float animationDuration)
   {
     Vec2 localSrc = GetPosInOwnerBase(pos);
-    Vec2 localDest = GetPosInOwnerBase(pos + attackOffset);
     
     cocos2d::Vec2 offset = m_offset;
     cocos2d::Vec2 rectOffset = spriteVector(m_size) * 0.5;
@@ -194,9 +193,9 @@ namespace PixelMap
     {
       m_sprite->stopAllActionsByTag(10);
       m_sprite->setPosition(spriteVector(localSrc + m_posOffset, offset + rectOffset));
-      auto m1 = cocos2d::MoveTo::create(animationDuration * 0.3, spriteVector(localDest + m_posOffset, offset + rectOffset));
+      auto m1 = cocos2d::MoveTo::create(animationDuration * 0.3, 0.5 * spriteVector(attackOffset) + spriteVector(localSrc + m_posOffset, offset + rectOffset));
       auto m2 = cocos2d::MoveTo::create(animationDuration * 0.3, spriteVector(localSrc + m_posOffset, offset + rectOffset));
-      auto s1 = cocos2d::ScaleTo::create(animationDuration*0.3, kSpriteScale * 1.5, kSpriteScale * 1.5);
+      auto s1 = cocos2d::ScaleTo::create(animationDuration*0.3, kSpriteScale * 1.2, kSpriteScale * 1.2);
       auto s2 = cocos2d::ScaleTo::create(animationDuration*0.3, kSpriteScale, kSpriteScale);
       auto spawn1 = cocos2d::Spawn::createWithTwoActions(m1, s1);
       auto spawn2 = cocos2d::Spawn::createWithTwoActions(m2, s2);
