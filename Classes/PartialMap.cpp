@@ -269,7 +269,8 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
     }
     else if (u.morph == true && m == false)
     {
-      static_cast<PixelMap::AmorphCellContext*>(context)->MoveAmorphCells(initialPos, u.morph.value, updateTime * 0.9);
+      auto aabb = u.desc->m_cellDescriptor->GetShape()->GetAABB();
+      static_cast<PixelMap::AmorphCellContext*>(context)->MoveAmorphCells(initialPos, u.morph.value, aabb, updateTime * 0.9);
     }
     else if (m == true || u.addCreature == true)
     {
@@ -482,13 +483,14 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
       auto groupId = dest->m_cellDescriptor->m_genom.m_groupId;
       auto textureRect = komorki::ui::SharedUIData::getInstance()->m_textureMap[groupId];
       auto c = new PixelMap::AmorphCellContext(this, textureRect);
+      auto aabb = dest->m_cellDescriptor->GetShape()->GetAABB();
       
       dest->m_cellDescriptor->Shape([&](PixelDescriptor* pd, bool& stop)
                 {
-                  c->AddSprite(pd->GetPos());
+                  c->AddSprite(aabb, pd->GetPos());
                 });
       
-      c->MoveAmorphCells(source, morphing, duration * 0.9);
+      c->MoveAmorphCells(source, morphing, aabb, duration * 0.9);
       c->EnableSmallAnimations(m_enableSmallAnimations);
       context = c;
     }
@@ -528,11 +530,12 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
                         float duration,
                         int steps,
                         komorki::Morphing &morphing,
-                        komorki::CellDescriptor *cd)
+                        komorki::CellDescriptor* cd)
   {
     if (context->GetType() == PixelMap::ContextType::ManyPixels)
     {
-      static_cast<PixelMap::AmorphCellContext*>(context)->MoveAmorphCells(source, morphing, duration*0.9*(steps + 1));
+      auto aabb = cd->GetShape()->GetAABB();
+      static_cast<PixelMap::AmorphCellContext*>(context)->MoveAmorphCells(source, morphing, aabb, duration*0.9*(steps + 1));
       return;
     }
     

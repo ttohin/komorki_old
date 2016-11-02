@@ -599,7 +599,7 @@ void PartialMapScene::timerForUpdate(float dt)
       m_viewport->Reset();
     }
     
-    float updateTime = m_speed == eSpeedNormal ? m_updateTime : m_updateTime * 0.5;
+    float updateTime = m_speed == eSpeedNormal ? m_updateTime : m_updateTime * 0.2;
     float updateTimeEstimated = updateTime;
     m_viewport->UpdateAsync(updateTimeEstimated);
     

@@ -105,8 +105,8 @@ Config::Config()
 //  this->percentOfBlue = 0.2;
   
   this->terrainSize = 8;
-  this->mapWidth = 500;
-  this->mapHeight = 300;
+  this->mapWidth = 300;
+  this->mapHeight = 200;
   
   this->green.health = 501;
   this->green.sleepTime = 2;
@@ -564,7 +564,7 @@ void PixelDescriptorProvider::GenLights()
                     float resultlevel = 0.5 + level * 0.5f;
                     float heightLevel = ((float)y/(float)m_config->mapHeight);
                     resultlevel = resultlevel * 0.8 + heightLevel * 0.2;
-                    m_map[x][y]->m_physicalDesc.light = resultlevel;
+                    m_map[x][y]->m_physicalDesc.light = 1; //resultlevel;
                   });
 }
   
@@ -744,7 +744,7 @@ CellDescriptor* PixelDescriptorProvider::ProcessMutation(CellDescriptor* source)
 {
   CellDescriptor* result = nullptr;
   
-  if (cBoolRandPercent(0.001))
+  if (false && cBoolRandPercent(0.001))
   {
     for (auto& g : m_groups)
     {

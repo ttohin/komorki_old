@@ -81,14 +81,19 @@ namespace komorki
       {
         struct PolymorphShapeContext
         {
+          typedef std::shared_ptr<PolymorphShapeContext> Ptr;
           cocos2d::Sprite* sprite = nullptr;
-          Vec2 pos;
+          Vec2 originalPos;
+          Vec2 targetPos;
           Vec2 prevPos;
           bool animationPlayed = false;
+          bool fade = false;
+          Morph::MorphDir direction;
+          cocos2d::Vec2 offset;
         };
         
-        typedef std::unordered_map<std::string, PolymorphShapeContext> SpriteMap;
-        typedef std::list<PolymorphShapeContext> SpriteList;
+        typedef std::unordered_map<std::string, PolymorphShapeContext::Ptr> SpriteMap;
+        typedef std::list<PolymorphShapeContext::Ptr> SpriteList;
 
       public:
         
@@ -101,15 +106,19 @@ namespace komorki
         
         AmorphCellContext(PartialMap *owner, const cocos2d::Rect& textureRect);
         
-        void AddSprite(Vec2ConstRef pos);
+        void AddSprite(const Rect& aabb, Vec2ConstRef pos);
         
         void MoveAmorphCells(Vec2ConstRef source,
                              komorki::Morphing& morph,
+                             const Rect& aabb,
                              float animationDuration);
+        void AnimatePart(PolymorphShapeContext::Ptr& context, const Rect& aabb, float animationDuration);
         
-        PolymorphShapeContext PopSprite(int x, int y);
-        PolymorphShapeContext GetSprite(int x, int y);
-        void SetSprite(cocos2d::Sprite*, int x, int y);
+        PolymorphShapeContext::Ptr CreateContext(const Rect& aabb,
+                                                 Vec2ConstRef originalPos);
+        PolymorphShapeContext::Ptr PopSprite(int x, int y);
+        PolymorphShapeContext::Ptr GetSprite(int x, int y);
+        void SetSprite(PolymorphShapeContext::Ptr, int x, int y);
         std::string GetKey(int x, int y) const;
         
         cocos2d::Sprite* CreateSprite();
@@ -118,6 +127,7 @@ namespace komorki
         virtual ContextType GetType() const override { return ContextType::ManyPixels; }
         virtual void BecomeOwner(PartialMap* _owner) override;
         virtual void Destory(PartialMap* _owner) override;
+        virtual void Attack(const Vec2& pos, const Vec2& offset, float animationTime) override;
       };
     }
   }
