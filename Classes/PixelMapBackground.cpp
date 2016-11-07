@@ -42,21 +42,27 @@ USING_NS_CC;
   
   Sprite* PixelMapBackground::CreateSprite()
   {
+    Sprite* s = nullptr;
     if( ! m_spritesPull.empty() )
     {
-      auto s = m_spritesPull.front();
-      s->setVisible(true);
-      s->setLocalZOrder(0);
+      s = m_spritesPull.front();
       m_spritesPull.pop_front();
-      
-      return s;
     }
     else
     {
-      auto s = Sprite::createWithTexture(getTexture());
+      s = Sprite::createWithTexture(getTexture());
       addChild(s);
-      return s;
     }
+    
+    s->setVisible(true);
+    s->setLocalZOrder(0);
+    s->setScale(kSpriteScale);
+    s->setAnchorPoint({0.5, 0.5});
+    s->setColor(cocos2d::Color3B(150, 150, 150));
+    s->setOpacity(110);
+    s->setTag(static_cast<int>(komorki::PixelDescriptor::CreatureType));
+    
+    return s;
   }
   
   void PixelMapBackground::RemoveSprite(Sprite* sprite)
@@ -71,20 +77,6 @@ USING_NS_CC;
     {
       sprite->removeFromParentAndCleanup(true);
     }
-  }
-  
-  Sprite* PixelMapBackground::spriteDeadCell(komorki::CellDescriptor* cd)
-  {
-    cocos2d::Rect r = cocos2d::Rect(0, DEAD_CEEL_LINE*kTileFrameSize, kTileFrameSize, kTileFrameSize);
-    auto s = CreateSprite();
-    s->setTextureRect(r);
-    s->setScale(kSpriteScale);
-    s->setOpacity(180);
-    s->setLocalZOrder(-1);
-    s->setAnchorPoint({0, 0});
-    s->setScale(kSpriteScale);
-    
-    return s;
   }
   
   bool PixelMapBackground::IsInAABB(const Vec2& vec)
@@ -151,14 +143,11 @@ USING_NS_CC;
             cocos2d::Vec2 rectOffset = spriteVectorWithOutOffset(size, {0, 0}) * 0.5;
             
             auto s = CreateSprite();
-            s->setTextureRect(singleCellContext->m_textureRect);
-            s->setScale(kSpriteScale);
-            s->setAnchorPoint({0.5, 0.5});
             
+            s->setTextureRect(singleCellContext->m_textureRect);
             s->setPosition(spriteVectorWithOutOffset(pos + posOffset, offset + rectOffset));
-            s->setTag(static_cast<int>(komorki::PixelDescriptor::CreatureType));
-            s->setColor(cocos2d::Color3B(20, 20, 20));
-            s->setOpacity(110);
+            
+
             
             auto fade = FadeTo::create(5, 0);
             auto removeSelf = CallFunc::create([this, s]()
@@ -167,6 +156,28 @@ USING_NS_CC;
                                                });
             
             s->runAction(Sequence::createWithTwoActions(fade, removeSelf));
+          }
+          else if (context && context->GetType() == PixelMap::ContextType::ManyPixels)
+          {
+            auto amorphContext = static_cast<PixelMap::AmorphCellContext*>(context);
+            
+            for (auto &spriteContext : amorphContext->m_spriteMap)
+            {
+              auto source = spriteContext.second->sprite;
+              
+              auto s = CreateSprite();
+              s->setTextureRect(amorphContext->m_textureRect);
+              s->setPosition(source->getPosition());
+
+              auto fade = FadeTo::create(5, 0);
+              auto removeSelf = CallFunc::create([this, s]()
+                                                 {
+                                                   this->RemoveSprite(s);
+                                                 });
+              
+              s->runAction(Sequence::createWithTwoActions(fade, removeSelf));
+            }
+            
           }
         }
         

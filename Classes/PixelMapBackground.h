@@ -27,7 +27,6 @@ public:
   PixelMapBackground(int a, int b, int width, int height);
   cocos2d::Sprite* CreateSprite();
   void RemoveSprite(cocos2d::Sprite* sprite);
-  cocos2d::Sprite* spriteDeadCell(komorki::CellDescriptor* cd);
   bool IsInAABB(const Vec2& vec);
   bool IsInAABB(const int& x, const int& y);
   cocos2d::Vec2 spriteVector(const komorki::Vec2& vec, const cocos2d::Vec2& vector = cocos2d::Vec2());
