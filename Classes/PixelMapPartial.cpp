@@ -90,23 +90,24 @@ namespace komorki
     
     Sprite* PixelMapPartial::CreateSprite()
     {
+      Sprite* s = nullptr;
       if( ! m_spritesPull.empty() )
       {
-        auto s = m_spritesPull.front();
-        s->setVisible(true);
-        s->setLocalZOrder(0);
-        s->setColor(cocos2d::Color3B::WHITE);
+        s = m_spritesPull.front();
         m_spritesPull.pop_front();
-        
-        return s;
       }
       else
       {
-        auto s = Sprite::createWithTexture(getTexture());
-        s->setAnchorPoint({0, 0});
+        s = Sprite::createWithTexture(getTexture());
         addChild(s);
-        return s;
       }
+      
+      s->setVisible(true);
+      s->setLocalZOrder(0);
+      s->setColor(cocos2d::Color3B::WHITE);
+      s->setOpacity(255);
+      
+      return s;
     }
     
     void PixelMapPartial::RemoveSprite(Sprite* sprite)
