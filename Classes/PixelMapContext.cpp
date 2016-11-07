@@ -15,6 +15,13 @@
 using namespace komorki::ui;
 using namespace komorki::ui::PixelMap;
 
+namespace
+{
+  const float kMaxAmorpghCellOpacity = 200;
+  const float kCenterAmorpghCellOpacity = 200;
+  const float kCenterCellScale = 0.6;
+}
+
 #ifdef DEBUG_PARTIAL_MAP
 #define LOG_W(...) KOMORKI_LOG(__VA_ARGS__)
 #else
@@ -263,6 +270,14 @@ namespace PixelMap
   : ObjectContext(owner)
   {
     m_textureRect = textureRect;
+    
+    m_centerSprite = CreateSprite();
+    m_centerSprite->setTextureRect(m_textureRect);
+    m_centerSprite->setColor(cocos2d::Color3B(200, 200, 200));
+    m_centerSprite->setOpacity(kCenterAmorpghCellOpacity);
+    m_centerSprite->setScale(kCenterCellScale);
+    m_centerSprite->setAnchorPoint({0.5, 0.5});
+    m_centerSprite->setLocalZOrder(10);
   }
   
   void CalcScale(const Rect& aabb, Vec2ConstRef pos, cocos2d::Vec2& outOffset, float& outScale)
@@ -281,7 +296,7 @@ namespace PixelMap
     outOffset = cocos2d::Vec2(distanceRatioX * offsetSizePerPixel, distanceRatioY * offsetSizePerPixel);
     
     float scaleRatio = 0.5 - 0.5 * std::abs(distanceRatioX) + 0.5 - 0.5 * std::abs(distanceRatioY);
-    outScale = 0.8 + 0.4 * scaleRatio;
+    outScale = 0.85 + 0.35 * scaleRatio;
   }
   
   AmorphCellContext::PolymorphShapeContext::Ptr AmorphCellContext::CreateContext(const Rect& aabb,
@@ -313,6 +328,13 @@ namespace PixelMap
   {
     auto context = CreateContext(aabb, pos);
     SetSprite(context, pos.x, pos.y);
+    
+    m_aabb = aabb;
+    
+    {
+      cocos2d::Vec2 centerPos = GetCenterPos();
+      m_centerSprite->setPosition(centerPos);
+    }
   }
   
   void AmorphCellContext::MoveAmorphCells(Vec2ConstRef source,
@@ -396,6 +418,15 @@ namespace PixelMap
     {
       AnimatePart(s.second, aabb, animationDuration);
     }
+    
+    m_aabb = aabb;
+  
+    {
+      cocos2d::Vec2 centerPos = GetCenterPos();
+      auto moveTo = cocos2d::MoveTo::create(animationDuration,
+                                            centerPos);
+      m_centerSprite->runAction(moveTo);
+    }
   }
   
   void AmorphCellContext::AnimatePart(PolymorphShapeContext::Ptr& context, const Rect& aabb, float animationDuration)
@@ -429,7 +460,7 @@ namespace PixelMap
         {
           context->sprite->setScale(0.2);
           context->sprite->setOpacity(0);
-          auto fadeAction = cocos2d::FadeIn::create(animationDuration);
+          auto fadeAction = cocos2d::FadeTo::create(animationDuration, kMaxAmorpghCellOpacity);
           auto fadeSeq = cocos2d::Spawn::createWithTwoActions(moveSpawn, fadeAction);
           context->sprite->runAction(fadeSeq);
           moveSpawn->setTag(0);
@@ -437,7 +468,7 @@ namespace PixelMap
       }
       else
       {
-        context->sprite->setOpacity(255);
+        context->sprite->setOpacity(kMaxAmorpghCellOpacity);
         context->sprite->runAction(moveSpawn);
       }
     }
@@ -455,7 +486,7 @@ namespace PixelMap
     {
       auto s = m_spritesPull.front();
       s->sprite->setVisible(true);
-      s->sprite->setOpacity(255);
+      s->sprite->setOpacity(kMaxAmorpghCellOpacity);
       s->sprite->setLocalZOrder(0);
       m_spritesPull.pop_front();
       
@@ -489,6 +520,14 @@ namespace PixelMap
 //    }
   }
   
+  cocos2d::Vec2 AmorphCellContext::GetCenterPos() const
+  {
+    Vec2 maxDistance = Vec2(m_aabb.size.x / 2, m_aabb.size.y / 2);
+    Vec2 center = m_aabb.origin + maxDistance;
+    cocos2d::Vec2 rectOffset = spriteVector({1, 1}) * 0.5;
+    return rectOffset + spriteVector(GetPosInOwnerBase(center));
+  }
+  
   void AmorphCellContext::BecomeOwner(PartialMap* _owner)
   {
     LOG_W("%s, %s. New owner: %p", __FUNCTION__, Description().c_str(), _owner);
@@ -516,6 +555,13 @@ namespace PixelMap
       cocos2d::Vec2 rectOffset = spriteVector({1, 1}) * 0.5;
       source->setPosition(rectOffset + spriteVector(GetPosInOwnerBase(s.second->originalPos), m_offset));
     }
+    
+    m_centerSprite->retain();
+    m_centerSprite->stopAllActions();
+    m_centerSprite->removeFromParentAndCleanup(true);
+    m_owner->m_cellMap->addChild(m_centerSprite);
+    m_centerSprite->release();
+    m_centerSprite->setPosition(GetCenterPos());
   }
   
   void AmorphCellContext::Destory(PartialMap* _owner)
@@ -526,17 +572,48 @@ namespace PixelMap
     for (auto& s : m_spritesPull)
     {
       assert(s->sprite);
-      assert(s->sprite->getParent() == _owner->m_cellMap.get());
-      s->sprite->removeFromParentAndCleanup(true);
+      
+      if (m_owner)
+        m_owner->m_cellMap->RemoveSprite(s->sprite);
+      else
+        s->sprite->removeFromParentAndCleanup(true);
     }
     
     for (auto& s : m_spriteMap)
     {
       assert(s.second->sprite);
-      assert(s.second->sprite->getParent() == _owner->m_cellMap.get());
-      s.second->sprite->removeFromParentAndCleanup(true);
+      if (m_owner)
+        m_owner->m_cellMap->RemoveSprite(s.second->sprite);
+      else
+        s.second->sprite->removeFromParentAndCleanup(true);
     }
+    
+    if (m_owner)
+      m_owner->m_cellMap->RemoveSprite(m_centerSprite);
+    else
+      m_centerSprite->removeFromParentAndCleanup(true);
+    
     delete this;
+  }
+  
+  void PlayAttackAnimation(cocos2d::Sprite* sprite,
+                           const cocos2d::Vec2& originalPos,
+                           const Vec2& attackOffset,
+                           float animationDuration,
+                           float initialScale,
+                           float targetScale)
+  {
+    sprite->stopAllActionsByTag(10);
+    sprite->setPosition(originalPos);
+    auto m1 = cocos2d::MoveTo::create(animationDuration * 0.3, 0.5 * spriteVector(attackOffset) + originalPos);
+    auto m2 = cocos2d::MoveTo::create(animationDuration * 0.3, originalPos);
+    auto s1 = cocos2d::ScaleTo::create(animationDuration*0.3, targetScale, targetScale);
+    auto s2 = cocos2d::ScaleTo::create(animationDuration*0.3, initialScale, initialScale);
+    auto spawn1 = cocos2d::Spawn::createWithTwoActions(m1, s1);
+    auto spawn2 = cocos2d::Spawn::createWithTwoActions(m2, s2);
+    auto seq = cocos2d::Sequence::createWithTwoActions(spawn1, spawn2);
+    seq->setTag(10);
+    sprite->runAction(seq);
   }
   
 //**************************************************************************************************
@@ -553,19 +630,20 @@ namespace PixelMap
     for (auto& s : m_spriteMap)
     {
       cocos2d::Vec2 originalPos = s.second->offset + rectOffset + spriteVector(GetPosInOwnerBase(s.second->targetPos));
-      
-      s.second->sprite->stopAllActionsByTag(10);
-      s.second->sprite->setPosition(originalPos);
-      auto m1 = cocos2d::MoveTo::create(animationDuration * 0.3, 0.5 * spriteVector(attackOffset) + originalPos);
-      auto m2 = cocos2d::MoveTo::create(animationDuration * 0.3, originalPos);
-      auto s1 = cocos2d::ScaleTo::create(animationDuration*0.3, kSpriteScale * 1.2, kSpriteScale * 1.2);
-      auto s2 = cocos2d::ScaleTo::create(animationDuration*0.3, kSpriteScale, kSpriteScale);
-      auto spawn1 = cocos2d::Spawn::createWithTwoActions(m1, s1);
-      auto spawn2 = cocos2d::Spawn::createWithTwoActions(m2, s2);
-      auto seq = cocos2d::Sequence::createWithTwoActions(spawn1, spawn2);
-      seq->setTag(10);
-      s.second->sprite->runAction(seq);
+      PlayAttackAnimation(s.second->sprite,
+                          originalPos,
+                          attackOffset,
+                          animationDuration,
+                          kSpriteScale,
+                          kSpriteScale * 1.2);
     }
+    
+    PlayAttackAnimation(m_centerSprite,
+                        GetCenterPos(),
+                        attackOffset,
+                        animationDuration,
+                        kCenterCellScale,
+                        kCenterCellScale * 1.2);
   }
 } //namespace PixelMap
 }

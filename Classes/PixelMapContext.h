@@ -101,8 +101,9 @@ namespace komorki
         SpriteMap m_spriteMap;
         SpriteList m_spritesPull;
         cocos2d::Vec2 m_offset;
-        
+        cocos2d::Sprite* m_centerSprite;
         cocos2d::Rect m_textureRect;
+        Rect m_aabb;
         
         AmorphCellContext(PartialMap *owner, const cocos2d::Rect& textureRect);
         
@@ -123,6 +124,7 @@ namespace komorki
         
         cocos2d::Sprite* CreateSprite();
         void RemoveSprite(cocos2d::Sprite* sprite);
+        cocos2d::Vec2 GetCenterPos() const;
         
         virtual ContextType GetType() const override { return ContextType::ManyPixels; }
         virtual void BecomeOwner(PartialMap* _owner) override;

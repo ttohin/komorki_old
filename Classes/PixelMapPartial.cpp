@@ -95,6 +95,7 @@ namespace komorki
         auto s = m_spritesPull.front();
         s->setVisible(true);
         s->setLocalZOrder(0);
+        s->setColor(cocos2d::Color3B::WHITE);
         m_spritesPull.pop_front();
         
         return s;
@@ -110,6 +111,7 @@ namespace komorki
     
     void PixelMapPartial::RemoveSprite(Sprite* sprite)
     {
+      assert(sprite->getParent() == this);
       if (m_spritesPull.size() < m_pullSize)
       {
         sprite->stopAllActions();
