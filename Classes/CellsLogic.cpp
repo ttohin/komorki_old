@@ -1237,7 +1237,7 @@ void ProcessCell(CellDescriptor* d,
   
   d->nextTurnTransaction.push_back(t);
   
-  d->PrintAsciiArt();
+  //d->PrintAsciiArt();
   
   ProcessUniversalCell(d,
                        pos,
@@ -1248,7 +1248,7 @@ void ProcessCell(CellDescriptor* d,
                        morph,
                        changeRect);
   
-  d->PrintAsciiArt();
+  //d->PrintAsciiArt();
 }
 
 } // namespace komorki;
