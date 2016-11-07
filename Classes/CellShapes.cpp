@@ -344,8 +344,15 @@ void PolymorphShape::AroundRandom(const PerPixelFunc& op) const
 {
   bool stop = false;
   
-  for(const auto& p : m_shape)
+  unsigned int size = m_shape.size();
+  unsigned int start = cRandABInt(0, size - 1);
+  
+  
+  for(unsigned int i = 0; i < size; i++)
   {
+    unsigned int index = (i + start)%size;
+    auto p = m_shape[index];
+    
     p->AroundRandom([&](PixelDescriptor* pixel, bool& _stop)
               {
                 if (std::find(m_shape.begin(), m_shape.end(), pixel) == m_shape.end())

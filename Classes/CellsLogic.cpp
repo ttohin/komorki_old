@@ -759,11 +759,7 @@ bool RectShapeStepTo(CellDescriptor* cd,
     return false;
   }
   
-  cd->Shape([&](PixelDescriptor* targetPd, bool& stop)
-            {
-              targetPd->m_cellDescriptor = nullptr;
-              targetPd->m_type = PixelDescriptor::Empty;
-            });
+  cd->CleanSpace();
   cd->GetShape()->SetPosition(m.value.destinationDesc);
   cd->parent = m.value.destinationDesc;
   cd->Finish();
@@ -850,11 +846,11 @@ bool AmorphShapeStepTo(CellDescriptor* cd,
     return false;
   }
   
-  std::vector<PixelDescriptor*> toRemove;
+  PixelDescriptor* toRemove = nullptr;
   
   distanceResult.maxPd->AroundRandom([&](PixelDescriptor* pd, bool& stop)
                                      {
-                                       if (pd->m_cellDescriptor != cd)
+                                       if (pd->m_cellDescriptor != cd || WillCauseTheGap(cd, distanceResult.maxPd))
                                        {
                                          return;
                                        }
@@ -872,7 +868,7 @@ bool AmorphShapeStepTo(CellDescriptor* cd,
                                          movement.SetValueFlag(true);
                                        }
                                        
-                                       toRemove.push_back(distanceResult.maxPd);
+                                       toRemove = distanceResult.maxPd;
                                        
                                        stop = true;
                                        
@@ -888,12 +884,47 @@ bool AmorphShapeStepTo(CellDescriptor* cd,
     return false;
   }
   
+  PixelDescriptor* toInsert = nullptr;
+  
+  bool performStepToTarget = true; //cBoolRandPercent(0.5);
+  if (!performStepToTarget)
+  {
+    cd->AroundRandom([&](PixelDescriptor* targetPd, bool& stop) {
+      
+      if (targetPd->IsEmpty())
+      {
+        targetPd->Around([&](PixelDescriptor* cellPd, bool& stop){
+          
+          if (cellPd->m_cellDescriptor == cd && cellPd != toRemove)
+          {
+            Morph m;
+            m.dir = Morph::Outside;
+            m.pos = targetPd->GetPos();
+            targetPd->Offset(cellPd, m.delta);
+            morph.value.vec.push_back(m);
+            morph.SetValueFlag(true);
+            
+            toInsert = targetPd;
+            
+            stop = true;
+          }
+          
+        });
+        
+        if (toInsert != nullptr) {
+          stop = true;
+        }
+      }
+      
+    });
+  }
+  
   Vec2 normalizedMinDist = distanceResult.minDist.Normalize();
   
-  std::vector<PixelDescriptor*> toInsert;
-  
+  if (toInsert == nullptr)
   {
     auto tagetPd = distanceResult.minPd->Offset(normalizedMinDist);
+    assert(normalizedMinDist != Vec2());
     if (FreePixelHasMyParts(cd, tagetPd, distanceResult.minPd))
     {
       Morph m;
@@ -903,15 +934,42 @@ bool AmorphShapeStepTo(CellDescriptor* cd,
       morph.value.vec.push_back(m);
       morph.SetValueFlag(true);
       
-      toInsert.push_back(tagetPd);
+      toInsert = tagetPd;
     }
   }
   
-  if (toInsert.size() == 0)
+  if (toInsert == nullptr)
+  {
+    AroundInDirection(distanceResult.minPd, normalizedMinDist, [&](PixelDescriptor* targetPd, bool& stop)
+                      {
+                        if (!FreePixelHasMyParts(cd, targetPd, distanceResult.minPd) &&
+                            !FreePixelHasMyParts(cd, targetPd, toRemove) )
+                        {
+                          return;
+                        }
+                        
+                        Vec2 offset;
+                        distanceResult.minPd->Offset(targetPd, offset);
+                        
+                        Morph m;
+                        m.dir = Morph::Outside;
+                        m.pos = targetPd->GetPos();
+                        m.delta = -offset;
+                        morph.value.vec.push_back(m);
+                        morph.SetValueFlag(true);
+                        
+                        toInsert = targetPd;
+                        
+                        stop = true;
+                      });
+  }
+  
+  if (toInsert == nullptr)
   {
     distanceResult.minPd->AroundRandom([&](PixelDescriptor* pd, bool& stop)
                                        {
-                                         if (!FreePixelHasMyParts(cd, pd, distanceResult.minPd))
+                                         if (!FreePixelHasMyParts(cd, pd, distanceResult.minPd) &&
+                                             !FreePixelHasMyParts(cd, pd, toRemove) )
                                          {
                                            return;
                                          }
@@ -926,14 +984,13 @@ bool AmorphShapeStepTo(CellDescriptor* cd,
                                          morph.value.vec.push_back(m);
                                          morph.SetValueFlag(true);
                                          
-                                         toInsert.push_back(pd);
+                                         toInsert = pd;
                                          
                                          stop = true;
                                        });
   }
   
-  
-  if (toInsert.size() == 0 || toRemove.size() == 0)
+  if (toInsert == nullptr || toRemove == nullptr)
   {
     cd->m_m1 = 0;
     cd->m_m2 = 0;
@@ -943,21 +1000,14 @@ bool AmorphShapeStepTo(CellDescriptor* cd,
     return false;
   }
   
+  assert(toInsert != nullptr && toRemove != nullptr);
+  
   PolymorphShape* shape = static_cast<PolymorphShape*>(cd->GetShape());
   
-  for (auto& pd : toInsert)
-  {
-    shape->AddPixel(pd);
-    pd->m_cellDescriptor = cd;
-    pd->m_type = PixelDescriptor::CreatureType;
-  }
+  cd->CleanSpace();
   
-  for (auto& pd : toRemove)
-  {
-    shape->RemovePixel(pd);
-    pd->m_cellDescriptor = nullptr;
-    pd->m_type = PixelDescriptor::Empty;
-  }
+  shape->AddPixel(toInsert);
+  shape->RemovePixel(toRemove);
   
   if (movement.isSet)
   {
@@ -1184,7 +1234,10 @@ void ProcessCell(CellDescriptor* d,
     h *= light;
   }
   t.m_health = h;
+  
   d->nextTurnTransaction.push_back(t);
+  
+  d->PrintAsciiArt();
   
   ProcessUniversalCell(d,
                        pos,
@@ -1194,6 +1247,8 @@ void ProcessCell(CellDescriptor* d,
                        a,
                        morph,
                        changeRect);
+  
+  d->PrintAsciiArt();
 }
 
 } // namespace komorki;

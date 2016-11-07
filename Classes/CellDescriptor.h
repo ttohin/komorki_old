@@ -68,6 +68,7 @@ public:
   virtual void PrintAsciiArt() const;
   virtual bool IsMyFood(CellDescriptor* cd) const;
   virtual ShapeType GetShapeType() const;
+  virtual void CleanSpace();
   
   virtual ~CellDescriptor () {};
 

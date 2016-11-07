@@ -82,11 +82,7 @@ void CellDescriptor::Finish()
 
 void CellDescriptor::Move(PixelDescriptor* pd)
 {
-  Shape([](PixelDescriptor* pd, bool& stop)
-        {
-          pd->m_cellDescriptor = nullptr;
-          pd->m_type = PixelDescriptor::Empty;
-        });
+  CleanSpace();
   m_shape->SetPosition(pd);
   Shape([this](PixelDescriptor* pd, bool& stop)
         {
@@ -269,5 +265,14 @@ bool CellDescriptor::IsMyFood(CellDescriptor* cd) const
 ShapeType CellDescriptor::GetShapeType() const
 {
   return m_genom.m_shapeType;
+}
+
+void CellDescriptor::CleanSpace()
+{
+  m_shape->ForEach([&](PixelDescriptor* pd, bool& stop)
+                   {
+                     pd->m_cellDescriptor = nullptr;
+                     pd->m_type = PixelDescriptor::Empty;
+                   });
 }
 

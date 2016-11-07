@@ -46,6 +46,7 @@ namespace komorki
   bool FreePixelHasMyParts(CellDescriptor* cd, PixelDescriptor* testPd, PixelDescriptor* ignorePd);
   
   bool WillCauseTheGap(CellDescriptor* cd, PixelDescriptor* pd, const Vec2& offset);
+  bool WillCauseTheGap(CellDescriptor* cd, PixelDescriptor* missingPd);
 }
 
 #endif /* defined(__prsv__CellShapesHelper__) */

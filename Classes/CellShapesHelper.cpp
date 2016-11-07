@@ -229,13 +229,13 @@ bool MoveCellShape(CellDescriptor* cd,
                 {
                   minDist = dist;
                   minDistPd = pixel;
-                  result.minDist = pixel->GetPos() - pos;
+                  result.minDist = pos - pixel->GetPos();
                 }
                 if (dist >= maxDist)
                 {
                   maxDist = dist;
                   maxDistPd = pixel;
-                  result.maxDist = pixel->GetPos() - pos;
+                  result.maxDist = pos + pixel->GetPos();
                 }
                 
                 if (Vec2(pixel->x, pixel->y) == pos)
@@ -331,6 +331,34 @@ bool MoveCellShape(CellDescriptor* cd,
       return true;
     }
     return false;
+  }
+  
+  bool WillCauseTheGap(CellDescriptor* cd, PixelDescriptor* missingPd)
+  {
+    bool result = false;
+    cd->Shape([&](PixelDescriptor* cellPd, bool& stop) {
+      
+      bool hasCellsAround = false;
+      if (cellPd == missingPd) {
+        return;
+      }
+      
+      cellPd->Around([&](PixelDescriptor* pd, bool& stop) {
+        if (pd->m_cellDescriptor == cd && pd != missingPd)
+        {
+          hasCellsAround = true;
+          stop = true;
+        }
+      });
+      
+      if (hasCellsAround == false) {
+        result = true;
+        stop = true;
+      }
+      
+    });
+    
+    return result;
   }
 
 }
