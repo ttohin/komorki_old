@@ -77,12 +77,12 @@ namespace komorki
   public:
     RectShape(PixelDescriptor* pd, const Vec2& origin, const Vec2& size);
     virtual ~RectShape(){}
-    virtual void ForEach(const PerPixelFunc& op) const;
-    virtual void ForEachRandom(const PerPixelFunc& op) const;
-    virtual void Around(const PerPixelFunc& op) const;
-    virtual void AroundRandom(const PerPixelFunc& op) const;
-    virtual void SetPosition(PixelDescriptor* pd);
-    virtual PixelDescriptor* GetOpposite(PixelDescriptor* target) const;
+    virtual void ForEach(const PerPixelFunc& op) const override;
+    virtual void ForEachRandom(const PerPixelFunc& op) const override;
+    virtual void Around(const PerPixelFunc& op) const override;
+    virtual void AroundRandom(const PerPixelFunc& op) const override;
+    virtual void SetPosition(PixelDescriptor* pd) override;
+    virtual PixelDescriptor* GetOpposite(PixelDescriptor* target) const override;
     virtual void Apply(PixelDescriptor* pd) override;
     virtual unsigned int Size() const override;
     virtual Rect GetAABB() const override;
@@ -108,12 +108,12 @@ namespace komorki
     
     // IShape
     
-    virtual void ForEach(const PerPixelFunc& op) const;
-    virtual void ForEachRandom(const PerPixelFunc& op) const;
-    virtual void Around(const PerPixelFunc& op) const;
-    virtual void AroundRandom(const PerPixelFunc& op) const;
-    virtual void SetPosition(PixelDescriptor* pd);
-    virtual PixelDescriptor* GetOpposite(PixelDescriptor* target) const;
+    virtual void ForEach(const PerPixelFunc& op) const override;
+    virtual void ForEachRandom(const PerPixelFunc& op) const override;
+    virtual void Around(const PerPixelFunc& op) const override;
+    virtual void AroundRandom(const PerPixelFunc& op) const override;
+    virtual void SetPosition(PixelDescriptor* pd) override;
+    virtual PixelDescriptor* GetOpposite(PixelDescriptor* target) const override;
     virtual void Apply(PixelDescriptor* pd) override;
     virtual unsigned int Size() const override;
     virtual Rect GetAABB() const override;

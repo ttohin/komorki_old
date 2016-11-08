@@ -886,7 +886,7 @@ bool AmorphShapeStepTo(CellDescriptor* cd,
   
   PixelDescriptor* toInsert = nullptr;
   
-  bool performStepToTarget = true; //cBoolRandPercent(0.5);
+  bool performStepToTarget = cBoolRandPercent(0.3);
   if (!performStepToTarget)
   {
     cd->AroundRandom([&](PixelDescriptor* targetPd, bool& stop) {

@@ -888,6 +888,24 @@ void PixelDescriptorProvider::Update(bool passUpdateResult, std::list<PixelDescr
     }
   }
   
+  for (int i = 0; i < m_config->mapWidth; ++i)
+  {
+    const std::vector<PixelPtr>& line = m_map[i];
+    for (int j = 0; j < m_config->mapHeight; ++j)
+    {
+      auto pd = line[j];
+      
+      if (pd->m_type == PixelDescriptor::CreatureType)
+      {
+        auto d = pd->m_cellDescriptor;
+        
+        d->Shape([d](PixelDescriptor* cellPd, bool& stop){
+          assert(cellPd->m_cellDescriptor == d);
+        });
+      }
+    }
+  }
+  
   ++m_updateId;
 }
   

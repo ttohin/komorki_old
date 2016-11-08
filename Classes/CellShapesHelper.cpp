@@ -335,30 +335,24 @@ bool MoveCellShape(CellDescriptor* cd,
   
   bool WillCauseTheGap(CellDescriptor* cd, PixelDescriptor* missingPd)
   {
-    bool result = false;
-    cd->Shape([&](PixelDescriptor* cellPd, bool& stop) {
-      
-      bool hasCellsAround = false;
-      if (cellPd == missingPd) {
-        return;
-      }
-      
-      cellPd->Around([&](PixelDescriptor* pd, bool& stop) {
-        if (pd->m_cellDescriptor == cd && pd != missingPd)
-        {
-          hasCellsAround = true;
-          stop = true;
-        }
-      });
-      
-      if (hasCellsAround == false) {
-        result = true;
+    PolymorphShape* shape = static_cast<PolymorphShape*>(cd->GetShape());
+    
+    PixelDescriptor* pixelInShape = nullptr;
+    
+    shape->ForEach([&](PixelDescriptor* pd, bool& stop){
+      if (pd != missingPd)
+      {
+        pixelInShape = pd;
         stop = true;
       }
-      
     });
     
-    return result;
+    assert(pixelInShape);
+    
+    PixelDescriptor::Vec pdStack;
+    FindNextCellPixel(cd, pixelInShape, nullptr, missingPd, pdStack);
+  
+    return pdStack.size() != (shape->Size() - 1);
   }
 
 }
