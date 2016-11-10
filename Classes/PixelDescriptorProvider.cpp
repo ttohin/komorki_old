@@ -564,7 +564,7 @@ void PixelDescriptorProvider::GenLights()
                     float resultlevel = 0.5 + level * 0.5f;
                     float heightLevel = ((float)y/(float)m_config->mapHeight);
                     resultlevel = resultlevel * 0.8 + heightLevel * 0.2;
-                    m_map[x][y]->m_physicalDesc.light = 1; //resultlevel;
+                    m_map[x][y]->m_physicalDesc.light = resultlevel;
                   });
 }
   

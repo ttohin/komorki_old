@@ -41,7 +41,7 @@ bool StaticLightsSprite::init(komorki::IPixelDescriptorProvider* pixelMap, const
       pos *= komorki::ui::kSpritePosition;
       
       const int kMaxLight = 255;
-      const int kMinLight = 100;
+      const int kMinLight = 0;
       
       sprite->setOpacity(kMinLight + (kMaxLight - kMinLight) * light);
       sprite->setScale(komorki::ui::kSpritePosition);
