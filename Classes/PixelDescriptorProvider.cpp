@@ -378,6 +378,7 @@ void PixelDescriptorProvider::Init()
     m_map[i].reserve(m_config->mapHeight);
     m_typeMap.push_back(std::vector<PixelDescriptor::Type>());
     m_typeMap[i].reserve(m_config->mapHeight);
+    m_typeMap[i].resize(m_config->mapHeight);
     for (int j = 0; j < m_config->mapHeight; ++j)
     {
       m_map[i].push_back(std::make_shared<PixelDescriptor>(i, j));

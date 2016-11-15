@@ -7,7 +7,7 @@
 //
 
 #include "DiamondSquareGenerator.h"
-#include <cmath>
+#include <algorithm>
 #include <stdlib.h>
 
 using namespace komorki;
@@ -34,6 +34,7 @@ bool DiamondSquareGenerator::GetValue(int x, int y, float& value) const
 void DiamondSquareGenerator::Generate(const OnValue& onValue)
 {
   m_data.reserve(m_width * m_height);
+  m_data.resize(m_width * m_height);
   for (int i = 0; i < m_width; ++i)
   {
     for (int j = 0; j < m_height; ++j)

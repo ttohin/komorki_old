@@ -19,22 +19,33 @@ namespace Const
 }
 
 PixelDescriptor::PixelDescriptor(int _x, int _y)
-: lt (nullptr)
-, lc (nullptr)
-, lb (nullptr)
-, ct (nullptr)
-, cb (nullptr)
-, rt (nullptr)
-, rc (nullptr)
-, rb (nullptr)
-, directions{&lb, &cb, &rb, &rc, &rt, &ct, &lt, &lc}
+  : lt(nullptr)
+  , lc(nullptr)
+  , lb(nullptr)
+  , ct(nullptr)
+  , cb(nullptr)
+  , rt(nullptr)
+  , rc(nullptr)
+  , rb(nullptr)
+#ifndef _WIN32
+  , directions{&lb, &cb, &rb, &rc, &rt, &ct, &lt, &lc}
+#endif
 , m_cellDescriptor(nullptr)
 , m_type(PixelDescriptor::Empty)
 , x(_x), y(_y)
 , offsetX(0), offsetY(0)
 , pushHandled(false)
 {
-  
+#ifdef _WIN32
+  directions[0] = &lb;
+  directions[1] = &cb;
+  directions[2] = &rb;
+  directions[3] = &rc;
+  directions[4] = &rt;
+  directions[5] = &ct;
+  directions[6] = &lt;
+  directions[7] = &lc;
+#endif
 }
 
 void PixelDescriptor::Around(const PerPixelFunc& op)

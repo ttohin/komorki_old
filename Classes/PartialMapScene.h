@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "cocos2d.h"
-#include "UIButton.h"
+#include "cocos2d/cocos/ui/CocosGUI.h"
 #include "OptionsMenu.h"
 #include "MainMenu.h"
 #include "LoadConfigMenu.h"
@@ -72,42 +72,42 @@ private:
   
 //  PixelMapManager* m_mapManager;
   komorki::ui::Viewport::Ptr m_viewport;
-  cocos2d::Node* m_rootNode;
-  cocos2d::Sprite* m_bg;
-  cocos2d::Sprite* m_brush;
-  cocos2d::Sprite* m_cross;
-  cocos2d::Sprite* m_microscope;
-  cocos2d::ui::Button* m_green;
-  cocos2d::ui::Button* m_hunter;
-  cocos2d::ui::Button* m_salad;
-  cocos2d::ui::Button* m_improvedSalad;
-  cocos2d::ui::Button* m_eraseButton;
-  cocos2d::ui::Button* m_brushButton;
-  cocos2d::ui::Button* m_speed1Button;
-  cocos2d::ui::Button* m_speed2Button;
-  cocos2d::ui::Button* m_speed10Button;
-  cocos2d::ui::Button* m_menuButton;
-  cocos2d::Node* m_toolbarNode;
-  cocos2d::Node* m_cellsSelectoToolbar;
-  cocos2d::Node* m_speedToolbar;
-  cocos2d::Node* m_menuNode;
+  cocos2d::Node* m_rootNode = nullptr;
+  cocos2d::Sprite* m_bg = nullptr;
+  cocos2d::Sprite* m_brush = nullptr;
+  cocos2d::Sprite* m_cross = nullptr;
+  cocos2d::Sprite* m_microscope = nullptr;
+  cocos2d::ui::Button* m_green = nullptr;
+  cocos2d::ui::Button* m_hunter = nullptr;
+  cocos2d::ui::Button* m_salad = nullptr;
+  cocos2d::ui::Button* m_improvedSalad = nullptr;
+  cocos2d::ui::Button* m_eraseButton = nullptr;
+  cocos2d::ui::Button* m_brushButton = nullptr;
+  cocos2d::ui::Button* m_speed1Button = nullptr;
+  cocos2d::ui::Button* m_speed2Button = nullptr;
+  cocos2d::ui::Button* m_speed10Button = nullptr;
+  cocos2d::ui::Button* m_menuButton = nullptr;
+  cocos2d::Node* m_toolbarNode = nullptr;
+  cocos2d::Node* m_cellsSelectoToolbar = nullptr;
+  cocos2d::Node* m_speedToolbar = nullptr;
+  cocos2d::Node* m_menuNode = nullptr;
   std::shared_ptr<OptionsMenu> m_optionsMenu;
   std::shared_ptr<MainMenu> m_mainMenu;
   std::shared_ptr<LoadConfigMenu> m_loadConfigMenu;
   std::shared_ptr<SaveConfigMenu> m_saveConfigMenu;
   std::shared_ptr<IFullScreenMenu> m_currenMenu;
-  cocos2d::RenderTexture* m_mainTexture;
-  cocos2d::RenderTexture* m_lightTexture;
-  cocos2d::Sprite* m_rendTexSprite;
-  cocos2d::Sprite* m_debugView;
+  cocos2d::RenderTexture* m_mainTexture = nullptr;
+  cocos2d::RenderTexture* m_lightTexture = nullptr;
+  cocos2d::Sprite* m_rendTexSprite = nullptr;
+  cocos2d::Sprite* m_debugView = nullptr;
   
   float m_mapScale;
   cocos2d::Vec2 m_mapPos;
   cocos2d::Vec2 m_moveDirection;
   float m_updateTime;
-  bool m_pause;
-  bool m_stopManager;
-  bool m_restartManagerFromOptionMenu;
+  bool m_pause = false;
+  bool m_stopManager = false;
+  bool m_restartManagerFromOptionMenu = false;
   void ZoomIn();
   void ZoomOut();
   void Zoom(float direction);

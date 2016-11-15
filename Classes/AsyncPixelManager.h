@@ -12,7 +12,7 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
-
+#include "Utilities.h"
 #include "PixelDescriptorProvider.h"
 
 namespace komorki

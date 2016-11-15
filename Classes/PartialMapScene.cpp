@@ -1,7 +1,7 @@
 #include "PartialMapScene.h"
 #include "PixelDescriptorProvider.h"
 #include "cocostudio/DictionaryHelper.h"
-#include "UIButton.h"
+#include "cocos2d/cocos/ui/CocosGUI.h"
 #include "ConfigManager.h"
 #include "DiamondSquareGenerator.h"
 
@@ -105,12 +105,12 @@ bool PartialMapScene::init(const komorki::ui::Viewport::Ptr& viewport)
     {
       if (m_eraseBrush)
       {
-        #warning don't forget
+//        #warning don't forget
 //        m_mapManager->RemoveCreatureAtPostion(touch->getLocation());
       }
       else
       {
-        #warning don't forget
+//        #warning don't forget
 //        m_mapManager->AddCreatureAtPosition(touch->getLocation(), this->GetCurretnCellType());
       }
     }
@@ -127,12 +127,12 @@ bool PartialMapScene::init(const komorki::ui::Viewport::Ptr& viewport)
     {
       if (m_eraseBrush)
       {
-        #warning don't forget
+//        #warning don't forget
 //        m_mapManager->RemoveCreatureAtPostion(touch->getLocation());
       }
       else
       {
-        #warning don't forget
+//        #warning don't forget
 //        m_mapManager->AddCreatureAtPosition(touch->getLocation(), this->GetCurretnCellType());
       }
     }
@@ -217,7 +217,7 @@ bool PartialMapScene::init(const komorki::ui::Viewport::Ptr& viewport)
                                 mouseEvent->getCursorY()));
       if(m_eraseBrush == false)
       {
-        #warning don't forget
+//        #warning don't forget
 //        m_mapManager->HightlightCellOnCursorPos(Vec2(mouseEvent->getCursorX(),
 //                                                     mouseEvent->getCursorY()), this->GetCurretnCellType());
       }
@@ -327,7 +327,7 @@ bool PartialMapScene::init(const komorki::ui::Viewport::Ptr& viewport)
   
 #endif // CC_TARGET_PLATFORM == CC_PLATFORM_IOS
   
-  auto menuButton = ui::Button::create("menuButton.png", "menuButtons_hl.png");
+  auto menuButton = ui::Button::create("menuButton.png", "menuButton_hl.png");
   menuButton->addTouchEventListener([this](Ref*,ui::Widget::TouchEventType controlEvent)
                                       {
                                         if (controlEvent == ui::Widget::TouchEventType::ENDED)
@@ -338,10 +338,8 @@ bool PartialMapScene::init(const komorki::ui::Viewport::Ptr& viewport)
   menuButton->setScale(kButtonScale);
   m_menuButton = menuButton;
 
-  CreateToolBar();
+  //CreateToolBar();
   CreateSpeedToolBar();
-  m_toolbarNode->setPosition(Vec2(origin.x + visibleSize.width,
-                                  origin.y + visibleSize.height));
   m_speedToolbar->setPosition(Vec2(origin.x + visibleSize.width,
                                    origin.y));
   
@@ -456,7 +454,6 @@ void PartialMapScene::CancelOptionSelection()
 
 void PartialMapScene::SetBackgroundPosition(float animationDuration)
 {
-#warning don't forget
   return;
   
   float scaleRatio = (m_mapScale - kMinMapScale)/(kMaxMapScale - kMinMapScale);
@@ -527,8 +524,6 @@ void PartialMapScene::visit(cocos2d::Renderer *renderer, const cocos2d::Mat4 &pa
    
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
     Size visibleSize = Director::getInstance()->getVisibleSize();
-    m_toolbarNode->setPosition(Vec2(origin.x + visibleSize.width,
-                                    origin.y + visibleSize.height));
     m_speedToolbar->setPosition(Vec2(origin.x + visibleSize.width,
                                      origin.y));
     m_menuButton->setPosition(Vec2(kButtonSize/2.f, visibleSize.height - kButtonSize/2.f));
@@ -576,7 +571,6 @@ void PartialMapScene::timerForUpdate(float dt)
   if (m_restartManagerFromOptionMenu)
   {
     komorki::ConfigManager::GetInstance()->ApplyPendingConfig();
-#warning Recrate map
 //    delete m_viewport;
 //    CreateMap();
     m_restartManagerFromOptionMenu = false;
@@ -585,7 +579,6 @@ void PartialMapScene::timerForUpdate(float dt)
   
   if (m_stopManager)
   {
-#warning Recrate map
 //    delete m_viewport;
 //    CreateMap();
     m_stopManager = false;
@@ -880,61 +873,14 @@ void PartialMapScene::SetSpeed(Speed speed)
     m_speed2Button->loadTextureNormal("speed2_sel.png");
   if (m_speed == eSpeedMax)
     m_speed10Button->loadTextureNormal("speed10_sel.png");
-  
-  if (m_speed != eSpeedNormal)
-  {
-    SetBrushEnabled(false);
-    SetDrawingMode(false);
-    SetEraseMode(false);
-    m_brushButton->setEnabled(false);
-    m_eraseButton->setEnabled(false);
-    m_brushButton->loadTextureNormal("add_icon_dis.png");
-    m_eraseButton->loadTextureNormal("remove_brush_dis.png");
-  }
-  else
-  {
-    m_brushButton->setEnabled(true);
-    m_eraseButton->setEnabled(true);
-    m_brushButton->loadTextureNormal("add_icon.png");
-    m_eraseButton->loadTextureNormal("remove_brush.png");
-  }
 }
 
 void PartialMapScene::SetBrushMode(BrushMode mode)
 {
-  if (m_brushMode == eBrushModeGreen)
-    m_green->loadTextureNormal("greenButton.png");
-  if (m_brushMode == eBrushModeHunter)
-    m_hunter->loadTextureNormal("hunterButton.png");
-  if (m_brushMode == eBrushModeSalad)
-    m_salad->loadTextureNormal("saladButton.png");
-  if (m_brushMode == eBrushModeImprovedSalad)
-    m_improvedSalad->loadTextureNormal("improvedSaladButton.png");
-  
-  m_brushMode = mode;
-  
-  if (m_brushMode == eBrushModeGreen)
-    m_green->loadTextureNormal("greenButton_sel.png");
-  if (m_brushMode == eBrushModeHunter)
-    m_hunter->loadTextureNormal("hunterButton_sel.png");
-  if (m_brushMode == eBrushModeSalad)
-    m_salad->loadTextureNormal("saladButton_sel.png");
-  if (m_brushMode == eBrushModeImprovedSalad)
-    m_improvedSalad->loadTextureNormal("improvedSaladButton_sel.png");
 }
 
 komorki::CellType PartialMapScene::GetCurretnCellType()
 {
-  if (m_brushMode == eBrushModeGreen)
-    return komorki::eCellTypeGreen;
-  if (m_brushMode == eBrushModeHunter)
-    return komorki::eCellTypeHunter;
-  if (m_brushMode == eBrushModeSalad)
-    return komorki::eCellTypeSalad;
-  if (m_brushMode == eBrushModeImprovedSalad)
-    return komorki::eCellTypeImprovedSalad;
-  
-  assert(0);
   return komorki::eCellTypeGreen;
 }
 

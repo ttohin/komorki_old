@@ -6,3 +6,8 @@ proj.ios_mac/Build
 cocos2d/external
 cocos2d/tools
 cocos2d/*.zip
+proj.win32/Release.win32
+proj.win32/Debug.win32
+proj.win32/*.db
+proj.win32/.vs
+**/**.obj

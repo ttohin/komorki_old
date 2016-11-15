@@ -9,6 +9,8 @@
 #ifndef __prsv__TestSampleShapesScene__
 #define __prsv__TestSampleShapesScene__
 
+#include <cocos2d.h>
+
 USING_NS_CC;
 
 class TestSampleShapesScene : public cocos2d::Layer
@@ -36,7 +38,7 @@ public:
   }
   
   
-  cocos2d::Label* CreateLabel(const char* text, const cocos2d::Vec2& offset) const;
+  cocos2d::LabelProtocol* CreateLabel(const char* text, const cocos2d::Vec2& offset);
   void timerForUpdate(float dt);
   void LoadTerrainMaps(float dt);
   void CreateViewport(float dt);

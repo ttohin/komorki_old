@@ -9,17 +9,12 @@
 #ifndef prsv_Utilities_h
 #define prsv_Utilities_h
 
-#define PEDANTIC_MODE
+#ifdef _WIN32
 
-#ifdef PEDANTIC_MODE
-#define PEDANTIC(blockBody) \
-{\
-auto pendantic_block = [&]() {blockBody}; \
-bool pedantic_result = pendantic_block(); \
-assert (pedantic_result); \
-}
-#else
-#define PEDANTIC(blockBody)
-#endif // PEDANTIC_MODE
+struct timezone;
+
+int gettimeofday(struct timeval * tp, struct timezone * tzp);
+
+#endif
 
 #endif // #ifndef prsv_Utilities_h

@@ -8,7 +8,7 @@
 
 #include "Common.h"
 #include <cstdlib>
-#include <cmath>
+#include <algorithm>
 #include <assert.h>
 
 

@@ -11,6 +11,7 @@
 #include "AsyncPixelManager.h"
 #include "UIConfig.h"
 #include "b2Utilites.h"
+#include "Utilities.h"
 
 
 #ifdef DEBUG_VIEWPORT
@@ -295,11 +296,11 @@ void ui::Viewport::Test()
   
   {
     cocos2d::Rect r1 = {0, 0, 320, 320};
-    Rect r2 = this->PixelRect(r1, 0.1);
+    Rect r2 = this->PixelRect(r1, 0.1f);
     assert(r2 == Rect({{0,0}, {100, 100}}));
   }
   {
-    cocos2d::Rect r1 = {0, 0, 320.2, 320.2};
+    cocos2d::Rect r1 = {0, 0, 320.2f, 320.2f};
     Rect r2 = this->PixelRect(r1, 0.1);
     assert(r2 == Rect({{0,0}, {101, 101}}));
   }
@@ -307,7 +308,7 @@ void ui::Viewport::Test()
   {
     cocos2d::Rect r1 = {0, 0, 320, 320};
     cocos2d::Rect r2 = {32, 0, 288, 320};
-    cocos2d::Rect r3 = {32.01, 0, 288, 320};
+    cocos2d::Rect r3 = {32.01f, 0, 288, 320};
     Rect r1p = this->PixelRect(r1, 0.1);
     Rect r2p = this->PixelRectInner(r2, 0.1);
     Rect r3p = this->PixelRectInner(r3, 0.1);
@@ -316,7 +317,7 @@ void ui::Viewport::Test()
   }
   {
     cocos2d::Rect r2 = {0, 32, 320, 288};
-    cocos2d::Rect r3 = {0, 32.01, 320, 288};
+    cocos2d::Rect r3 = {0, 32.01f, 320, 288};
     Rect r1p = {{0, 0}, {100, 100}};
     Rect r2p = this->PixelRectInner(r2, 0.1);
     Rect r3p = this->PixelRectInner(r3, 0.1);
@@ -475,9 +476,11 @@ void ui::Viewport::Resize(const cocos2d::Size& size)
 
 cocos2d::Size ui::Viewport::GetTotalMapSize() const
 {
+  return cocos2d::Size();
 }
 bool ui::Viewport::HightlightCellOnCursorPos(cocos2d::Vec2 cursorPosition, komorki::CellType type)
 {
+  return false;
 }
 void ui::Viewport::StopHightlighting()
 {
@@ -485,6 +488,7 @@ void ui::Viewport::StopHightlighting()
 bool ui::Viewport::AddCreatureAtPosition(cocos2d::Vec2 cursorPosition, komorki::CellType type)
 {
  assert(0);
+ return false;
 }
 void ui::Viewport::RemoveCreatureAtPostion(cocos2d::Vec2 cursorPosition)
 {

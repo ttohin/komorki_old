@@ -8,6 +8,7 @@
 
 #include "ShapesGenerator.h"
 #include "b2Utilites.h"
+#include <assert.h>
 
 namespace komorki
 {
@@ -126,7 +127,7 @@ namespace komorki
   }
   
   ShapesGenerator::ShapesGenerator()
-  : m_internalMap(new PixelMap({100, 100}))
+  : m_internalMap(new PixelMap(Vec2(100, 100)))
   {
   }
   

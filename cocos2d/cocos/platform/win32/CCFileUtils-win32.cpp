@@ -66,7 +66,7 @@ static void _checkPath()
         int nNum = WideCharToMultiByte(CP_UTF8, 0, utf16Path, -1, utf8Path, sizeof(utf8Path), nullptr, nullptr);
 
         s_resourcePath = convertPathFormatToUnixStyle(utf8Path);
-        s_resourcePath.append("/");
+        s_resourcePath.append("/Resources/");
     }
 }
 

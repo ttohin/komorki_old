@@ -193,11 +193,12 @@ void TestSampleShapesScene::CreateViewport(float dt)
   Director::getInstance()->replaceScene(mapScene);
 }
 
-cocos2d::Label* TestSampleShapesScene::CreateLabel(const char* text, const cocos2d::Vec2& offset) const
+cocos2d::LabelProtocol* TestSampleShapesScene::CreateLabel(const char* text, const cocos2d::Vec2& offset)
 {
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
   auto result = LabelAtlas::create(text, "font.png", 18, 24, 32);
   result->setPosition(offset);
+  addChild(result);
   return result;
 #else
   auto result = Label::createWithSystemFont(text, "Menlo", 24, Size::ZERO, TextHAlignment::RIGHT);

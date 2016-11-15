@@ -25,6 +25,7 @@
     <PlatformToolset Condition="'$(VisualStudioVersion)' == '11.0' and exists('$(MSBuildProgramFiles32)\Microsoft SDKs\Windows\v7.1A')">v110_xp</PlatformToolset>
     <PlatformToolset Condition="'$(VisualStudioVersion)' == '12.0'">v120</PlatformToolset>
     <PlatformToolset Condition="'$(VisualStudioVersion)' == '12.0' and exists('$(MSBuildProgramFiles32)\Microsoft SDKs\Windows\v7.1A')">v120_xp</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -34,6 +35,7 @@
     <PlatformToolset Condition="'$(VisualStudioVersion)' == '11.0' and exists('$(MSBuildProgramFiles32)\Microsoft SDKs\Windows\v7.1A')">v110_xp</PlatformToolset>
     <PlatformToolset Condition="'$(VisualStudioVersion)' == '12.0'">v120</PlatformToolset>
     <PlatformToolset Condition="'$(VisualStudioVersion)' == '12.0' and exists('$(MSBuildProgramFiles32)\Microsoft SDKs\Windows\v7.1A')">v120_xp</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -138,13 +140,112 @@ xcopy /Y /Q "$(EngineRoot)external\websockets\prebuilt\win32\*.*" "$(OutDir)"</C
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Classes\AppDelegate.cpp" />
-    <ClCompile Include="..\Classes\HelloWorldScene.cpp" />
+    <ClCompile Include="..\Classes\AsyncMapLoader.cpp" />
+    <ClCompile Include="..\Classes\CellCanvasSprite.cpp" />
+    <ClCompile Include="..\Classes\CellDescriptor.cpp" />
+    <ClCompile Include="..\Classes\CellShapes.cpp" />
+    <ClCompile Include="..\Classes\CellShapesHelper.cpp" />
+    <ClCompile Include="..\Classes\CellsLogic.cpp" />
+    <ClCompile Include="..\Classes\Common.cpp" />
+    <ClCompile Include="..\Classes\ConfigManager.cpp" />
+    <ClCompile Include="..\Classes\DiamondSquareGenerator.cpp" />
+    <ClCompile Include="..\Classes\GenomsGenerator.cpp" />
+    <ClCompile Include="..\Classes\GlowMapOverlay.cpp" />
+    <ClCompile Include="..\Classes\ListController.cpp" />
+    <ClCompile Include="..\Classes\LoadConfigMenu.cpp" />
+    <ClCompile Include="..\Classes\LoadingScene.cpp" />
+    <ClCompile Include="..\Classes\MainMenu.cpp" />
+    <ClCompile Include="..\Classes\Map.cpp" />
+    <ClCompile Include="..\Classes\OptionsMenu.cpp" />
+    <ClCompile Include="..\Classes\PartialMap.cpp" />
+    <ClCompile Include="..\Classes\PartialMapScene.cpp" />
+    <ClCompile Include="..\Classes\PhysicalDescriptor.cpp" />
+    <ClCompile Include="..\Classes\PixelDebugView.cpp" />
+    <ClCompile Include="..\Classes\PixelDescriptor.cpp" />
+    <ClCompile Include="..\Classes\PixelDescriptorProvider.cpp" />
+    <ClCompile Include="..\Classes\PixelMap.cpp" />
+    <ClCompile Include="..\Classes\PixelMapBackground.cpp" />
+    <ClCompile Include="..\Classes\PixelMapContext.cpp" />
+    <ClCompile Include="..\Classes\PixelMapLightOverlay.cpp" />
+    <ClCompile Include="..\Classes\PixelMapPartial.cpp" />
+    <ClCompile Include="..\Classes\PixelProviderConfig.cpp" />
+    <ClCompile Include="..\Classes\SaveConfigMenu.cpp" />
+    <ClCompile Include="..\Classes\ShaderLayer.cpp" />
+    <ClCompile Include="..\Classes\ShapeAnalizer.cpp" />
+    <ClCompile Include="..\Classes\ShapesGenerator.cpp" />
+    <ClCompile Include="..\Classes\SharedUIData.cpp" />
+    <ClCompile Include="..\Classes\Utilities.cpp" />
+    <ClCompile Include="..\Classes\StaticLightsSprite.cpp" />
+    <ClCompile Include="..\Classes\TerrainAnalizer.cpp" />
+    <ClCompile Include="..\Classes\TerrainBatchSprite.cpp" />
+    <ClCompile Include="..\Classes\TestSampleShapesScene.cpp" />
+    <ClCompile Include="..\Classes\UICommon.cpp" />
+    <ClCompile Include="..\Classes\UIConfig.cpp" />
+    <ClCompile Include="..\Classes\Viewport.cpp" />
+    <ClCompile Include="..\Classes\Window.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Classes\AppDelegate.h" />
-    <ClInclude Include="..\Classes\HelloWorldScene.h" />
+    <ClInclude Include="..\Classes\AsyncMapLoader.h" />
+    <ClInclude Include="..\Classes\AsyncPixelManager.h" />
+    <ClInclude Include="..\Classes\b2Utilites.h" />
+    <ClInclude Include="..\Classes\Buffer2D.h" />
+    <ClInclude Include="..\Classes\CellCanvasSprite.h" />
+    <ClInclude Include="..\Classes\CellDescriptor.h" />
+    <ClInclude Include="..\Classes\CellShapes.h" />
+    <ClInclude Include="..\Classes\CellShapesHelper.h" />
+    <ClInclude Include="..\Classes\CellsLogic.h" />
+    <ClInclude Include="..\Classes\CellsParameters.h" />
+    <ClInclude Include="..\Classes\Common.h" />
+    <ClInclude Include="..\Classes\ConfigManager.h" />
+    <ClInclude Include="..\Classes\DiamondSquareGenerator.h" />
+    <ClInclude Include="..\Classes\GenomsGenerator.hpp" />
+    <ClInclude Include="..\Classes\GlowMapOverlay.h" />
+    <ClInclude Include="..\Classes\IFullScreenMenu.h" />
+    <ClInclude Include="..\Classes\IPixelDescriptor.h" />
+    <ClInclude Include="..\Classes\IPixelDescriptorProvider.h" />
+    <ClInclude Include="..\Classes\ListController.h" />
+    <ClInclude Include="..\Classes\ListView.h" />
+    <ClInclude Include="..\Classes\LoadConfigMenu.h" />
+    <ClInclude Include="..\Classes\LoadingScene.h" />
+    <ClInclude Include="..\Classes\MainMenu.h" />
+    <ClInclude Include="..\Classes\Map.h" />
+    <ClInclude Include="..\Classes\OptionsMenu.h" />
+    <ClInclude Include="..\Classes\PartialMap.h" />
+    <ClInclude Include="..\Classes\PartialMapScene.h" />
+    <ClInclude Include="..\Classes\PhysicalDescriptor.h" />
+    <ClInclude Include="..\Classes\PixelDebugView.h" />
+    <ClInclude Include="..\Classes\PixelDescriptor.h" />
+    <ClInclude Include="..\Classes\PixelDescriptorProvider.h" />
+    <ClInclude Include="..\Classes\PixelMap.hpp" />
+    <ClInclude Include="..\Classes\PixelMapBackground.h" />
+    <ClInclude Include="..\Classes\PixelMapContext.h" />
+    <ClInclude Include="..\Classes\PixelMapLightOverlay.hpp" />
+    <ClInclude Include="..\Classes\PixelMapPartial.h" />
+    <ClInclude Include="..\Classes\PixelMapPartial.hpp" />
+    <ClInclude Include="..\Classes\PixelProviderConfig.h" />
+    <ClInclude Include="..\Classes\SaveConfigMenu.h" />
+    <ClInclude Include="..\Classes\ShaderLayer.h" />
+    <ClInclude Include="..\Classes\ShapeAnalizer.hpp" />
+    <ClInclude Include="..\Classes\ShapesGenerator.h" />
+    <ClInclude Include="..\Classes\SharedUIData.h" />
+    <ClInclude Include="..\Classes\StaticLightsSprite.h" />
+    <ClInclude Include="..\Classes\Statistic.h" />
+    <ClInclude Include="..\Classes\Statistic.hpp" />
+    <ClInclude Include="..\Classes\TerrainAnalizer.h" />
+    <ClInclude Include="..\Classes\TerrainBatchSprite.h" />
+    <ClInclude Include="..\Classes\TerrainSprite.h" />
+    <ClInclude Include="..\Classes\TestSampleShapesScene.h" />
+    <ClInclude Include="..\Classes\TextButton.h" />
+    <ClInclude Include="..\Classes\tinydir.h" />
+    <ClInclude Include="..\Classes\UICommon.h" />
+    <ClInclude Include="..\Classes\UIConfig.h" />
+    <ClInclude Include="..\Classes\Utilities.h" />
+    <ClInclude Include="..\Classes\Viewport.h" />
+    <ClInclude Include="..\Classes\Window.h" />
     <ClInclude Include="main.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\cocos2d\cocos\2d\libcocos2d.vcxproj">
@@ -160,6 +261,10 @@ xcopy /Y /Q "$(EngineRoot)external\websockets\prebuilt\win32\*.*" "$(OutDir)"</C
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="game.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\game.ico" />
+    <Image Include="res\icon1.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <functional>
+#include <memory>
 
 
 template <typename T, typename S = int>

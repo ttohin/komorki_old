@@ -28,8 +28,10 @@ bool AppDelegate::applicationDidFinishLaunching()
   auto glview = director->getOpenGLView();
   if(!glview)
   {
+
+    glview = GLViewImpl::createWithRect("Komorki 0.1.1", Rect(0, 0, 1024, 768), 1.0);
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
-    glview = GLViewImpl::createWithFullScreen("Komorki 0.1.1");
+    //glview = GLViewImpl::createWithFullScreen("Komorki 0.1.1");
 #else
     // glview = GLViewImpl::createWithFullScreen("Komorki 0.1.1");
     glview = GLViewImpl::createWithRect("Komorki 0.1.1", Rect(0, 0, 1024, 768), 1.0);

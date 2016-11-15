@@ -10,7 +10,7 @@
 #define prsv_ListController_h
 
 #include "cocos2d.h"
-#include "CocosGUI.h"
+#include "cocos2d/cocos/ui/CocosGUI.h"
 #include "IFullScreenMenu.h"
 #include "ListView.h"
 

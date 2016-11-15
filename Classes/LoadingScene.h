@@ -37,7 +37,7 @@ public:
   }
  
   
-  cocos2d::Label* CreateLabel(const char* text, const cocos2d::Vec2& offset) const;
+  cocos2d::LabelProtocol* CreateLabel(const char* text, const cocos2d::Vec2& offset);
   void timerForUpdate(float dt);
   void SaveTerrain(const TerrainAnalizer::Result& terrainAnalizerResult,
                    const komorki::Rect& rect,
@@ -49,7 +49,7 @@ public:
   void CreateViewport(float dt);
  
 private:
-  cocos2d::Label* m_info;
+  cocos2d::LabelProtocol* m_info;
   std::shared_ptr<AsyncMapLoader> m_mapLoader;
   std::shared_ptr<komorki::IPixelDescriptorProvider> m_provider;
   komorki::ui::Viewport::Ptr m_viewport;

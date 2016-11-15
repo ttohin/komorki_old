@@ -10,7 +10,7 @@
 #define komorki_ListView_h
 
 #include "cocos2d.h"
-#include "CocosGUI.h"
+#include "cocos2d/cocos/ui/CocosGUI.h"
 
 namespace komorki
 {

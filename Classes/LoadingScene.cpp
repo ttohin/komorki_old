@@ -31,7 +31,6 @@ bool LoadingScene::init()
   Vec2 origin = Director::getInstance()->getVisibleOrigin();
   
   m_info = CreateLabel("Loading", Vec2(visibleSize.width / 2, visibleSize.height / 2));
-  addChild(m_info, 999);
   
   Director::getInstance()->getTextureCache()->addImage("tile_32x32.png");
   Director::getInstance()->getTextureCache()->addImage("ground.png");
@@ -309,11 +308,12 @@ void LoadingScene::CreateViewport(float dt)
   Director::getInstance()->replaceScene(mapScene);
 }
 
-cocos2d::Label* LoadingScene::CreateLabel(const char* text, const cocos2d::Vec2& offset) const
+cocos2d::LabelProtocol* LoadingScene::CreateLabel(const char* text, const cocos2d::Vec2& offset)
 {
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
   auto result = LabelAtlas::create(text, "font.png", 18, 24, 32);
   result->setPosition(offset);
+  addChild(result);
   return result;
 #else
   auto result = Label::createWithSystemFont(text, "Menlo", 24, Size::ZERO, TextHAlignment::RIGHT);
@@ -321,6 +321,7 @@ cocos2d::Label* LoadingScene::CreateLabel(const char* text, const cocos2d::Vec2&
   result->setString(text);
   result->setPosition(offset);
   result->setHorizontalAlignment(TextHAlignment::LEFT);
+  addChild(result);
   return result;
 #endif
 }
