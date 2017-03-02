@@ -301,7 +301,6 @@
 		8FBF24E81DB8CFBE00AE7991 /* CellCanvasSprite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CellCanvasSprite.h; sourceTree = "<group>"; };
 		8FBF24E91DB8CFBE00AE7991 /* CellShapesHelper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CellShapesHelper.cpp; sourceTree = "<group>"; };
 		8FBF24EA1DB8CFBE00AE7991 /* CellShapesHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CellShapesHelper.h; sourceTree = "<group>"; };
-		8FBF24EB1DB8CFBE00AE7991 /* CellsParameters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CellsParameters.h; sourceTree = "<group>"; };
 		8FBF24ED1DB8CFBE00AE7991 /* ParallaxSprite.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ParallaxSprite.cpp; sourceTree = "<group>"; };
 		8FBF24EE1DB8CFBE00AE7991 /* ParallaxSprite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParallaxSprite.h; sourceTree = "<group>"; };
 		8FBF24F01DB8CFBE00AE7991 /* ObjectContext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ObjectContext.cpp; sourceTree = "<group>"; };
@@ -600,7 +599,6 @@
 			children = (
 				8FBF24E91DB8CFBE00AE7991 /* CellShapesHelper.cpp */,
 				8FBF24EA1DB8CFBE00AE7991 /* CellShapesHelper.h */,
-				8FBF24EB1DB8CFBE00AE7991 /* CellsParameters.h */,
 				8FBF24F91DB8CFBE00AE7991 /* Statistic.h */,
 				8FAB25201B80FBA600F2C0E4 /* Random */,
 				8F48DE5E1AB676B50075D222 /* GreatPixel.h */,

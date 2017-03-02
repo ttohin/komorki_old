@@ -20,6 +20,11 @@
 
 USING_NS_CC;
 
+namespace komorki
+{
+  namespace ui
+  {
+
 bool LoadingScene::init()
 {
   if ( !Layer::init() )
@@ -30,7 +35,7 @@ bool LoadingScene::init()
   m_viewport = nullptr;
   
   Size visibleSize = Director::getInstance()->getVisibleSize();
-  Vec2 origin = Director::getInstance()->getVisibleOrigin();
+  auto origin = Director::getInstance()->getVisibleOrigin();
   
   m_info = CreateLabel("Loading", Vec2(visibleSize.width / 2, visibleSize.height / 2));
   
@@ -277,7 +282,7 @@ void LoadingScene::LoadCellShapes(float dt)
   bool ok = sharedFileUtils->createDirectory(mapDir);
   assert(ok && sharedFileUtils->isDirectoryExist(mapDir));
   
-  Vec2 origin = Director::getInstance()->getVisibleOrigin();
+  auto origin = Director::getInstance()->getVisibleOrigin();
   
   auto renderer = _director->getRenderer();
   auto& parentTransform = _director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
@@ -326,4 +331,6 @@ cocos2d::LabelProtocol* LoadingScene::CreateLabel(const char* text, const cocos2
   addChild(result);
   return result;
 #endif
+}
+  }
 }

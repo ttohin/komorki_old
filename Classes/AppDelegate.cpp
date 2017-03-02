@@ -46,8 +46,8 @@ bool AppDelegate::applicationDidFinishLaunching()
   director->setDisplayStats(true);
   
   director->setAnimationInterval(1.0 / 60);
-  auto scene = LoadingScene::createScene();
-//  auto scene = TestSampleShapesScene::createScene();
+  auto scene = komorki::ui::LoadingScene::createScene();
+//  auto scene = komorki::ui::TestSampleShapesScene::createScene();
   director->runWithScene(scene);
   
   return true;
