@@ -163,7 +163,7 @@ namespace komorki
                               }
                               if (level >= TerrainLevel::Ground)
                               {
-                                m_map[x/2][y/2]->m_type = PixelDescriptor::TerrainType;
+                                m_map[x/2][y/2]->m_type = GreatPixel::TerrainType;
                               }
                             });
     

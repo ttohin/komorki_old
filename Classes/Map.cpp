@@ -7,7 +7,7 @@
 //
 
 #include "Map.h"
-#include "PixelDescriptorProvider.h"
+#include "PixelWorld.h"
 #include "Random.h"
 
 namespace
@@ -17,7 +17,7 @@ namespace
 
 using namespace komorki;
 
-void Map::Apply(komorki::PixelDescriptorProvider *provider)
+void Map::Apply(komorki::PixelWorld *provider)
 {
   Vec2 size = provider->GetSize();
   for (int i = 0; i < size.x; ++i)
@@ -26,7 +26,7 @@ void Map::Apply(komorki::PixelDescriptorProvider *provider)
     for (int j = 0; j < height; ++j)
     {
       auto pixelD = provider->GetDescriptor(i, j);
-      if (pixelD) pixelD->m_type = PixelDescriptor::TerrainType;
+      if (pixelD) pixelD->m_type = GreatPixel::TerrainType;
     }
     
     for (int j = height - 2; j >= 0; --j)
@@ -37,14 +37,14 @@ void Map::Apply(komorki::PixelDescriptorProvider *provider)
       for (int c = 0; c < side; c++)
       {
         auto pixelD = provider->GetDescriptor(i + c, j);
-        if (pixelD) pixelD->m_type = PixelDescriptor::TerrainType;
+        if (pixelD) pixelD->m_type = GreatPixel::TerrainType;
       }
       
       side = cRandABInt(minWidht, maxWidht);
       for (int c = 0; c < side; c++)
       {
         auto pixelD = provider->GetDescriptor(i - c, j);
-        if (pixelD) pixelD->m_type = PixelDescriptor::TerrainType;
+        if (pixelD) pixelD->m_type = GreatPixel::TerrainType;
       }
     }
   }

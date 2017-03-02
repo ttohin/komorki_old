@@ -130,7 +130,7 @@ namespace komorki
     
     Viewport::Viewport(cocos2d::Node* superView,
                            const cocos2d::Size& originalSize,
-                           const std::shared_ptr<IPixelDescriptorProvider>& provider)
+                           const std::shared_ptr<IPixelWorld>& provider)
     
     {
       assert(superView);
@@ -470,31 +470,6 @@ namespace komorki
       m_performMove = true;
     }
     
-    cocos2d::Size Viewport::GetTotalMapSize() const
-    {
-    }
-    bool Viewport::HightlightCellOnCursorPos(cocos2d::Vec2 cursorPosition, CellType type)
-    {
-    }
-    void Viewport::StopHightlighting()
-    {
-    }
-    bool Viewport::AddCreatureAtPosition(cocos2d::Vec2 cursorPosition, CellType type)
-    {
-      assert(0);
-    }
-    void Viewport::RemoveCreatureAtPostion(cocos2d::Vec2 cursorPosition)
-    {
-      assert(0);
-    }
-    void Viewport::CleanMap()
-    {
-      assert(0);
-    }
-    void Viewport::Reset()
-    {
-      assert(0);
-    }
     void Viewport::UpdateAsync(float& updateTime)
     {
       if ( false == m_manager->IsAvailable() )
@@ -596,7 +571,7 @@ namespace komorki
       {
         std::string operationType;
         
-        PixelDescriptor* descriptor = static_cast<PixelDescriptor*>(u.desc);
+        GreatPixel* descriptor = static_cast<GreatPixel*>(u.desc);
         
         Vec2 destinationPos(0,0);
         Vec2 initialPos = Vec2(u.desc->x, u.desc->y);

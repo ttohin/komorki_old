@@ -11,7 +11,7 @@
 
 #include <list>
 #include "CellShapes.h"
-#include "PixelDescriptorProvider.h"
+#include "PixelWorld.h"
 #include "CellDescriptor.h"
 
 
@@ -19,7 +19,7 @@ namespace komorki
 {
   struct MorphInternal
   {
-    PixelDescriptor* pd;
+    GreatPixel* pd;
     Vec2 offset;
   };
   
@@ -27,8 +27,8 @@ namespace komorki
   {
     Vec2 maxDist;
     Vec2 minDist;
-    PixelDescriptor* minPd = nullptr;
-    PixelDescriptor* maxPd = nullptr;
+    GreatPixel* minPd = nullptr;
+    GreatPixel* maxPd = nullptr;
     bool targetIsInShape = false;
   };
   
@@ -36,17 +36,17 @@ namespace komorki
   
   bool MoveCellShape(CellDescriptor* cd,
                             const MorphingInternal& sourceChanges,
-                            const PixelDescriptorProvider::PixelMap& map, // ugly hack
+                            const PixelWorld::PixelMap& map, // ugly hack
                             Morphing& outMorphing,
                             Movement& outMovement);
-  bool AddPixelToCell(CellDescriptor* cd, PixelDescriptor* pd);
-  bool RemovePixelFromCell(CellDescriptor* cd, PixelDescriptor* pd);
+  bool AddPixelToCell(CellDescriptor* cd, GreatPixel* pd);
+  bool RemovePixelFromCell(CellDescriptor* cd, GreatPixel* pd);
   
   void GetMaxMinDistantPixel(Vec2 pos, const IShape* shape, DistanceMeasureResult& result);
-  bool FreePixelHasMyParts(CellDescriptor* cd, PixelDescriptor* testPd, PixelDescriptor* ignorePd);
+  bool FreePixelHasMyParts(CellDescriptor* cd, GreatPixel* testPd, GreatPixel* ignorePd);
   
-  bool WillCauseTheGap(CellDescriptor* cd, PixelDescriptor* pd, const Vec2& offset);
-  bool WillCauseTheGap(CellDescriptor* cd, PixelDescriptor* missingPd);
+  bool WillCauseTheGap(CellDescriptor* cd, GreatPixel* pd, const Vec2& offset);
+  bool WillCauseTheGap(CellDescriptor* cd, GreatPixel* missingPd);
 }
 
 #endif /* defined(__prsv__CellShapesHelper__) */

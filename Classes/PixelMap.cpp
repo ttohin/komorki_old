@@ -7,7 +7,7 @@
 //
 
 #include "PixelMap.hpp"
-#include "PixelDescriptor.h"
+#include "GreatPixel.h"
 
 namespace komorki
 {
@@ -21,7 +21,7 @@ namespace komorki
       m_map[i].reserve(size.y);
       for (int j = 0; j < size.y; ++j)
       {
-        m_map[i].push_back(std::make_shared<PixelDescriptor>(i, j));
+        m_map[i].push_back(std::make_shared<GreatPixel>(i, j));
       }
     }
     
@@ -29,7 +29,7 @@ namespace komorki
     {
       for (int j = 0; j < size.y; ++j)
       {
-        PixelDescriptor* pd = m_map[i][j].get();
+        GreatPixel* pd = m_map[i][j].get();
         
         for (int di = -1; di <= 1; ++di)
         {
@@ -49,7 +49,7 @@ namespace komorki
               continue;
             }
             
-            PixelDescriptor* aroundPd = m_map[i + di][j + dj].get();
+            GreatPixel* aroundPd = m_map[i + di][j + dj].get();
             pd->SetDirection(di, dj, aroundPd);
           }
         }
@@ -57,7 +57,7 @@ namespace komorki
     }
   }
   
-  PixelDescriptor* PixelMap::GetDescriptor(PixelPos x, PixelPos y) const
+  GreatPixel* PixelMap::GetDescriptor(PixelPos x, PixelPos y) const
   {
     if (x < 0 || x >= m_size.x)
     {

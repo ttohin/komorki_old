@@ -16,61 +16,61 @@
 
 namespace komorki
 {
-  class PixelDescriptor;
+  class GreatPixel;
   
   class SinglePixel : public IShape
   {
   public:
-    SinglePixel(PixelDescriptor* pd) : m_pd(pd) {}
+    SinglePixel(GreatPixel* pd) : m_pd(pd) {}
     virtual ~SinglePixel(){}
     virtual void ForEach(const PerPixelFunc& op) const override;
     virtual void ForEachRandom(const PerPixelFunc& op) const override;
     virtual void Around(const PerPixelFunc& op) const override;
     virtual void AroundRandom(const PerPixelFunc& op) const override;
-    virtual void SetPosition(PixelDescriptor* pd) override;
-    virtual PixelDescriptor* GetOpposite(PixelDescriptor* target) const override;
-    virtual void Apply(PixelDescriptor* pd) override;
+    virtual void SetPosition(GreatPixel* pd) override;
+    virtual GreatPixel* GetOpposite(GreatPixel* target) const override;
+    virtual void Apply(GreatPixel* pd) override;
     virtual unsigned int Size() const override;
     virtual Rect GetAABB() const override;
-    virtual IShape::Ptr CopyWithBasePixel(PixelDescriptor* pd) const override;
+    virtual IShape::Ptr CopyWithBasePixel(GreatPixel* pd) const override;
   private:
-    PixelDescriptor* m_pd;
+    GreatPixel* m_pd;
   };
   
   class BigCell : public IShape
   {
   public:
-    BigCell(PixelDescriptor* pd) : m_pd(pd) {}
+    BigCell(GreatPixel* pd) : m_pd(pd) {}
     virtual ~BigCell(){}
     virtual void ForEach(const PerPixelFunc& op) const override;
     virtual void ForEachRandom(const PerPixelFunc& op) const override;
     virtual void Around(const PerPixelFunc& op) const override;
     virtual void AroundRandom(const PerPixelFunc& op) const override;
-    virtual void SetPosition(PixelDescriptor* pd) override;
-    virtual PixelDescriptor* GetOpposite(PixelDescriptor* target) const override;
-    virtual void Apply(PixelDescriptor* pd) override;
+    virtual void SetPosition(GreatPixel* pd) override;
+    virtual GreatPixel* GetOpposite(GreatPixel* target) const override;
+    virtual void Apply(GreatPixel* pd) override;
     virtual unsigned int Size() const override;
     virtual Rect GetAABB() const override;
-    virtual IShape::Ptr CopyWithBasePixel(PixelDescriptor* pd) const override;
+    virtual IShape::Ptr CopyWithBasePixel(GreatPixel* pd) const override;
   private:
-    PixelDescriptor* m_pd;
+    GreatPixel* m_pd;
   };
   
   class RectShape : public IShape
   {
   public:
-    RectShape(PixelDescriptor* pd, const Vec2& origin, const Vec2& size);
+    RectShape(GreatPixel* pd, const Vec2& origin, const Vec2& size);
     virtual ~RectShape(){}
     virtual void ForEach(const PerPixelFunc& op) const override;
     virtual void ForEachRandom(const PerPixelFunc& op) const override;
     virtual void Around(const PerPixelFunc& op) const override;
     virtual void AroundRandom(const PerPixelFunc& op) const override;
-    virtual void SetPosition(PixelDescriptor* pd) override;
-    virtual PixelDescriptor* GetOpposite(PixelDescriptor* target) const override;
-    virtual void Apply(PixelDescriptor* pd) override;
+    virtual void SetPosition(GreatPixel* pd) override;
+    virtual GreatPixel* GetOpposite(GreatPixel* target) const override;
+    virtual void Apply(GreatPixel* pd) override;
     virtual unsigned int Size() const override;
     virtual Rect GetAABB() const override;
-    virtual IShape::Ptr CopyWithBasePixel(PixelDescriptor* pd) const override;
+    virtual IShape::Ptr CopyWithBasePixel(GreatPixel* pd) const override;
     
     //public
     virtual void SetAABB(const Vec2& origin, const Vec2& size);
@@ -78,7 +78,7 @@ namespace komorki
     
     
   private:
-    PixelDescriptor* m_pd;
+    GreatPixel* m_pd;
     Vec2 m_size;
     Vec2 m_pdOffset;
   };
@@ -86,8 +86,8 @@ namespace komorki
   class PolymorphShape : public IShape
   {
   public:
-    PolymorphShape(PixelDescriptor* pd, int numberOfPixels);
-    PolymorphShape(PixelDescriptor* pd, const std::vector<PixelDescriptor*>& pixels);
+    PolymorphShape(GreatPixel* pd, int numberOfPixels);
+    PolymorphShape(GreatPixel* pd, const std::vector<GreatPixel*>& pixels);
     virtual ~PolymorphShape(){}
     
     // IShape
@@ -96,22 +96,22 @@ namespace komorki
     virtual void ForEachRandom(const PerPixelFunc& op) const override;
     virtual void Around(const PerPixelFunc& op) const override;
     virtual void AroundRandom(const PerPixelFunc& op) const override;
-    virtual void SetPosition(PixelDescriptor* pd) override;
-    virtual PixelDescriptor* GetOpposite(PixelDescriptor* target) const override;
-    virtual void Apply(PixelDescriptor* pd) override;
+    virtual void SetPosition(GreatPixel* pd) override;
+    virtual GreatPixel* GetOpposite(GreatPixel* target) const override;
+    virtual void Apply(GreatPixel* pd) override;
     virtual unsigned int Size() const override;
     virtual Rect GetAABB() const override;
-    virtual IShape::Ptr CopyWithBasePixel(PixelDescriptor* pd) const override;
+    virtual IShape::Ptr CopyWithBasePixel(GreatPixel* pd) const override;
     
     // public
-    virtual void RemovePixel(PixelDescriptor* source);
-    virtual void AddPixel(PixelDescriptor* source);
-    virtual bool IsInShape(PixelDescriptor* pd);
-    virtual void SetPixels(PixelDescriptor* pd, const std::vector<PixelDescriptor*>& pixels);
+    virtual void RemovePixel(GreatPixel* source);
+    virtual void AddPixel(GreatPixel* source);
+    virtual bool IsInShape(GreatPixel* pd);
+    virtual void SetPixels(GreatPixel* pd, const std::vector<GreatPixel*>& pixels);
     
   private:
-    PixelDescriptor* m_pd;
-    std::vector<PixelDescriptor*> m_shape;
+    GreatPixel* m_pd;
+    std::vector<GreatPixel*> m_shape;
   };
 }
 

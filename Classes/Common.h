@@ -15,9 +15,9 @@
 
 namespace komorki
 {
-  class PixelDescriptor;
+  class GreatPixel;
   
-  typedef std::function<void(PixelDescriptor* pixel, bool& stop)> PerPixelFunc;
+  typedef std::function<void(GreatPixel* pixel, bool& stop)> PerPixelFunc;
   
   typedef int PixelPos;
 

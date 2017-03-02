@@ -43,7 +43,7 @@ namespace komorki
       s->setAnchorPoint({0.5, 0.5});
       
       s->setPosition(spriteVector(m_pos + m_posOffset, m_offset + rectOffset));
-      s->setTag(static_cast<int>(komorki::PixelDescriptor::CreatureType));
+      s->setTag(static_cast<int>(komorki::GreatPixel::CreatureType));
       m_sprite = s;
     }
     

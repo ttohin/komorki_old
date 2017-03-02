@@ -9,15 +9,14 @@
 #ifndef __komorki__CellsLogic__
 #define __komorki__CellsLogic__
 
-#include "PixelDescriptor.h"
-#include "PixelDescriptorProvider.h"
+#include "GreatPixel.h"
+#include "PixelWorld.h"
 
 namespace komorki
 {
   void ProcessCell(CellDescriptor* pd,
                    Vec2 pos,
-                   Config* config,
-                   const PixelDescriptorProvider::PixelMap& map, // ugly hack
+                   const PixelWorld::PixelMap& map, // ugly hack
                    Optional<Movement>& movement,
                    Optional<Action>& action,
                    Optional<Morphing>& morph,

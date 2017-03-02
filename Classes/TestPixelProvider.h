@@ -9,11 +9,11 @@
 #ifndef __prsv__TestPixelProvider__
 #define __prsv__TestPixelProvider__
 
-#include "PixelDescriptorProvider.h"
+#include "PixelWorld.h"
 
 namespace komorki
 {
-  class TestPixelProvider : public PixelDescriptorProvider
+  class TestPixelProvider : public PixelWorld
   {
   public:
     typedef std::function<void(char symbol, const Vec2& pos)> PerMapSymbolFunc;
@@ -31,7 +31,7 @@ namespace komorki
   private:
     std::string m_stringMap;
     Vec2 m_mapSize;
-    Config m_testConfig;
+    PixelWorldConfig m_testConfig;
   };
 }
 

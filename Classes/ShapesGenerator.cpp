@@ -8,25 +8,25 @@
 
 #include "ShapesGenerator.h"
 #include "Random.h"
-#include "PixelDescriptor.h"
+#include "GreatPixel.h"
 
 namespace komorki
 {
-  IShape::Ptr ContinousShape(PixelDescriptor* pd)
+  IShape::Ptr ContinousShape(GreatPixel* pd)
   {
-    PixelDescriptor::Vec pixels;
+    GreatPixel::Vec pixels;
 
     int numberOfPixels = 3;
-    PixelDescriptor* currentPd = pd;
+    GreatPixel* currentPd = pd;
     pixels.push_back(pd);
-    pd->m_type = PixelDescriptor::CreatureType;
+    pd->m_type = GreatPixel::CreatureType;
     while (1)
     {
       bool foundEmpty = false;
-      currentPd->AroundRandom([&](PixelDescriptor* p, bool& stop){
+      currentPd->AroundRandom([&](GreatPixel* p, bool& stop){
         if (p->IsEmpty())
         {
-          p->m_type = PixelDescriptor::CreatureType;
+          p->m_type = GreatPixel::CreatureType;
           pixels.push_back(p);
           currentPd = p;
           stop = true;
@@ -38,25 +38,25 @@ namespace komorki
     }
     
     auto shape = std::make_shared<PolymorphShape>(pd, pixels);
-    shape->ForEach([](PixelDescriptor* p, bool& stop){
-      p->m_type = PixelDescriptor::Empty;
+    shape->ForEach([](GreatPixel* p, bool& stop){
+      p->m_type = GreatPixel::Empty;
     });
     
     return shape;
   }
   
-  IShape::Ptr CompactShape(PixelDescriptor* pd)
+  IShape::Ptr CompactShape(GreatPixel* pd)
   {
-    PixelDescriptor::Vec pixels;
+    GreatPixel::Vec pixels;
     
     int numberOfPixels = cRandABInt(4, 8);
     pixels.push_back(pd);
     
-    pd->AroundRandom([&](PixelDescriptor* p, bool& stop){
+    pd->AroundRandom([&](GreatPixel* p, bool& stop){
       if (p->IsEmpty() && cBoolRandPercent(0.6) && pixels.size() < numberOfPixels)
 
       {
-        p->m_type = PixelDescriptor::CreatureType;
+        p->m_type = GreatPixel::CreatureType;
         pixels.push_back(p);
       }
     });
@@ -67,24 +67,24 @@ namespace komorki
     {
       int randomPixelIndex = cRandABInt(0, pixels.size());
       auto randomPixel = pixels[randomPixelIndex];
-      randomPixel->AroundRandom([&](PixelDescriptor* p, bool& stop){
+      randomPixel->AroundRandom([&](GreatPixel* p, bool& stop){
         if (p->IsEmpty() && cBoolRandPercent(0.6) && pixels.size() < numberOfPixels)
         {
-          p->m_type = PixelDescriptor::CreatureType;
+          p->m_type = GreatPixel::CreatureType;
           pixels.push_back(p);
         }
       });
     }
     
     auto shape = std::make_shared<PolymorphShape>(pd, pixels);
-    shape->ForEach([](PixelDescriptor* p, bool& stop){
-      p->m_type = PixelDescriptor::Empty;
+    shape->ForEach([](GreatPixel* p, bool& stop){
+      p->m_type = GreatPixel::Empty;
     });
     
     return shape;
   }
   
-  void ShapesGenerator::GenerateShape(PixelDescriptor* pd, IShape::Ptr& outShape, ShapeType& outShapeType)
+  void ShapesGenerator::GenerateShape(GreatPixel* pd, IShape::Ptr& outShape, ShapeType& outShapeType)
   {
     std::shared_ptr<IShape> shape;
     

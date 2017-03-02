@@ -5,13 +5,10 @@
 
 #include "cocos2d.h"
 #include "cocos2d/cocos/ui/CocosGUI.h"
-#include "OptionsMenu.h"
 #include "MainMenu.h"
-#include "LoadConfigMenu.h"
-#include "SaveConfigMenu.h"
 #include "IFullScreenMenu.h"
 #include "Viewport.h"
-#include "PixelProviderConfig.h"
+
 
 class MainScene : public cocos2d::Layer, cocos2d::TextFieldDelegate
 {
@@ -75,7 +72,6 @@ private:
   float m_updateTime;
   bool m_pause;
   bool m_stopManager;
-  bool m_restartManagerFromOptionMenu;
   
   
   void ZoomIn();
@@ -92,9 +88,6 @@ private:
   void SetCurrentMenu(const std::shared_ptr<IFullScreenMenu> menu);
   void Exit();
   void ShowMainScreen();
-  
-  void ConfirmNewOptions();
-  void CancelOptionSelection();
   
   void CreateSpeedToolBar();
   

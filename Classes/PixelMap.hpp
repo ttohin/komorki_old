@@ -23,12 +23,12 @@ namespace komorki
     
     PixelMap(const Vec2& size);
     virtual ~PixelMap() {}
-    virtual PixelDescriptor* GetDescriptor(PixelPos x, PixelPos y) const;
+    virtual GreatPixel* GetDescriptor(PixelPos x, PixelPos y) const;
     virtual Vec2 GetSize() const;
     
   private:
     
-    typedef std::shared_ptr<PixelDescriptor> PixelPtr;
+    typedef std::shared_ptr<GreatPixel> PixelPtr;
     typedef std::vector<std::vector<PixelPtr> > PixelsArray;
     
     PixelsArray m_map;

@@ -16,7 +16,7 @@
 
 namespace komorki
 {
-  class PixelDescriptor;
+  class GreatPixel;
   
   class ShapesGenerator
   {
@@ -32,7 +32,7 @@ namespace komorki
     ShapesGenerator();
     ResultItem GenerateNext();
   private:
-    void GenerateShape(PixelDescriptor* pd, IShape::Ptr& outShape, ShapeType& outShapeType);
+    void GenerateShape(GreatPixel* pd, IShape::Ptr& outShape, ShapeType& outShapeType);
     PixelMap::Ptr m_internalMap;
   };
 }

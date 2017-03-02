@@ -57,7 +57,7 @@ namespace graphic
     s->setAnchorPoint({0.5, 0.5});
     s->setColor(cocos2d::Color3B(150, 150, 150));
     s->setOpacity(110);
-    s->setTag(static_cast<int>(komorki::PixelDescriptor::CreatureType));
+    s->setTag(static_cast<int>(komorki::GreatPixel::CreatureType));
     
     return s;
   }
@@ -104,7 +104,7 @@ namespace graphic
     return result;
   }
   
-  cocos2d::Vec2 DeadCellsLayer::spriteVector(komorki::PixelDescriptor* pd, const cocos2d::Vec2& vector)
+  cocos2d::Vec2 DeadCellsLayer::spriteVector(komorki::GreatPixel* pd, const cocos2d::Vec2& vector)
   {
     auto result = cocos2d::Vec2(((int)pd->x - m_a1) * kSpritePosition, ((int)pd->y - m_b1) * kSpritePosition) + vector;
     return result;

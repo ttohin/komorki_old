@@ -15,7 +15,7 @@
 
 namespace komorki
 {
-  class PixelDescriptor;
+  class GreatPixel;
   
   namespace graphic
   {

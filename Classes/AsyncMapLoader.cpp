@@ -7,7 +7,6 @@
 //
 
 #include "AsyncMapLoader.h"
-#include "ConfigManager.h"
 #include "TestPixelProvider.h"
 #include "SharedUIData.h"
 #include "UIConfig.h"
@@ -39,10 +38,9 @@ void AsyncMapLoader::WorkerThread()
 #ifdef USE_TEST_PROVIDER
   m_provider = std::make_shared<komorki::TestPixelProvider>();
 #else
-  komorki::ConfigManager::GetInstance()->CreateNewConfig();
-  m_provider = std::make_shared<komorki::PixelDescriptorProvider>();
-  m_provider->InitWithConfig(komorki::ConfigManager::GetInstance()->GetCurrentConfig().get(),
-                             komorki::graphic::SharedUIData::getInstance()->m_genomsGenerator->m_genomsList);
+  m_provider = std::make_shared<komorki::PixelWorld>();
+  komorki::PixelWorldConfig config;
+  m_provider->Init(config, komorki::graphic::SharedUIData::getInstance()->m_genomsGenerator->m_genomsList);
 #endif
   
   SetCurrentJobString("Runnig few generations");
@@ -80,7 +78,7 @@ void AsyncMapLoader::SetCurrentJobString(const std::string& text)
   m_currentJob = text;
 }
 
-std::shared_ptr<komorki::IPixelDescriptorProvider> AsyncMapLoader::GetProvider()
+std::shared_ptr<komorki::IPixelWorld> AsyncMapLoader::GetProvider()
 {
   return m_provider;
 }

@@ -1,8 +1,7 @@
 #include "MainScene.h"
-#include "PixelDescriptorProvider.h"
+#include "PixelWorld.h"
 #include "cocostudio/DictionaryHelper.h"
 #include "cocos2d/cocos/ui/CocosGUI.h"
-#include "ConfigManager.h"
 #include "DiamondSquareGenerator.h"
 
 static const float kUpdateTime = 0.5;
@@ -311,25 +310,6 @@ void MainScene::ShowMainScreen()
   m_mainMenu = nullptr;
 }
 
-void MainScene::ConfirmNewOptions()
-{
-  m_restartManagerFromOptionMenu = true;
-  ShowMainScreen();
-}
-
-void MainScene::CancelOptionSelection()
-{
-  if (m_mainMenu)
-  {
-    ShowMainMenu();
-  }
-  else
-  {
-    ShowMainScreen();
-  }
-}
-
-
 void MainScene::visit(cocos2d::Renderer *renderer, const cocos2d::Mat4 &parentTransform, uint32_t parentFlags)
 {  
   Size viewSize = Director::getInstance()->getVisibleSize();
@@ -386,15 +366,6 @@ void MainScene::timerForUpdate(float dt)
   
   if(!m_viewport->IsAvailable()) return;
   
-  if (m_restartManagerFromOptionMenu)
-  {
-    komorki::ConfigManager::GetInstance()->ApplyPendingConfig();
-//    delete m_viewport;
-//    CreateMap();
-    m_restartManagerFromOptionMenu = false;
-    return;
-  }
-  
   if (m_stopManager)
   {
 //    delete m_viewport;
@@ -405,11 +376,6 @@ void MainScene::timerForUpdate(float dt)
 
   if (m_speed == eSpeedNormal || m_speed == eSpeedDouble)
   {
-    if (m_prevSpeed == eSpeedWarp)
-    {
-      m_viewport->Reset();
-    }
-    
     float updateTime = m_speed == eSpeedNormal ? m_updateTime : m_updateTime * 0.2;
     float updateTimeEstimated = updateTime;
     m_viewport->UpdateAsync(updateTimeEstimated);

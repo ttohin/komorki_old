@@ -12,7 +12,7 @@
 #include "StaticLightsLayer.h"
 #include "CellsLayer.h"
 #include "DynamicLightsLayer.h"
-#include "PixelDescriptorProvider.h"
+#include "PixelWorld.h"
 #include "Utilities.h"
 #include "UIConfig.h"
 #include <stdio.h>
@@ -93,7 +93,7 @@ PartialMap::~PartialMap()
 }
   
 bool PartialMap::Init(int a, int b, int width, int height,
-                      IPixelDescriptorProvider* provider,
+                      IPixelWorld* provider,
                       cocos2d::Node* superView,
                       cocos2d::Node* lightNode,
                       const cocos2d::Vec2& offset)
@@ -210,7 +210,7 @@ void PartialMap::Update(WorldUpdateList& updateResult, float updateTime)
     auto a = u.action;
    
     Vec2 destinationPos(0,0);
-    PixelDescriptor* destinationDesc = nullptr;
+    GreatPixel* destinationDesc = nullptr;
     ObjectContext* context = nullptr;
     if(u.addCreature == true)
     {
@@ -360,7 +360,7 @@ void PartialMap::Update(WorldUpdateList& updateResult, float updateTime)
       for (int j = m_b1; j < m_b2; ++j)
       {
         auto pd = m_provider->GetDescriptor(i, j);
-        if (pd->m_type == PixelDescriptor::CreatureType)
+        if (pd->m_type == GreatPixel::CreatureType)
         {
           if (pd->m_cellDescriptor->parent == pd)
           {
@@ -411,9 +411,9 @@ void PartialMap::Update(WorldUpdateList& updateResult, float updateTime)
     return std::string(buf);
   }
   
-  void PartialMap::InitPixel(PixelDescriptor* pd)
+  void PartialMap::InitPixel(GreatPixel* pd)
   {
-    if (pd->m_type == PixelDescriptor::CreatureType)
+    if (pd->m_type == GreatPixel::CreatureType)
     {
       if (pd->m_cellDescriptor->parent == pd)
       {
@@ -443,7 +443,7 @@ void PartialMap::Update(WorldUpdateList& updateResult, float updateTime)
     }
   }
   
-  ObjectContext* PartialMap::AddCreature(const Vec2& source, PixelDescriptor* dest, Morphing& morphing, float duration)
+  ObjectContext* PartialMap::AddCreature(const Vec2& source, GreatPixel* dest, Morphing& morphing, float duration)
   {
     ObjectContext* context = nullptr;
     if (dest->m_cellDescriptor->GetShapeType() == eShapeTypeAmorph)
@@ -453,7 +453,7 @@ void PartialMap::Update(WorldUpdateList& updateResult, float updateTime)
       auto c = new AmorphCellContext(this, textureRect);
       auto aabb = dest->m_cellDescriptor->GetShape()->GetAABB();
       
-      dest->m_cellDescriptor->Shape([&](PixelDescriptor* pd, bool& stop)
+      dest->m_cellDescriptor->Shape([&](GreatPixel* pd, bool& stop)
                 {
                   c->AddSprite(aabb, pd->GetPos());
                 });
@@ -486,7 +486,7 @@ void PartialMap::Update(WorldUpdateList& updateResult, float updateTime)
     return context;
   }
   
-  ObjectContext* PartialMap::CreateCell(PixelDescriptor* dest)
+  ObjectContext* PartialMap::CreateCell(GreatPixel* dest)
   {
     komorki::Morphing m;
     return AddCreature(Vec2(), dest, m, 0.f);

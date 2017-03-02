@@ -94,7 +94,7 @@ namespace komorki
       
       cocos2d::Vec2 rectOffset = spriteVector({1, 1}) * 0.5;
       s->setPosition(rectOffset + spriteVector(GetPosInOwnerBase(originalPos), m_offset + offset));
-      s->setTag(static_cast<int>(komorki::PixelDescriptor::CreatureType + 10));
+      s->setTag(static_cast<int>(komorki::GreatPixel::CreatureType + 10));
       
       auto context = std::make_shared<PolymorphShapeContext>();
       context->sprite = s;

@@ -8,7 +8,6 @@
 
 #include "MainMenu.h"
 #include "cocostudio/CocoStudio.h"
-#include "ConfigManager.h"
 
 USING_NS_CC;
 using namespace cocostudio;
@@ -49,7 +48,7 @@ void MainMenu::ShowInView(cocos2d::Node* root)
     return;
   }
   
-  bool doublSize = komorki::ConfigManager::GetInstance()->RequiredDoubleSize();
+  bool doublSize = false;
  
   m_bg = CSLoader::createNode("MainMenu.csb")->getChildByName<ui::Layout*>("BackgroundPanel");
   m_bg->retain();

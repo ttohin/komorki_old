@@ -12,15 +12,15 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
-#include "Utilities.h"
-#include "PixelDescriptorProvider.h"
+
+#include "PixelWorld.h"
 
 namespace komorki
 {
   class AsyncPixelManager
   {
   public:
-    AsyncPixelManager(IPixelDescriptorProvider* provider)
+    AsyncPixelManager(IPixelWorld* provider)
     : m_provider(provider)
     , m_performUpdate(false)
     , m_shouldStop(false)
@@ -129,7 +129,7 @@ namespace komorki
     }
     
   private:
-    IPixelDescriptorProvider* m_provider;
+    IPixelWorld* m_provider;
     bool m_performUpdate;
     bool m_shouldStop;
     bool m_inProccess;

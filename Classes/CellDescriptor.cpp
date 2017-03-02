@@ -17,7 +17,7 @@
 using namespace komorki;
 
 
-CellDescriptor::CellDescriptor (PixelDescriptor* pd)
+CellDescriptor::CellDescriptor (GreatPixel* pd)
 : m_skipFirstStep(false)
 , m_age(0)
 , m_new(false)
@@ -57,10 +57,10 @@ void CellDescriptor::AroundRandom(const PerPixelFunc& op)
 bool CellDescriptor::Check() 
 {
   bool result = true;
-  Shape([this, &result](PixelDescriptor* pd, bool& stop)
+  Shape([this, &result](GreatPixel* pd, bool& stop)
         {
           assert(pd);
-          assert(pd->m_type == PixelDescriptor::CreatureType);
+          assert(pd->m_type == GreatPixel::CreatureType);
           assert (pd->m_cellDescriptor != nullptr);
           assert (pd->m_cellDescriptor->m_id == m_id);
           assert (pd->m_cellDescriptor == this);
@@ -70,8 +70,8 @@ bool CellDescriptor::Check()
 
 void CellDescriptor::Finish()
 {
-  Shape([this](PixelDescriptor* pd, bool& stop){
-    pd->m_type = PixelDescriptor::CreatureType;
+  Shape([this](GreatPixel* pd, bool& stop){
+    pd->m_type = GreatPixel::CreatureType;
     pd->m_cellDescriptor = this;
     pd->pushHandled = false;
   });
@@ -80,31 +80,31 @@ void CellDescriptor::Finish()
   m_volume = m_shape->Size();
 }
 
-void CellDescriptor::Move(PixelDescriptor* pd)
+void CellDescriptor::Move(GreatPixel* pd)
 {
   CleanSpace();
   m_shape->SetPosition(pd);
-  Shape([this](PixelDescriptor* pd, bool& stop)
+  Shape([this](GreatPixel* pd, bool& stop)
         {
           assert(pd->m_cellDescriptor == nullptr);
-          assert(pd->m_type == PixelDescriptor::Empty);
+          assert(pd->m_type == GreatPixel::Empty);
           pd->m_cellDescriptor = this;
-          pd->m_type = PixelDescriptor::CreatureType;
+          pd->m_type = GreatPixel::CreatureType;
         });
   parent = pd;
 }
 
-bool CellDescriptor::TestSpace(PixelDescriptor* pd)
+bool CellDescriptor::TestSpace(GreatPixel* pd)
 {
   if (pd == nullptr) return false;
   
   bool empty = true;
   m_shape->SetPosition(pd);
-  m_shape->ForEach([&empty, this](PixelDescriptor* pd, bool& stop)
+  m_shape->ForEach([&empty, this](GreatPixel* pd, bool& stop)
                    {
-                     if (pd == nullptr || pd->m_type != PixelDescriptor::Empty)
+                     if (pd == nullptr || pd->m_type != GreatPixel::Empty)
                      {
-                       if (pd && pd->m_type == PixelDescriptor::CreatureType)
+                       if (pd && pd->m_type == GreatPixel::CreatureType)
                        {
                          if (pd->m_cellDescriptor == this)
                          {
@@ -120,13 +120,13 @@ bool CellDescriptor::TestSpace(PixelDescriptor* pd)
   return empty;
 }
 
-bool CellDescriptor::TestSpaceEmpty(PixelDescriptor* pd)
+bool CellDescriptor::TestSpaceEmpty(GreatPixel* pd)
 {
   bool empty = true;
   m_shape->SetPosition(pd);
-  m_shape->ForEach([&empty, this](PixelDescriptor* pd, bool& stop)
+  m_shape->ForEach([&empty, this](GreatPixel* pd, bool& stop)
                    {
-                     if (pd == nullptr || pd->m_type != PixelDescriptor::Empty)
+                     if (pd == nullptr || pd->m_type != GreatPixel::Empty)
                      {
                        empty = false;
                        stop = true;
@@ -141,15 +141,15 @@ IShape* CellDescriptor::GetShape() const
   return m_shape.get();
 }
 
-bool CellDescriptor::Move(const std::vector<PixelDescriptor*>& removePixels,
-                          const std::vector<PixelDescriptor*>& addPixels)
+bool CellDescriptor::Move(const std::vector<GreatPixel*>& removePixels,
+                          const std::vector<GreatPixel*>& addPixels)
 {
   PolymorphShape* shape = static_cast<PolymorphShape*>(m_shape.get());
   for (const auto& p : removePixels)
   {
     assert(p->m_cellDescriptor == this);
     p->m_cellDescriptor = nullptr;
-    p->m_type = PixelDescriptor::Empty;
+    p->m_type = GreatPixel::Empty;
     shape->RemovePixel(p);
   }
   
@@ -157,14 +157,14 @@ bool CellDescriptor::Move(const std::vector<PixelDescriptor*>& removePixels,
   {
     assert(p->m_cellDescriptor == nullptr);
     p->m_cellDescriptor = this;
-    p->m_type = PixelDescriptor::CreatureType;
+    p->m_type = GreatPixel::CreatureType;
     shape->AddPixel(p);
     parent = p;
   }
   
   if (addPixels.empty()) // if no new pixels -
   {
-    shape->ForEach([this](PixelDescriptor* pd, bool& stop)
+    shape->ForEach([this](GreatPixel* pd, bool& stop)
                    {
                      parent = pd;
                      stop = true;
@@ -238,11 +238,11 @@ void CellDescriptor::PrintAsciiArt() const
   std::cout << GetAsciiArt() << std::endl;
 }
 
-//void CellDescriptor::StepFrom(PixelDescriptor* pd)
+//void CellDescriptor::StepFrom(GreatPixel* pd)
 //{
 //  STRICT_CHECK(
 //               bool pdIsInCorner = true;
-//               Around([pd, &pdIsInCorner](PixelDescriptor* cornerPd, bool& stop)
+//               Around([pd, &pdIsInCorner](GreatPixel* cornerPd, bool& stop)
 //                      {
 //                        if (cornerPd == pd) pdIsInCorner = true;
 //                      });
@@ -251,7 +251,7 @@ void CellDescriptor::PrintAsciiArt() const
 //  Vec2 offset;
 //  offset.x = parent->x > pd->x ? 1 : parent->x < pd->x ? -1 : 0;
 //  offset.y = parent->y > pd->y ? 1 : parent->y < pd->y ? -1 : 0;
-//  PixelDescriptor* newPos = parent->Offset(offset);
+//  GreatPixel* newPos = parent->Offset(offset);
 //  
 //}
 
@@ -269,10 +269,10 @@ ShapeType CellDescriptor::GetShapeType() const
 
 void CellDescriptor::CleanSpace()
 {
-  m_shape->ForEach([&](PixelDescriptor* pd, bool& stop)
+  m_shape->ForEach([&](GreatPixel* pd, bool& stop)
                    {
                      pd->m_cellDescriptor = nullptr;
-                     pd->m_type = PixelDescriptor::Empty;
+                     pd->m_type = GreatPixel::Empty;
                    });
 }
 

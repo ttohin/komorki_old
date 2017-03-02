@@ -10,7 +10,7 @@
 #define __komorki__CellsLayer__
 
 #include "cocos2d.h"
-#include "PixelDescriptorProvider.h"
+#include "PixelWorld.h"
 #include "Random.h"
 #include "CellDescriptor.h"
 
@@ -47,7 +47,7 @@ class CellsLayer : public cocos2d::SpriteBatchNode
 {
 public:
   
-  struct PixelDescriptorContext
+  struct GreatPixelContext
   {
     Sprite* sprite;
     Vec2 offset;
@@ -55,7 +55,7 @@ public:
     int j;
   };
   
-  CellsLayer(int a, int b, int width, int height, komorki::PixelDescriptorProvider* provider)
+  CellsLayer(int a, int b, int width, int height, komorki::PixelWorld* provider)
   {
     m_a1 = a;
     m_a2 = a + width;
@@ -68,10 +68,10 @@ public:
     m_pullSize = PMP_PULL_SIZE;
   }
   
-  Rect OffsetForType(komorki::PixelDescriptor* pd)
+  Rect OffsetForType(komorki::GreatPixel* pd)
   {
-    komorki::PixelDescriptor::Type t = pd->m_type;
-    if(t == komorki::PixelDescriptor::CreatureType)
+    komorki::GreatPixel::Type t = pd->m_type;
+    if(t == komorki::GreatPixel::CreatureType)
     {
       auto d = pd->m_cellDescriptor;
       assert(d);
@@ -91,7 +91,7 @@ public:
       
       return Rect(index*kTileFrameSize, line*kTileFrameSize, kTileFrameSize, kTileFrameSize);
     }
-    if(t == komorki::PixelDescriptor::TerrainType)
+    if(t == komorki::GreatPixel::TerrainType)
     {
       return Rect(cRandABInt(GROWND_START, GROWND_END)*kTileFrameSize, GROWND_LINE*kTileFrameSize, kTileFrameSize, kTileFrameSize);
     }
@@ -132,9 +132,9 @@ public:
     }
   }
   
-  Sprite* spriteForDescriptor(komorki::PixelDescriptor* pixelD)
+  Sprite* spriteForDescriptor(komorki::GreatPixel* pixelD)
   {
-    if (pixelD->m_type == komorki::PixelDescriptor::Empty)
+    if (pixelD->m_type == komorki::GreatPixel::Empty)
     {
       return nullptr;
     }
@@ -145,13 +145,13 @@ public:
       return nullptr;
     }
     
-    PixelDescriptorContext* context = new PixelDescriptorContext();
+    GreatPixelContext* context = new GreatPixelContext();
     
     Rect r = OffsetForType(pixelD);
     auto s = CreateSprite();
     s->setTextureRect(r);
     s->setScale(kSpriteScale);
-    if (pixelD->m_type == komorki::PixelDescriptor::CreatureType)
+    if (pixelD->m_type == komorki::GreatPixel::CreatureType)
     {
       assert(pixelD->m_cellDescriptor);
       assert(pixelD->m_cellDescriptor->userData == nullptr);
@@ -236,7 +236,7 @@ public:
       {
         if(IsInAABB(destinationPos))
         {
-          komorki::PixelDescriptor* newDescriptor = nullptr;
+          komorki::GreatPixel* newDescriptor = nullptr;
           
           if (m == true)
           {
@@ -247,7 +247,7 @@ public:
             newDescriptor = u.addCreature.value.destinationDesc;
           }
           
-          auto context = static_cast<PixelDescriptorContext*>(newDescriptor->m_cellDescriptor->userData);
+          auto context = static_cast<GreatPixelContext*>(newDescriptor->m_cellDescriptor->userData);
           context->i = destinationPos.x;
           context->j = destinationPos.y;
           
@@ -267,7 +267,7 @@ public:
     {
       std::string operationType;
       
-//      komorki::PixelDescriptor* descriptor = static_cast<komorki::PixelDescriptor*>(u.desc);
+//      komorki::GreatPixel* descriptor = static_cast<komorki::GreatPixel*>(u.desc);
      
       Vec2 destinationPos(0,0);
       Vec2 initialPos = Vec2(u.desc->x, u.desc->y);
@@ -300,7 +300,7 @@ public:
         continue;
       }
       
-      PixelDescriptorContext* context = static_cast<PixelDescriptorContext*>(u.userData);
+      GreatPixelContext* context = static_cast<GreatPixelContext*>(u.userData);
       {
         Sprite* source = nullptr;
         if (context)
@@ -330,7 +330,7 @@ public:
         auto s = spriteForDescriptor(newDescriptor);
 
         Vec2 offset = RANDOM_OFFSET_VECTOR;
-        auto context = static_cast<PixelDescriptorContext*>(newDescriptor->m_cellDescriptor->userData);
+        auto context = static_cast<GreatPixelContext*>(newDescriptor->m_cellDescriptor->userData);
         context->offset = offset;
         
         if (ANIMATED)
@@ -537,10 +537,10 @@ public:
   int m_a2;
   int m_b2;
   Sprite* m_hlSprite;
-  komorki::PixelDescriptorProvider* m_provider;
+  komorki::PixelWorld* m_provider;
   std::list<Sprite*> m_spritesPull;
   unsigned int m_pullSize;
-  std::vector<PixelDescriptorContext*> m_upcomingDescriptors;
+  std::vector<GreatPixelContext*> m_upcomingDescriptors;
 };
 
 #endif /* defined(__komorki__CellsLayer__) */

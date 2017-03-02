@@ -12,7 +12,7 @@
 #include <memory>
 #include "cocos2d.h"
 #include "Common.h"
-#include "PixelDescriptorProvider.h"
+#include "PixelWorld.h"
 #include "Statistic.hpp"
 
 namespace komorki
@@ -35,19 +35,12 @@ namespace komorki
       
       Viewport(cocos2d::Node* superView,
                const cocos2d::Size& originalSize,
-               const std::shared_ptr<komorki::IPixelDescriptorProvider>& provider);
+               const std::shared_ptr<komorki::IPixelWorld>& provider);
       
       ~Viewport();
       void Test();
       void CreateMap();
       void Resize(const cocos2d::Size& originalSize);
-      cocos2d::Size GetTotalMapSize() const;
-      bool HightlightCellOnCursorPos(cocos2d::Vec2 cursorPosition, komorki::CellType type);
-      void StopHightlighting();
-      bool AddCreatureAtPosition(cocos2d::Vec2 cursorPosition, komorki::CellType type);
-      void RemoveCreatureAtPostion(cocos2d::Vec2 cursorPosition);
-      void CleanMap();
-      void Reset();
       
       void Update(float updateTime, float& outUpdateTime);
       void UpdateAsync(float& updateTime);
@@ -101,7 +94,7 @@ namespace komorki
       bool m_enableSmallAnimations;
       bool m_enableAnimations;
      
-      std::shared_ptr<IPixelDescriptorProvider> m_provider;
+      std::shared_ptr<IPixelWorld> m_provider;
       std::shared_ptr<AsyncPixelManager> m_manager;
       MapList m_maps;
       MapList m_mapsToRemove;

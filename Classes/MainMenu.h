@@ -11,7 +11,7 @@
 
 #include "cocos2d.h"
 #include "cocos2d/cocos/ui/CocosGUI.h"
-#include "PixelDescriptorProvider.h"
+#include "PixelWorld.h"
 #include "IFullScreenMenu.h"
 
 class MainMenu : public IFullScreenMenu

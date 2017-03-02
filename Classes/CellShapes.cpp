@@ -7,7 +7,7 @@
 //
 
 #include "CellShapes.h"
-#include "PixelDescriptor.h"
+#include "GreatPixel.h"
 #include "Random.h"
 #include <assert.h>
 
@@ -35,7 +35,7 @@ void SinglePixel::AroundRandom(const PerPixelFunc& op) const
   m_pd->AroundRandom(op);
 }
 
-void SinglePixel::SetPosition(PixelDescriptor* pd)
+void SinglePixel::SetPosition(GreatPixel* pd)
 {
   m_pd = pd;
 }
@@ -50,17 +50,17 @@ Rect SinglePixel::GetAABB() const
   return {m_pd->GetPos(), {1, 1}};
 }
 
-IShape::Ptr SinglePixel::CopyWithBasePixel(PixelDescriptor* pd) const
+IShape::Ptr SinglePixel::CopyWithBasePixel(GreatPixel* pd) const
 {
   return std::make_shared<SinglePixel>(pd);
 }
 
-PixelDescriptor* SinglePixel::GetOpposite(PixelDescriptor* target) const
+GreatPixel* SinglePixel::GetOpposite(GreatPixel* target) const
 {
   return m_pd->GetOpposite(target);
 }
 
-void SinglePixel::Apply(PixelDescriptor* pd)
+void SinglePixel::Apply(GreatPixel* pd)
 {
   m_pd->offsetX = 0;
   m_pd->offsetY = 0;
@@ -120,17 +120,17 @@ void BigCell::AroundRandom(const PerPixelFunc& op) const
   }
 }
 
-void BigCell::SetPosition(PixelDescriptor* pd)
+void BigCell::SetPosition(GreatPixel* pd)
 {
   m_pd = pd;
 }
 
-PixelDescriptor* BigCell::GetOpposite(PixelDescriptor* target) const
+GreatPixel* BigCell::GetOpposite(GreatPixel* target) const
 {
   return nullptr;
 }
 
-void BigCell::Apply(PixelDescriptor* pd)
+void BigCell::Apply(GreatPixel* pd)
 {
   m_pd->offsetX = 0;
   m_pd->offsetY = 0;
@@ -146,7 +146,7 @@ Rect BigCell::GetAABB() const
   return {m_pd->GetPos(), {2, 2}};
 }
 
-IShape::Ptr BigCell::CopyWithBasePixel(PixelDescriptor* pd) const
+IShape::Ptr BigCell::CopyWithBasePixel(GreatPixel* pd) const
 {
   return std::make_shared<BigCell>(pd);
 }
@@ -154,7 +154,7 @@ IShape::Ptr BigCell::CopyWithBasePixel(PixelDescriptor* pd) const
 //**************************************************************************************************
 // RectShape
 //**************************************************************************************************
-RectShape::RectShape(PixelDescriptor* pd, const Vec2& origin, const Vec2& size)
+RectShape::RectShape(GreatPixel* pd, const Vec2& origin, const Vec2& size)
 : m_pd(pd)
 , m_size(size)
 , m_pdOffset(origin)
@@ -234,17 +234,17 @@ void RectShape::AroundRandom(const PerPixelFunc& op) const
   Around(op);
 }
 
-void RectShape::SetPosition(PixelDescriptor* pd)
+void RectShape::SetPosition(GreatPixel* pd)
 {
   m_pd = pd;
 }
 
-PixelDescriptor* RectShape::GetOpposite(PixelDescriptor* target) const
+GreatPixel* RectShape::GetOpposite(GreatPixel* target) const
 {
   return nullptr;
 }
 
-void RectShape::Apply(PixelDescriptor* pd)
+void RectShape::Apply(GreatPixel* pd)
 {
   m_pd->offsetX = 0;
   m_pd->offsetY = 0;
@@ -261,7 +261,7 @@ Rect RectShape::GetAABB() const
   return {origin, m_size};
 }
 
-IShape::Ptr RectShape::CopyWithBasePixel(PixelDescriptor* pd) const
+IShape::Ptr RectShape::CopyWithBasePixel(GreatPixel* pd) const
 {
   return std::make_shared<RectShape>(pd, m_pdOffset, m_size);
 }
@@ -293,14 +293,14 @@ void PolymorphShape::ForEach(const PerPixelFunc& op) const
 }
 
 //***************************************************************
-PolymorphShape::PolymorphShape(PixelDescriptor* pd, int numberOfPixels) : m_pd(pd)
+PolymorphShape::PolymorphShape(GreatPixel* pd, int numberOfPixels) : m_pd(pd)
 {
   m_pd = pd;
   m_shape.push_back(pd);
   
   if (numberOfPixels > 1)
   {
-    pd->Around([&](PixelDescriptor* pixel, bool& stop)
+    pd->Around([&](GreatPixel* pixel, bool& stop)
                {
                  m_shape.push_back(pixel);
                  if (m_shape.size() == numberOfPixels) stop = true;
@@ -309,7 +309,7 @@ PolymorphShape::PolymorphShape(PixelDescriptor* pd, int numberOfPixels) : m_pd(p
   }
 }
 
-PolymorphShape::PolymorphShape(PixelDescriptor* pd, const std::vector<PixelDescriptor*>& pixels)
+PolymorphShape::PolymorphShape(GreatPixel* pd, const std::vector<GreatPixel*>& pixels)
 {
   m_pd = pd;
   m_shape.insert(m_shape.end(), pixels.begin(), pixels.end());
@@ -326,7 +326,7 @@ void PolymorphShape::Around(const PerPixelFunc& op) const
   
   for(const auto& p : m_shape)
   {
-    p->Around([&](PixelDescriptor* pixel, bool&)
+    p->Around([&](GreatPixel* pixel, bool&)
               {
                 if (std::find(m_shape.begin(), m_shape.end(), pixel) == m_shape.end())
                 {
@@ -353,7 +353,7 @@ void PolymorphShape::AroundRandom(const PerPixelFunc& op) const
     unsigned int index = (i + start)%size;
     auto p = m_shape[index];
     
-    p->AroundRandom([&](PixelDescriptor* pixel, bool& _stop)
+    p->AroundRandom([&](GreatPixel* pixel, bool& _stop)
               {
                 if (std::find(m_shape.begin(), m_shape.end(), pixel) == m_shape.end())
                 {
@@ -368,17 +368,17 @@ void PolymorphShape::AroundRandom(const PerPixelFunc& op) const
   }
 }
 
-void PolymorphShape::SetPosition(PixelDescriptor* pd)
+void PolymorphShape::SetPosition(GreatPixel* pd)
 {
   m_pd = pd;
 }
 
-PixelDescriptor* PolymorphShape::GetOpposite(PixelDescriptor* target) const
+GreatPixel* PolymorphShape::GetOpposite(GreatPixel* target) const
 {
   return nullptr;
 }
 
-void PolymorphShape::Apply(PixelDescriptor* pd)
+void PolymorphShape::Apply(GreatPixel* pd)
 {
   m_pd = pd;
   m_pd->offsetX = 0;
@@ -390,17 +390,17 @@ void PolymorphShape::Apply(PixelDescriptor* pd)
   }
 }
 
-void PolymorphShape::RemovePixel(PixelDescriptor* pd)
+void PolymorphShape::RemovePixel(GreatPixel* pd)
 {
-  std::vector<PixelDescriptor*>::iterator it = std::find(m_shape.begin(), m_shape.end(), pd);
+  std::vector<GreatPixel*>::iterator it = std::find(m_shape.begin(), m_shape.end(), pd);
   bool isInShape = it != m_shape.end();
   assert(isInShape);
   m_shape.erase(it);
 }
 
-void PolymorphShape::AddPixel(PixelDescriptor* pd)
+void PolymorphShape::AddPixel(GreatPixel* pd)
 {
-  std::vector<PixelDescriptor*>::iterator it = std::find(m_shape.begin(), m_shape.end(), pd);
+  std::vector<GreatPixel*>::iterator it = std::find(m_shape.begin(), m_shape.end(), pd);
   bool isInShape = it != m_shape.end();
   assert(!isInShape);
   m_shape.push_back(pd);
@@ -408,14 +408,14 @@ void PolymorphShape::AddPixel(PixelDescriptor* pd)
   pd->offsetY = pd->y - m_pd->y;
 }
 
-bool PolymorphShape::IsInShape(PixelDescriptor* pd)
+bool PolymorphShape::IsInShape(GreatPixel* pd)
 {
-  std::vector<PixelDescriptor*>::iterator it = std::find(m_shape.begin(), m_shape.end(), pd);
+  std::vector<GreatPixel*>::iterator it = std::find(m_shape.begin(), m_shape.end(), pd);
   return it != m_shape.end();
 }
 
 
-void PolymorphShape::SetPixels(PixelDescriptor* pd, const std::vector<PixelDescriptor*>& pixels)
+void PolymorphShape::SetPixels(GreatPixel* pd, const std::vector<GreatPixel*>& pixels)
 {
   m_pd = pd;
   m_shape = pixels;
@@ -460,7 +460,7 @@ Rect PolymorphShape::GetAABB() const
   return result;
 }
 
-IShape::Ptr PolymorphShape::CopyWithBasePixel(PixelDescriptor* pd) const
+IShape::Ptr PolymorphShape::CopyWithBasePixel(GreatPixel* pd) const
 {
   std::vector<Vec2> offsetsList;
   for (auto& p : m_shape)
@@ -468,7 +468,7 @@ IShape::Ptr PolymorphShape::CopyWithBasePixel(PixelDescriptor* pd) const
     offsetsList.emplace_back(p->x - m_pd->x, p->y - m_pd->y);
   }
   
-  std::vector<PixelDescriptor*> listOfNewPixels;
+  std::vector<GreatPixel*> listOfNewPixels;
   for (auto& offset : offsetsList)
   {
     auto targetPd = pd->RecOffset(offset.x, offset.y);

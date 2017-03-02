@@ -11,12 +11,12 @@
 
 namespace komorki
 {
-  class PixelDescriptorProvider;
+  class PixelWorld;
   
   class Map
   {
   public:
-    void Apply(PixelDescriptorProvider* provider);
+    void Apply(PixelWorld* provider);
   };
 }
 

@@ -1,14 +1,14 @@
 
 #pragma once
 
-#include "PixelDescriptor.h"
+#include "GreatPixel.h"
 #include "CellShapes.h"
 #include "Genom.h"
 #include <vector>
 
 namespace komorki
 {
-  class PixelDescriptor;
+  class GreatPixel;
   
   struct Transaction
   {
@@ -20,7 +20,7 @@ namespace komorki
   class CellDescriptor
   {
   public:
-    CellDescriptor (PixelDescriptor* pd);
+    CellDescriptor (GreatPixel* pd);
     
     virtual void Shape(const PerPixelFunc& op);
     virtual void ShapeRandom(const PerPixelFunc& op);
@@ -28,12 +28,12 @@ namespace komorki
     virtual void AroundRandom(const PerPixelFunc& op);
     virtual bool Check();
     virtual void Finish();
-    virtual void Move(PixelDescriptor* pd);
-    virtual bool TestSpace(PixelDescriptor* pd);
-    virtual bool TestSpaceEmpty(PixelDescriptor* pd);
+    virtual void Move(GreatPixel* pd);
+    virtual bool TestSpace(GreatPixel* pd);
+    virtual bool TestSpaceEmpty(GreatPixel* pd);
     virtual IShape* GetShape() const;
-    virtual bool Move(const std::vector<PixelDescriptor*>& removePixels,
-                      const std::vector<PixelDescriptor*>& addPixels);
+    virtual bool Move(const std::vector<GreatPixel*>& removePixels,
+                      const std::vector<GreatPixel*>& addPixels);
     virtual std::string GetAsciiArt() const;
     virtual void PrintAsciiArt() const;
     virtual bool IsMyFood(CellDescriptor* cd) const;
@@ -58,7 +58,7 @@ namespace komorki
     
     IShape::Ptr m_shape;
     void* userData;
-    PixelDescriptor* parent;
+    GreatPixel* parent;
     
     std::vector<Transaction> nextTurnTransaction;
     

@@ -14,12 +14,12 @@
 #include "Common.h"
 #include "cocos2d.h"
 #include "WorldUpdateResult.h"
-#include "PixelDescriptor.h"
+#include "GreatPixel.h"
 
 
 namespace komorki
 {
-  class IPixelDescriptorProvider;
+  class IPixelWorld;
   
   namespace graphic
   {
@@ -44,7 +44,7 @@ namespace komorki
                 int b,
                 int width,
                 int height,
-                IPixelDescriptorProvider* provider,
+                IPixelWorld* provider,
                 cocos2d::Node* superView,
                 cocos2d::Node* lightNode,
                 const cocos2d::Vec2& offset);
@@ -77,10 +77,10 @@ namespace komorki
       
     private:
    
-      void InitPixel(PixelDescriptor* pd);
-      ObjectContext* AddCreature(const Vec2& source, PixelDescriptor* dest, Morphing& morphing, float duration);
-      ObjectContext* CreateCell(PixelDescriptor* dest);
-      ObjectContext* CreatePolymorphCell(PixelDescriptor* dest);
+      void InitPixel(GreatPixel* pd);
+      ObjectContext* AddCreature(const Vec2& source, GreatPixel* dest, Morphing& morphing, float duration);
+      ObjectContext* CreateCell(GreatPixel* dest);
+      ObjectContext* CreatePolymorphCell(GreatPixel* dest);
       void Delete(ObjectContext* context);
       void Move(const Vec2& source, const Vec2& dest, ObjectContext* context, float duration, int steps, Morphing& morphing, CellDescriptor* cd);
       void Attack(ObjectContext* context, const Vec2& pos, const Vec2& offset, float animationDuration);
@@ -93,7 +93,7 @@ namespace komorki
       std::shared_ptr<DeadCellsLayer> m_background;
       cocos2d::Sprite* m_terrainSprite;
       cocos2d::Sprite* m_terrainBgSprite;
-      IPixelDescriptorProvider* m_provider;
+      IPixelWorld* m_provider;
       std::list<ObjectContext*> m_upcomingContexts;
       std::list<CellDescriptor*> m_outgoingCells;
       bool m_enableSmallAnimations = false;

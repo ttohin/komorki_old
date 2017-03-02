@@ -51,7 +51,7 @@ public:
 private:
   cocos2d::LabelProtocol* m_info;
   std::shared_ptr<AsyncMapLoader> m_mapLoader;
-  std::shared_ptr<komorki::IPixelDescriptorProvider> m_provider;
+  std::shared_ptr<komorki::IPixelWorld> m_provider;
   komorki::graphic::Viewport::Ptr m_viewport;
   std::vector<std::string> m_mapList;
   

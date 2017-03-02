@@ -11,7 +11,7 @@
 
 #include "cocos2d.h"
 #include "Common.h"
-#include "IPixelDescriptorProvider.h"
+#include "IPixelWorld.h"
 
 namespace komorki
 {

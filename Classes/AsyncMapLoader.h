@@ -9,7 +9,7 @@
 #ifndef __prsv__AsyncMapLoader__
 #define __prsv__AsyncMapLoader__
 
-#include "PixelDescriptorProvider.h"
+#include "PixelWorld.h"
 #include "Viewport.h"
 
 class AsyncMapLoader
@@ -24,7 +24,7 @@ public:
   std::string GetCurrentJobString();
   
   komorki::graphic::Viewport::Ptr GetViewport();
-  std::shared_ptr<komorki::IPixelDescriptorProvider> GetProvider();
+  std::shared_ptr<komorki::IPixelWorld> GetProvider();
   
 private:
 
@@ -40,7 +40,7 @@ private:
   std::condition_variable m_semaphore;
   std::thread m_thread;
   std::shared_ptr<komorki::Config> m_config;
-  std::shared_ptr<komorki::IPixelDescriptorProvider> m_provider;
+  std::shared_ptr<komorki::IPixelWorld> m_provider;
   std::string m_currentJob;
   komorki::graphic::Viewport::Ptr m_viewport;
 };

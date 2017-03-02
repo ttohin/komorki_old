@@ -18,7 +18,7 @@ namespace
 }
 
 
-bool StaticLightsSprite::init(komorki::IPixelDescriptorProvider* pixelMap, const komorki::Rect& rect)
+bool StaticLightsSprite::init(komorki::IPixelWorld* pixelMap, const komorki::Rect& rect)
 {
   if ( !Node::init())
   {

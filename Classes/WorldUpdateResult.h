@@ -14,12 +14,12 @@
 namespace komorki
 {
   class CellDescriptor;
-  class PixelDescriptor;
+  class GreatPixel;
   class Config;
   
   struct AddCreature
   {
-    PixelDescriptor* destinationDesc = nullptr;
+    GreatPixel* destinationDesc = nullptr;
   };
   
   struct Action
@@ -61,7 +61,7 @@ namespace komorki
   struct Movement
   {
     int duration = 0;
-    PixelDescriptor* destinationDesc = nullptr;
+    GreatPixel* destinationDesc = nullptr;
   };
   
   template<typename T>
@@ -106,7 +106,7 @@ namespace komorki
   struct WorldUpateDiff
   {
     void* userData = nullptr;
-    PixelDescriptor* desc = nullptr;
+    GreatPixel* desc = nullptr;
     komorki::Optional<komorki::Action> action;
     komorki::Optional<komorki::Movement> movement;
     komorki::Optional<komorki::AddCreature> addCreature;

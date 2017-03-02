@@ -103,7 +103,7 @@ CellCanvasSprite* CreateCanvasWithGenomsGenerator()
     auto originalBuffer = std::make_shared<Buffer2D<bool>>(aabb.size.x, aabb.size.y);
     originalBuffer->Fill(false);
     
-    shape->ForEach([&](komorki::PixelDescriptor* pd, bool& stop)
+    shape->ForEach([&](komorki::GreatPixel* pd, bool& stop)
                    {
                      auto pos = pd->GetPos();
                      pos = pos - aabb.origin;

@@ -30,7 +30,7 @@ Vec2 RandVec(const Vec2& source)
   }
   
 bool PushShapePixel(CellDescriptor* cd,
-                    PixelDescriptor* pd,
+                    GreatPixel* pd,
                     const Vec2& offset,
                     MorphingInternal& changes)
   {
@@ -38,14 +38,14 @@ bool PushShapePixel(CellDescriptor* cd,
       assert(0);
     }
     
-    if (pd->m_type == PixelDescriptor::Empty)
+    if (pd->m_type == GreatPixel::Empty)
     {
       return true;
     }
     
     auto targetPd = pd->Offset(offset);
-    if (targetPd->m_type == PixelDescriptor::Empty
-        || (targetPd->m_type == PixelDescriptor::CreatureType
+    if (targetPd->m_type == GreatPixel::Empty
+        || (targetPd->m_type == GreatPixel::CreatureType
             && targetPd->m_cellDescriptor == cd
             && !targetPd->pushHandled))
     {
@@ -60,10 +60,10 @@ bool PushShapePixel(CellDescriptor* cd,
     else
     {
       targetPd = nullptr;
-      pd->AroundRandom([&](PixelDescriptor* localPd, bool& stop)
+      pd->AroundRandom([&](GreatPixel* localPd, bool& stop)
                               {
-                                if (localPd->m_type == PixelDescriptor::Empty ||
-                                    (localPd->m_type == PixelDescriptor::CreatureType
+                                if (localPd->m_type == GreatPixel::Empty ||
+                                    (localPd->m_type == GreatPixel::CreatureType
                                      && localPd->m_cellDescriptor == cd
                                      && !localPd->pushHandled))
                                 {
@@ -92,7 +92,7 @@ bool PushShapePixel(CellDescriptor* cd,
 
 bool MoveCellShape(CellDescriptor* cd,
                      const MorphingInternal& sourceChanges,
-                            const PixelDescriptorProvider::PixelMap& map, // ugly hack
+                            const PixelWorld::PixelMap& map, // ugly hack
                      Morphing& outMorphing,
                      Movement& outMovement)
 {
@@ -100,7 +100,7 @@ bool MoveCellShape(CellDescriptor* cd,
   
   MorphingInternal intermidiateChanges;
   Vec2 baseOffset;
-  PixelDescriptor* newBasePd = nullptr;
+  GreatPixel* newBasePd = nullptr;
   for (const auto& change : sourceChanges) {
     if (change.pd == cd->parent)
     {
@@ -123,7 +123,7 @@ bool MoveCellShape(CellDescriptor* cd,
   PolymorphShape* shape = static_cast<PolymorphShape*>(cd->m_shape.get());
   MorphingInternal intermidiateChanges3;
   
-  shape->ForEach([&](PixelDescriptor* pd, bool& stop)
+  shape->ForEach([&](GreatPixel* pd, bool& stop)
   {
     Morph m;
     m.dir = Morph::Move;
@@ -150,13 +150,13 @@ bool MoveCellShape(CellDescriptor* cd,
   }
   
   unsigned int volume = cd->m_volume;
-  PixelDescriptor::Vec pdStack;
+  GreatPixel::Vec pdStack;
   
   for (const auto& change : intermidiateChanges2)
   {
-    PixelDescriptor* newPd = change.pd->Offset(change.offset);
+    GreatPixel* newPd = change.pd->Offset(change.offset);
     
-    PixelDescriptor::Vec::iterator it = std::find(pdStack.begin(), pdStack.end(), change.pd);
+    GreatPixel::Vec::iterator it = std::find(pdStack.begin(), pdStack.end(), change.pd);
     if (it == pdStack.end())
     {
       shape->RemovePixel(change.pd);
@@ -196,33 +196,33 @@ bool MoveCellShape(CellDescriptor* cd,
   {
     auto pd = map[m.pos.x + m.delta.x][m.pos.y + m.delta.y];
     assert(pd->m_cellDescriptor == cd);
-    assert(pd->m_type == PixelDescriptor::CreatureType);
+    assert(pd->m_type == GreatPixel::CreatureType);
   }
   
   return true;
 }
   
-  bool AddPixelToCell(CellDescriptor* cd, PixelDescriptor* pd)
+  bool AddPixelToCell(CellDescriptor* cd, GreatPixel* pd)
   {
-    pd->m_type = PixelDescriptor::CreatureType;
+    pd->m_type = GreatPixel::CreatureType;
     pd->m_cellDescriptor = cd;
     return true;
   }
   
-  bool RemovePixelFromCell(CellDescriptor* cd, PixelDescriptor* pd)
+  bool RemovePixelFromCell(CellDescriptor* cd, GreatPixel* pd)
   {
-    pd->m_type = PixelDescriptor::Empty;
+    pd->m_type = GreatPixel::Empty;
     pd->m_cellDescriptor = nullptr;
     return true;
   }
   
   void GetMaxMinDistantPixel(Vec2 pos, const IShape* shape, DistanceMeasureResult& result)
   {
-    PixelDescriptor* minDistPd = nullptr;
+    GreatPixel* minDistPd = nullptr;
     float minDist = std::numeric_limits<float>::max();
-    PixelDescriptor* maxDistPd = nullptr;
+    GreatPixel* maxDistPd = nullptr;
     float maxDist = 0.f;
-    shape->ForEach([&](PixelDescriptor* pixel, bool& stop)
+    shape->ForEach([&](GreatPixel* pixel, bool& stop)
               {
                 float dist = std::powf(pos.x - pixel->x, 2) + std::powf(pos.y - pixel->y, 2);
                 if (dist <= minDist)
@@ -249,7 +249,7 @@ bool MoveCellShape(CellDescriptor* cd,
   }
   
   
-  bool FreePixelHasMyParts(CellDescriptor* cd, PixelDescriptor* testPd, PixelDescriptor* ignorePd)
+  bool FreePixelHasMyParts(CellDescriptor* cd, GreatPixel* testPd, GreatPixel* ignorePd)
   {
     if (!testPd->IsEmpty())
     {
@@ -258,7 +258,7 @@ bool MoveCellShape(CellDescriptor* cd,
     
     bool result = false;
     
-    testPd->Around([&](PixelDescriptor* pd, bool& stop){
+    testPd->Around([&](GreatPixel* pd, bool& stop){
       if (pd->m_cellDescriptor == cd && pd != ignorePd)
       {
         result = true;
@@ -271,17 +271,17 @@ bool MoveCellShape(CellDescriptor* cd,
   }
   
   bool FindNextCellPixel(CellDescriptor* cd,
-                         PixelDescriptor* pd,
-                         PixelDescriptor* include,
-                         PixelDescriptor* except,
-                         PixelDescriptor::Vec& pdStack)
+                         GreatPixel* pd,
+                         GreatPixel* include,
+                         GreatPixel* except,
+                         GreatPixel::Vec& pdStack)
   {
     if (except == pd)
     {
       return true;
     }
     
-    PixelDescriptor::Vec::iterator it = std::find(pdStack.begin(), pdStack.end(), pd);
+    GreatPixel::Vec::iterator it = std::find(pdStack.begin(), pdStack.end(), pd);
     if (it != pdStack.end())
     {
       return true;
@@ -291,7 +291,7 @@ bool MoveCellShape(CellDescriptor* cd,
       pdStack.push_back(pd);
     }
     
-    pd->Around([&](PixelDescriptor* targetPd, bool& stop) {
+    pd->Around([&](GreatPixel* targetPd, bool& stop) {
       
       if (include == targetPd)
       {
@@ -307,10 +307,10 @@ bool MoveCellShape(CellDescriptor* cd,
     return true;
   }
   
-  bool WillCauseTheGap(CellDescriptor* cd, PixelDescriptor* pd, const Vec2& offset)
+  bool WillCauseTheGap(CellDescriptor* cd, GreatPixel* pd, const Vec2& offset)
   {
-    PixelDescriptor::Vec pdStack;
-    PixelDescriptor* basePd = cd->parent;
+    GreatPixel::Vec pdStack;
+    GreatPixel* basePd = cd->parent;
     if (pd == basePd)
     {
       basePd = pd->Offset(offset);
@@ -333,13 +333,13 @@ bool MoveCellShape(CellDescriptor* cd,
     return false;
   }
   
-  bool WillCauseTheGap(CellDescriptor* cd, PixelDescriptor* missingPd)
+  bool WillCauseTheGap(CellDescriptor* cd, GreatPixel* missingPd)
   {
     PolymorphShape* shape = static_cast<PolymorphShape*>(cd->GetShape());
     
-    PixelDescriptor* pixelInShape = nullptr;
+    GreatPixel* pixelInShape = nullptr;
     
-    shape->ForEach([&](PixelDescriptor* pd, bool& stop){
+    shape->ForEach([&](GreatPixel* pd, bool& stop){
       if (pd != missingPd)
       {
         pixelInShape = pd;
@@ -349,7 +349,7 @@ bool MoveCellShape(CellDescriptor* cd,
     
     assert(pixelInShape);
     
-    PixelDescriptor::Vec pdStack;
+    GreatPixel::Vec pdStack;
     FindNextCellPixel(cd, pixelInShape, nullptr, missingPd, pdStack);
   
     return pdStack.size() != (shape->Size() - 1);

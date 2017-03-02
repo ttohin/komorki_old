@@ -1,12 +1,12 @@
 //
-//  PixelDescriptor.cpp
+//  GreatPixel.cpp
 //  prsv
 //
 //  Created by Anton Simakov on 04.05.15.
 //
 //
 
-#include "PixelDescriptor.h"
+#include "GreatPixel.h"
 #include "Random.h"
 #include <assert.h>
 #include <cstdlib>
@@ -18,20 +18,20 @@ namespace Const
   const unsigned int numberOfDirections = 8;
 }
 
-PixelDescriptor::PixelDescriptor(int _x, int _y)
-  : lt(nullptr)
-  , lc(nullptr)
-  , lb(nullptr)
-  , ct(nullptr)
-  , cb(nullptr)
-  , rt(nullptr)
-  , rc(nullptr)
-  , rb(nullptr)
+GreatPixel::GreatPixel(int _x, int _y)
+: lt (nullptr)
+, lc (nullptr)
+, lb (nullptr)
+, ct (nullptr)
+, cb (nullptr)
+, rt (nullptr)
+, rc (nullptr)
+, rb (nullptr)
 #ifndef _WIN32
-  , directions{&lb, &cb, &rb, &rc, &rt, &ct, &lt, &lc}
+ , directions{&lb, &cb, &rb, &rc, &rt, &ct, &lt, &lc}
 #endif
 , m_cellDescriptor(nullptr)
-, m_type(PixelDescriptor::Empty)
+, m_type(GreatPixel::Empty)
 , x(_x), y(_y)
 , offsetX(0), offsetY(0)
 , pushHandled(false)
@@ -48,7 +48,7 @@ PixelDescriptor::PixelDescriptor(int _x, int _y)
 #endif
 }
 
-void PixelDescriptor::Around(const PerPixelFunc& op)
+void GreatPixel::Around(const PerPixelFunc& op)
 {
   bool stop = false;
   for (int i = 0; i < Const::numberOfDirections; ++i)
@@ -61,7 +61,7 @@ void PixelDescriptor::Around(const PerPixelFunc& op)
   }
 }
 
-void PixelDescriptor::AroundRandom(const PerPixelFunc& op)
+void GreatPixel::AroundRandom(const PerPixelFunc& op)
 {
   const int start = cRandABInt(0, Const::numberOfDirections);
   bool stop = false;
@@ -75,7 +75,7 @@ void PixelDescriptor::AroundRandom(const PerPixelFunc& op)
   }
 }
 
-PixelDescriptor* PixelDescriptor::GetOpposite(PixelDescriptor *target) const
+GreatPixel* GreatPixel::GetOpposite(GreatPixel *target) const
 {
   if (target == lt) return rb;
   if (target == lc) return rc;
@@ -88,12 +88,12 @@ PixelDescriptor* PixelDescriptor::GetOpposite(PixelDescriptor *target) const
   return nullptr;
 }
 
-PixelDescriptor* PixelDescriptor::Offset(const Vec2& offset) const
+GreatPixel* GreatPixel::Offset(const Vec2& offset) const
 {
   return Offset(offset.x, offset.y);
 }
 
-PixelDescriptor* PixelDescriptor::Offset(PixelPos x, PixelPos y) const
+GreatPixel* GreatPixel::Offset(PixelPos x, PixelPos y) const
 {
   assert(!(x > 1) && !(x < -1));
   assert(!(y > 1) && !(y < -1));
@@ -110,7 +110,7 @@ PixelDescriptor* PixelDescriptor::Offset(PixelPos x, PixelPos y) const
   return nullptr;
 }
 
-PixelDescriptor* PixelDescriptor::RecOffset(PixelPos x, PixelPos y) 
+GreatPixel* GreatPixel::RecOffset(PixelPos x, PixelPos y) 
 {
   if (x == 0 && y == 0) return this;
   PixelPos _x = x > 0 ? 1 : x < 0 ? -1 : x;
@@ -134,7 +134,7 @@ PixelDescriptor* PixelDescriptor::RecOffset(PixelPos x, PixelPos y)
   return pd->RecOffset(x - _x, y - _y);
 }
 
-bool PixelDescriptor::Offset(PixelDescriptor* target, Vec2& offset) const
+bool GreatPixel::Offset(GreatPixel* target, Vec2& offset) const
 {
   if (target == lt) { offset = {-1, 1}; return true; }
   if (target == lc) { offset = {-1, 0}; return true; }
@@ -147,7 +147,7 @@ bool PixelDescriptor::Offset(PixelDescriptor* target, Vec2& offset) const
   return false;
 }
 
-//bool PixelDescriptor::Offset(PixelDescriptor* target, Vec2& offset) const
+//bool GreatPixel::Offset(GreatPixel* target, Vec2& offset) const
 //{
 //  if (target == lt) { offset = {-1, 1}; return true; }
 //  if (target == lc) { offset = {-1, 0}; return true; }
@@ -160,7 +160,7 @@ bool PixelDescriptor::Offset(PixelDescriptor* target, Vec2& offset) const
 //  return false;
 //}
 
-void PixelDescriptor::SetDirection(PixelPos x, PixelPos y, PixelDescriptor* pd)
+void GreatPixel::SetDirection(PixelPos x, PixelPos y, GreatPixel* pd)
 {
   assert(!(x > 1) && !(x < -1));
   assert(!(y > 1) && !(y < -1));
@@ -175,7 +175,7 @@ void PixelDescriptor::SetDirection(PixelPos x, PixelPos y, PixelDescriptor* pd)
   if (Vec2(1, -1) == Vec2(x, y)) rb = pd;
 }
 
-//void PixelDescriptor::SetDirection(PixelPos x, PixelPos y, PixelDescriptor* pd)
+//void GreatPixel::SetDirection(PixelPos x, PixelPos y, GreatPixel* pd)
 //{
 //  assert(!(x > 1) && !(x < -1));
 //  assert(!(y > 1) && !(y < -1));
@@ -185,12 +185,12 @@ void PixelDescriptor::SetDirection(PixelPos x, PixelPos y, PixelDescriptor* pd)
 //  *directions[index] = pd;
 //}
 
-std::string PixelDescriptor::GetAscii() const
+std::string GreatPixel::GetAscii() const
 {
   return GetAscii('a');
 }
 
-std::string PixelDescriptor::GetAscii(char cellSymbol) const
+std::string GreatPixel::GetAscii(char cellSymbol) const
 {
   switch (m_type)
   {
@@ -204,7 +204,7 @@ std::string PixelDescriptor::GetAscii(char cellSymbol) const
   return "?";
 }
 
-int PixelDescriptor::GetDirectionIndex(const Vec2& dir) const
+int GreatPixel::GetDirectionIndex(const Vec2& dir) const
 {
   for (int i = 0; i < Const::numberOfDirections; ++i)
   {
@@ -220,7 +220,7 @@ int PixelDescriptor::GetDirectionIndex(const Vec2& dir) const
   return -1;
 }
 
-PixelDescriptor* PixelDescriptor::GetPixelByDirectionalindex(int index) const
+GreatPixel* GreatPixel::GetPixelByDirectionalindex(int index) const
 {
   if (index < 0)
   {

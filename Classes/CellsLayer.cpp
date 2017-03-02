@@ -9,7 +9,7 @@
 #include "CellsLayer.h"
 
 #include "cocos2d.h"
-#include "PixelDescriptorProvider.h"
+#include "PixelWorld.h"
 #include "Random.h"
 #include "CellDescriptor.h"
 #include "UIConfig.h"
