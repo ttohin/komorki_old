@@ -51,18 +51,11 @@ bool PartialMapScene::init(const komorki::ui::Viewport::Ptr& viewport)
     kButtonSize *= 2.f;
   }
   
-  m_brushMode = eBrushModeGreen;
-  m_touchMode = eTouchModeMove;
   m_moveDirection = Vec2::ZERO;
-  m_eraseBrush = false;
   m_stopManager = false;
   m_updateTime = kUpdateTime;
   m_pause = false;
-  
-  m_brush = Sprite::create("cursor.png");
-  addChild(m_brush, 2);
-  m_brush->setVisible(false);
-  
+
   Size visibleSize = Director::getInstance()->getVisibleSize();
   
   Vec2 origin = Director::getInstance()->getVisibleOrigin();
@@ -96,24 +89,7 @@ bool PartialMapScene::init(const komorki::ui::Viewport::Ptr& viewport)
   
   touchListener->onTouchMoved = [this](Touch* touch, Event* event)
   {
-    if (m_touchMode == eTouchModeMove)
-    {
-//      m_mapPos = m_mapPos - touch->getDelta();
-      this->Move(touch->getDelta());
-    }
-    else if (m_touchMode == eTouchModeBrush)
-    {
-      if (m_eraseBrush)
-      {
-//        #warning don't forget
-//        m_mapManager->RemoveCreatureAtPostion(touch->getLocation());
-      }
-      else
-      {
-//        #warning don't forget
-//        m_mapManager->AddCreatureAtPosition(touch->getLocation(), this->GetCurretnCellType());
-      }
-    }
+    this->Move(touch->getDelta());
   };
   
   touchListener->onTouchBegan = [this](Touch* touch, Event* event)
@@ -123,23 +99,6 @@ bool PartialMapScene::init(const komorki::ui::Viewport::Ptr& viewport)
   
   touchListener->onTouchEnded = [this](Touch* touch, Event* event)
   {
-    if (m_touchMode == eTouchModeBrush)
-    {
-      if (m_eraseBrush)
-      {
-//        #warning don't forget
-//        m_mapManager->RemoveCreatureAtPostion(touch->getLocation());
-      }
-      else
-      {
-//        #warning don't forget
-//        m_mapManager->AddCreatureAtPosition(touch->getLocation(), this->GetCurretnCellType());
-      }
-    }
-    else if (m_touchMode == eTouchModeMove)
-    {
-//      this->m_viewport->Calculate();
-    }
   };
   
 #else // CC_TARGET_PLATFORM == CC_PLATFORM_IOS
@@ -149,21 +108,7 @@ bool PartialMapScene::init(const komorki::ui::Viewport::Ptr& viewport)
   {
     if (touches.size() == 1)
     {
-      if (m_touchMode == eTouchModeMove)
-      {
-        m_mapPos = m_rootNode->getPosition() + touches[0]->getDelta();
-      }
-      else if (m_touchMode == eTouchModeBrush)
-      {
-        if (m_eraseBrush)
-        {
-          m_mapManager->RemoveCreatureAtPostion(touches[0]->getLocation());
-        }
-        else
-        {
-          m_mapManager->AddCreatureAtPosition(touches[0]->getLocation(), this->GetCurretnCellType());
-        }
-      }
+      m_mapPos = m_rootNode->getPosition() + touches[0]->getDelta();
     }
     else if (touches.size() == 2)
     {

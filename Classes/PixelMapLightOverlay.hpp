@@ -19,6 +19,7 @@ namespace komorki
 {
 namespace ui
 {
+  
 class PixelMapLightOverlay
 {
 public:
@@ -41,6 +42,7 @@ public:
     return s;
   }
 };
+  
 }
 }
 

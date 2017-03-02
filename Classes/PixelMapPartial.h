@@ -27,17 +27,11 @@ public:
   PixelMapPartial();
   virtual ~PixelMapPartial();
   
-  cocos2d::Rect OffsetForType(komorki::PixelDescriptor* pd);
-  
   cocos2d::Sprite* CreateSprite();
   void RemoveSprite(cocos2d::Sprite* sprite);
-  cocos2d::Sprite* spriteForDescriptor(komorki::PixelDescriptor* pixelD);
-  
-//  cocos2d::Vec2 spriteVector(const komorki::Vec2& vec, const cocos2d::Vec2& vector = cocos2d::Vec2());
+
   bool init();
   void Reset();
-  void HightlightCellOnPos(int x, int y, komorki::CellType type);
-  void StopHightlighting();
   void SetUpdateTime(float updateTime);
   
   void AddSprite(PixelDescriptor* pd, const Vec2& pos);
@@ -45,7 +39,6 @@ public:
   void AddPolymorphCreature(CellDescriptor* cd, PixelMap::AmorphCellContext* context, Vec2 partialMapOffset);
   void MoveCreature(PixelMap::ObjectContext* context, const Vec2& source, const Vec2& dest, int duration, Morphing& morphing, Vec2 partialMapOffset,CellDescriptor* cd);
   
- 
 private:
   
   cocos2d::Sprite* m_hlSprite;

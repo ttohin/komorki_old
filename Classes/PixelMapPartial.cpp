@@ -52,42 +52,7 @@ namespace komorki
     {
       LOG_W("%s, %p", __FUNCTION__, this);
     }
-    
-    int TagForType(komorki::PixelDescriptor* pd)
-    {
-      return static_cast<int>(pd->m_type);
-    }
-    
-    cocos2d::Rect PixelMapPartial::OffsetForType(komorki::PixelDescriptor* pd)
-    {
-      komorki::PixelDescriptor::Type t = pd->m_type;
-      if (t == komorki::PixelDescriptor::CreatureType)
-      {
-        auto d = pd->m_cellDescriptor;
-        assert(d);
-        int index = cRandABInt(0, 4);
-        
-        int line = 0;
-        
-        int groupIndex = 0;
-        for (; groupIndex < 64; groupIndex++)
-        {
-          if (d->m_genom.m_groupId & (1 << groupIndex)) break;
-        }
-        
-        line = groupIndex/16;
-        index = groupIndex%16;
-        
-        return cocos2d::Rect(index*kTileFrameSize, line*kTileFrameSize, kTileFrameSize, kTileFrameSize);
-      }
-      if (t == komorki::PixelDescriptor::TerrainType)
-      {
-        return cocos2d::Rect(cRandABInt(GROWND_START, GROWND_END)*kTileFrameSize, GROWND_LINE*kTileFrameSize, kTileFrameSize, kTileFrameSize);
-      }
-      
-      return cocos2d::Rect(9, 0, 1, 1);
-    }
-    
+
     Sprite* PixelMapPartial::CreateSprite()
     {
       Sprite* s = nullptr;
@@ -125,25 +90,6 @@ namespace komorki
       }
     }
     
-    Sprite* PixelMapPartial::spriteForDescriptor(komorki::PixelDescriptor* pixelD)
-    {
-      if (pixelD->m_type == komorki::PixelDescriptor::Empty
-          || pixelD->m_type == komorki::PixelDescriptor::TerrainType)
-      {
-        return nullptr;
-      }
-      
-      cocos2d::Rect r = OffsetForType(pixelD);
-      auto s = CreateSprite();
-      s->setTextureRect(r);
-      s->setScale(kSpriteScale);
-      s->setTag(TagForType(pixelD));
-      
-      return s;
-    }
-    
-
-    
     bool PixelMapPartial::init()
     {
       std::string mapName = "Komorki/tmp/cells.png";
@@ -175,60 +121,10 @@ namespace komorki
 //      m_pullSize = PMP_PULL_SIZE;
     }
     
-    void PixelMapPartial::HightlightCellOnPos(int x, int y, komorki::CellType type)
-    {
-      if (m_hlSprite)
-      {
-        m_hlSprite->removeFromParentAndCleanup(true);
-        m_hlSprite = nullptr;
-      }
-      
-      auto s = Sprite::createWithTexture(getTexture());
-      addChild(s, 999);
-      
-      int index = 0;
-      int line = (CREATURE_LINE_START + type)%CREATURE_LINE_END;
-      auto r = cocos2d::Rect(index*kTileFrameSize, line*kTileFrameSize, kTileFrameSize, kTileFrameSize);
-      
-      s->setTextureRect(r);
-      s->setScale(kSpriteScale);
-      s->setPosition(spriteVector(komorki::Vec2(x, y), cocos2d::Vec2::ZERO));
-      
-      m_hlSprite = s;
-    }
-    
-    void PixelMapPartial::StopHightlighting()
-    {
-      if (m_hlSprite)
-      {
-        m_hlSprite->removeFromParentAndCleanup(true);
-        m_hlSprite = nullptr;
-      }
-    }
-    
     void PixelMapPartial::SetUpdateTime(float updateTime)
     {
       m_updateTime = updateTime;
     }
-
-    void PixelMapPartial::AddSprite(PixelDescriptor* pd, const Vec2& pos)
-    {
-      auto s = spriteForDescriptor(pd);
-      
-      if(pd->m_type != PixelDescriptor::Empty
-        && pd->m_type != PixelDescriptor::TerrainType)
-      {
-        assert(s);
-      }
-      else
-      {
-        assert(s == nullptr);
-      }
-      
-      if (s)
-      {
-        s->setPosition(spriteVector(pos));
-      }
-    }
+    
   }
 }

@@ -142,8 +142,8 @@
 		8FDE8CDA1B237033000EE52C /* PartialMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FDE8CD71B237033000EE52C /* PartialMap.cpp */; };
 		8FDE8CDC1B23742E000EE52C /* PixelMapPartial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FDE8CDB1B23742E000EE52C /* PixelMapPartial.cpp */; };
 		8FDE8CDD1B23742E000EE52C /* PixelMapPartial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FDE8CDB1B23742E000EE52C /* PixelMapPartial.cpp */; };
-		8FDE8CDF1B2376D6000EE52C /* PixelMapBackground.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FDE8CDE1B2376D6000EE52C /* PixelMapBackground.cpp */; };
-		8FDE8CE01B2376D6000EE52C /* PixelMapBackground.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FDE8CDE1B2376D6000EE52C /* PixelMapBackground.cpp */; };
+		8FDE8CDF1B2376D6000EE52C /* DeadCellsPartialMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FDE8CDE1B2376D6000EE52C /* DeadCellsPartialMap.cpp */; };
+		8FDE8CE01B2376D6000EE52C /* DeadCellsPartialMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FDE8CDE1B2376D6000EE52C /* DeadCellsPartialMap.cpp */; };
 		8FDE8CE31B23793E000EE52C /* UIConfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FDE8CE21B23793E000EE52C /* UIConfig.cpp */; };
 		8FDE8CE41B23793E000EE52C /* UIConfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FDE8CE21B23793E000EE52C /* UIConfig.cpp */; };
 		8FDE8CE71B237A29000EE52C /* UICommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FDE8CE51B237A29000EE52C /* UICommon.cpp */; };
@@ -347,7 +347,7 @@
 		8FDE8CD71B237033000EE52C /* PartialMap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PartialMap.cpp; sourceTree = "<group>"; };
 		8FDE8CD81B237033000EE52C /* PartialMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PartialMap.h; sourceTree = "<group>"; };
 		8FDE8CDB1B23742E000EE52C /* PixelMapPartial.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PixelMapPartial.cpp; sourceTree = "<group>"; };
-		8FDE8CDE1B2376D6000EE52C /* PixelMapBackground.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PixelMapBackground.cpp; sourceTree = "<group>"; };
+		8FDE8CDE1B2376D6000EE52C /* DeadCellsPartialMap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DeadCellsPartialMap.cpp; sourceTree = "<group>"; };
 		8FDE8CE11B2378BC000EE52C /* UIConfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UIConfig.h; sourceTree = "<group>"; };
 		8FDE8CE21B23793E000EE52C /* UIConfig.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UIConfig.cpp; sourceTree = "<group>"; };
 		8FDE8CE51B237A29000EE52C /* UICommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UICommon.cpp; sourceTree = "<group>"; };
@@ -371,7 +371,7 @@
 		8FF338691AEC2D7100CF6F6B /* ListView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ListView.h; sourceTree = "<group>"; };
 		8FF3386A1AEC36F800CF6F6B /* TextButton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TextButton.h; sourceTree = "<group>"; };
 		8FF3386B1AEC3ABA00CF6F6B /* ListController.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ListController.cpp; sourceTree = "<group>"; };
-		8FF338721AED933900CF6F6B /* PixelMapBackground.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PixelMapBackground.h; sourceTree = "<group>"; };
+		8FF338721AED933900CF6F6B /* DeadCellsPartialMap.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DeadCellsPartialMap.h; sourceTree = "<group>"; };
 		8FFE7FDF1B9F522C008D2289 /* Buffer2D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Buffer2D.h; sourceTree = "<group>"; };
 		8FFE7FE01B9F522C008D2289 /* TerrainAnalizer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TerrainAnalizer.cpp; sourceTree = "<group>"; };
 		8FFE7FE11B9F522D008D2289 /* TerrainAnalizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TerrainAnalizer.h; sourceTree = "<group>"; };
@@ -679,8 +679,8 @@
 				8F48DE621AB676B50075D222 /* PartialMapScene.h */,
 				8F48DE6B1AB676B50075D222 /* PixelMapPartial.h */,
 				8FDE8CDB1B23742E000EE52C /* PixelMapPartial.cpp */,
-				8FF338721AED933900CF6F6B /* PixelMapBackground.h */,
-				8FDE8CDE1B2376D6000EE52C /* PixelMapBackground.cpp */,
+				8FF338721AED933900CF6F6B /* DeadCellsPartialMap.h */,
+				8FDE8CDE1B2376D6000EE52C /* DeadCellsPartialMap.cpp */,
 				8F8F528A1B19F295002F47D7 /* PixelMapLightOverlay.hpp */,
 				8FDE8CEC1B237DF0000EE52C /* PixelMapLightOverlay.cpp */,
 				8FDE8CF01B23AD8A000EE52C /* GlowMapOverlay.cpp */,
@@ -925,7 +925,7 @@
 				8FFE7FE61B9F522D008D2289 /* TerrainBatchSprite.cpp in Sources */,
 				8FDE8CD51B236D46000EE52C /* Window.cpp in Sources */,
 				8FBF25021DB8CFBE00AE7991 /* PixelMapContext.cpp in Sources */,
-				8FDE8CDF1B2376D6000EE52C /* PixelMapBackground.cpp in Sources */,
+				8FDE8CDF1B2376D6000EE52C /* DeadCellsPartialMap.cpp in Sources */,
 				8FBF25071DB8CFBE00AE7991 /* TestSampleShapesScene.cpp in Sources */,
 				8FDE8CE71B237A29000EE52C /* UICommon.cpp in Sources */,
 				503AE10117EB989F00D1A890 /* main.m in Sources */,
@@ -979,7 +979,7 @@
 				8F48DE701AB676B50075D222 /* PartialMapScene.cpp in Sources */,
 				8FBF251D1DB935E100AE7991 /* ShapeAnalizer.cpp in Sources */,
 				8FDE8CD61B236D46000EE52C /* Window.cpp in Sources */,
-				8FDE8CE01B2376D6000EE52C /* PixelMapBackground.cpp in Sources */,
+				8FDE8CE01B2376D6000EE52C /* DeadCellsPartialMap.cpp in Sources */,
 				8FFE7FEB1B9F524B008D2289 /* DiamondSquareGenerator.cpp in Sources */,
 				8FDE8CEE1B237DF0000EE52C /* PixelMapLightOverlay.cpp in Sources */,
 				8F108B181AF820ED00580096 /* PixelDescriptor.cpp in Sources */,

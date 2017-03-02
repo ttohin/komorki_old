@@ -7,7 +7,7 @@
 //
 
 #include "PartialMap.h"
-#include "PixelMapBackground.h"
+#include "DeadCellsLayer.h"
 #include "PixelDebugView.h"
 #include "PixelMapLightOverlay.hpp"
 #include "PixelMapPartial.h"

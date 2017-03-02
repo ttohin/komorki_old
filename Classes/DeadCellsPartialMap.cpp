@@ -1,12 +1,12 @@
 //
-//  PixelMapBackground.cpp
+//  DeadCellsPartialMap.cpp
 //  prsv
 //
 //  Created by ttohin on 06.06.15.
 //
 //
 
-#include "PixelMapBackground.h"
+#include "DeadCellsPartialMap.h"
 #include "UIConfig.h"
 #include "UICommon.h"
 
@@ -14,13 +14,7 @@
 #define PMP_MAX_NUMBER_OF_CHILDREN 2000
 #define PMP_PULL_SIZE 32
 #define ANIMATED 1
-#define CREATURE_LINE_START 0
-#define CREATURE_LINE_END 4
-#define CREATURE_LINE 0
-#define GROWND_START 0
-#define GROWND_END  4
-#define GROWND_LINE CREATURE_LINE_END
-#define DEAD_CEEL_LINE (GROWND_LINE + 1)
+
 
 namespace komorki
 {
@@ -29,7 +23,7 @@ namespace ui
   
 USING_NS_CC;
 
-  PixelMapBackground::PixelMapBackground(int a, int b, int width, int height)
+  DeadCellsPartialMap::DeadCellsPartialMap(int a, int b, int width, int height)
   {
     m_a1 = a;
     m_a2 = a + width;
@@ -40,7 +34,7 @@ USING_NS_CC;
     m_pullSize = PMP_PULL_SIZE;
   }
   
-  Sprite* PixelMapBackground::CreateSprite()
+  Sprite* DeadCellsPartialMap::CreateSprite()
   {
     Sprite* s = nullptr;
     if( ! m_spritesPull.empty() )
@@ -65,7 +59,7 @@ USING_NS_CC;
     return s;
   }
   
-  void PixelMapBackground::RemoveSprite(Sprite* sprite)
+  void DeadCellsPartialMap::RemoveSprite(Sprite* sprite)
   {
     if (m_spritesPull.size() < m_pullSize)
     {
@@ -79,12 +73,12 @@ USING_NS_CC;
     }
   }
   
-  bool PixelMapBackground::IsInAABB(const Vec2& vec)
+  bool DeadCellsPartialMap::IsInAABB(const Vec2& vec)
   {
     return IsInAABB(vec.x, vec.y);
   }
   
-  bool PixelMapBackground::IsInAABB(const int& x, const int& y)
+  bool DeadCellsPartialMap::IsInAABB(const int& x, const int& y)
   {
     if(x < m_a1 || x >= m_a2 ||
        y < m_b1 || y >= m_b2)
@@ -95,7 +89,7 @@ USING_NS_CC;
     return true;
   }
   
-  cocos2d::Vec2 PixelMapBackground::spriteVector(const komorki::Vec2& vec, const cocos2d::Vec2& vector)
+  cocos2d::Vec2 DeadCellsPartialMap::spriteVector(const komorki::Vec2& vec, const cocos2d::Vec2& vector)
   {
     auto result = cocos2d::Vec2(((int)vec.x - m_a1) * kSpritePosition, ((int)vec.y - m_b1) * kSpritePosition) + vector;
     return result;
@@ -107,13 +101,13 @@ USING_NS_CC;
     return result;
   }
   
-  cocos2d::Vec2 PixelMapBackground::spriteVector(komorki::PixelDescriptor* pd, const cocos2d::Vec2& vector)
+  cocos2d::Vec2 DeadCellsPartialMap::spriteVector(komorki::PixelDescriptor* pd, const cocos2d::Vec2& vector)
   {
     auto result = cocos2d::Vec2(((int)pd->x - m_a1) * kSpritePosition, ((int)pd->y - m_b1) * kSpritePosition) + vector;
     return result;
   }
   
-  void PixelMapBackground::Update(const std::list<komorki::PixelDescriptorProvider::UpdateResult>& updateResult, float updateTime)
+  void DeadCellsPartialMap::Update(const std::list<komorki::PixelDescriptorProvider::UpdateResult>& updateResult, float updateTime)
   {
     for (auto& u : updateResult)
     {
@@ -187,7 +181,7 @@ USING_NS_CC;
     
   }
   
-  bool PixelMapBackground::init()
+  bool DeadCellsPartialMap::init()
   {
     std::string mapName = "Komorki/tmp/cells.png";
     
@@ -203,12 +197,10 @@ USING_NS_CC;
     return true;
   }
   
-  void PixelMapBackground::Reset()
+  void DeadCellsPartialMap::Reset()
   {
     removeAllChildren();
   }
-  
-
   
 }
 }

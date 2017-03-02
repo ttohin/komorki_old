@@ -41,21 +41,6 @@ public:
   
 private:
   
-  enum BrushMode
-  {
-    eBrushModeGreen,
-    eBrushModeHunter,
-    eBrushModeSalad,
-    eBrushModeImprovedSalad,
-    eBrushModeGround
-  };
-  
-  enum TouchMode
-  {
-    eTouchModeMove,
-    eTouchModeBrush
-  };
-  
   enum Speed
   {
     eSpeedNormal,
@@ -64,50 +49,35 @@ private:
     eSpeedWarp
   };
   
-  TouchMode m_touchMode;
-  BrushMode m_brushMode;
   Speed m_speed;
   Speed m_prevSpeed;
-  bool m_eraseBrush;
   
-//  PixelMapManager* m_mapManager;
   komorki::ui::Viewport::Ptr m_viewport;
-  cocos2d::Node* m_rootNode = nullptr;
-  cocos2d::Sprite* m_bg = nullptr;
-  cocos2d::Sprite* m_brush = nullptr;
-  cocos2d::Sprite* m_cross = nullptr;
-  cocos2d::Sprite* m_microscope = nullptr;
-  cocos2d::ui::Button* m_green = nullptr;
-  cocos2d::ui::Button* m_hunter = nullptr;
-  cocos2d::ui::Button* m_salad = nullptr;
-  cocos2d::ui::Button* m_improvedSalad = nullptr;
-  cocos2d::ui::Button* m_eraseButton = nullptr;
-  cocos2d::ui::Button* m_brushButton = nullptr;
-  cocos2d::ui::Button* m_speed1Button = nullptr;
-  cocos2d::ui::Button* m_speed2Button = nullptr;
-  cocos2d::ui::Button* m_speed10Button = nullptr;
-  cocos2d::ui::Button* m_menuButton = nullptr;
-  cocos2d::Node* m_toolbarNode = nullptr;
-  cocos2d::Node* m_cellsSelectoToolbar = nullptr;
-  cocos2d::Node* m_speedToolbar = nullptr;
-  cocos2d::Node* m_menuNode = nullptr;
-  std::shared_ptr<OptionsMenu> m_optionsMenu;
+  cocos2d::Node* m_rootNode;
+  cocos2d::Sprite* m_bg;
+  cocos2d::ui::Button* m_speed1Button;
+  cocos2d::ui::Button* m_speed2Button;
+  cocos2d::ui::Button* m_speed10Button;
+  cocos2d::ui::Button* m_menuButton;
+  cocos2d::Node* m_speedToolbar;
+  cocos2d::Node* m_menuNode;
   std::shared_ptr<MainMenu> m_mainMenu;
-  std::shared_ptr<LoadConfigMenu> m_loadConfigMenu;
-  std::shared_ptr<SaveConfigMenu> m_saveConfigMenu;
   std::shared_ptr<IFullScreenMenu> m_currenMenu;
-  cocos2d::RenderTexture* m_mainTexture = nullptr;
-  cocos2d::RenderTexture* m_lightTexture = nullptr;
-  cocos2d::Sprite* m_rendTexSprite = nullptr;
-  cocos2d::Sprite* m_debugView = nullptr;
+  cocos2d::RenderTexture* m_mainTexture;
+  cocos2d::RenderTexture* m_lightTexture;
+  cocos2d::Sprite* m_rendTexSprite;
+  cocos2d::Sprite* m_debugView;
+  std::shared_ptr<komorki::Config> m_config;
   
   float m_mapScale;
   cocos2d::Vec2 m_mapPos;
   cocos2d::Vec2 m_moveDirection;
   float m_updateTime;
-  bool m_pause = false;
-  bool m_stopManager = false;
-  bool m_restartManagerFromOptionMenu = false;
+  bool m_pause;
+  bool m_stopManager;
+  bool m_restartManagerFromOptionMenu;
+  
+  
   void ZoomIn();
   void ZoomOut();
   void Zoom(float direction);
@@ -133,22 +103,11 @@ private:
   void CreateSpeedToolBar();
   void CreateToolBar();
   
-  void SelectBrushTouchDownAction(Ref *sender, cocos2d::ui::Widget::TouchEventType controlEvent);
-  void SelectRemoveBrushTouchDownAction(Ref *sender, cocos2d::ui::Widget::TouchEventType controlEvent);
-  void SetBrushEnabled(bool enabled);
-  void SetDrawingMode(bool enabled);
-  void SetBrushMode(BrushMode mode);
-  void SetEraseMode(bool enabled);
   void SetSpeed(Speed speed);
-  komorki::CellType GetCurretnCellType();
   void CreateRenderTextures(const cocos2d::Size& size);
   
   float AspectToFill(const cocos2d::Size& source, const cocos2d::Size& target);
   float AspectToFit(const cocos2d::Size& source, const cocos2d::Size& target);
-  
-  std::shared_ptr<komorki::Config> m_config;
-  
-  std::vector<cocos2d::Touch*> zoomToches;
   
   void visit(cocos2d::Renderer *renderer, const cocos2d::Mat4 &parentTransform, uint32_t parentFlags);
 };

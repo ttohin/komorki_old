@@ -1,13 +1,13 @@
 //
-//  PixelMapPartial.h
+//  DeadCellsPartialMap.h
 //  komorki
 //
 //  Created by ttohin on 11.03.15.
 //
 //
 
-#ifndef __komorki__PixelMapBackground__
-#define __komorki__PixelMapBackground__
+#ifndef __komorki__DeadCellsPartialMap__
+#define __komorki__DeadCellsPartialMap__
 
 #include "cocos2d.h"
 #include "PixelDescriptorProvider.h"
@@ -20,11 +20,11 @@ namespace komorki
 {
 namespace ui
 {
-class PixelMapBackground : public cocos2d::SpriteBatchNode
+class DeadCellsPartialMap : public cocos2d::SpriteBatchNode
 {
 public:
   
-  PixelMapBackground(int a, int b, int width, int height);
+  DeadCellsPartialMap(int a, int b, int width, int height);
   cocos2d::Sprite* CreateSprite();
   void RemoveSprite(cocos2d::Sprite* sprite);
   bool IsInAABB(const Vec2& vec);
@@ -47,4 +47,4 @@ public:
 }
 }
 
-#endif /* defined(__komorki__PixelMapBackground__) */
+#endif /* defined(__komorki__DeadCellsPartialMap__) */
