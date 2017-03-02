@@ -54,6 +54,7 @@ namespace komorki
     g.m_lightFood = cRandABInt(1, 15);
     g.m_passiveHealthIncome = cRandABInt(0, 10);
     g.m_healthPerAttach = cRandABInt(10, 100);
+    g.m_mutationRate = cRandAB(0, 0.05);
     
     if (g.m_shapeType == ShapeType::eShapeTypeAmorph)
     {

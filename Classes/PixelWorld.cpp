@@ -476,7 +476,7 @@ namespace komorki
   {
     CellDescriptor* result = nullptr;
     
-    if (false && cBoolRandPercent(0.001))
+    if (cBoolRandPercent(source->m_genom.m_mutationRate))
     {
       for (auto& g : m_groups)
       {
