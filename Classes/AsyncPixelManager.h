@@ -111,7 +111,7 @@ namespace komorki
       m_semaphore.notify_one();
     }
     
-    std::list<PixelDescriptorProvider::UpdateResult>& GetUpdateResult()
+    WorldUpdateList& GetUpdateResult()
     {
       return m_updateResult;
     }
@@ -138,7 +138,7 @@ namespace komorki
     unsigned char m_updateId;
     std::mutex m_lock;
     std::condition_variable m_semaphore;
-    std::list<PixelDescriptorProvider::UpdateResult> m_updateResult;
+    WorldUpdateList m_updateResult;
     std::thread m_thread;
   };
 }

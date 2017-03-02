@@ -9,6 +9,7 @@
 #ifndef __prsv__CellShapes__
 #define __prsv__CellShapes__
 
+#include "IShape.h"
 #include "Common.h"
 #include <vector>
 #include <memory>
@@ -17,34 +18,17 @@ namespace komorki
 {
   class PixelDescriptor;
   
-  class IShape
-  {
-  public:
-    typedef std::shared_ptr<IShape> Ptr;
-    virtual void ForEach(const PerPixelFunc& op) const = 0;
-    virtual void ForEachRandom(const PerPixelFunc& op) const = 0;
-    virtual void Around(const PerPixelFunc& op) const = 0;
-    virtual void AroundRandom(const PerPixelFunc& op) const = 0;
-    virtual void SetPosition(PixelDescriptor* pd) = 0;
-    virtual PixelDescriptor* GetOpposite(PixelDescriptor* target) const = 0;
-    virtual void Apply(PixelDescriptor* pd) = 0; // applay the shape to corresponding pixel descriptors
-    virtual unsigned int Size() const = 0;
-    virtual Rect GetAABB() const { return Rect(); }
-    virtual IShape::Ptr CopyWithBasePixel(PixelDescriptor* pd) const { return nullptr; }
-    virtual ~IShape(){}
-  };
-  
   class SinglePixel : public IShape
   {
   public:
     SinglePixel(PixelDescriptor* pd) : m_pd(pd) {}
     virtual ~SinglePixel(){}
-    virtual void ForEach(const PerPixelFunc& op) const;
-    virtual void ForEachRandom(const PerPixelFunc& op) const;
-    virtual void Around(const PerPixelFunc& op) const;
-    virtual void AroundRandom(const PerPixelFunc& op) const;
-    virtual void SetPosition(PixelDescriptor* pd);
-    virtual PixelDescriptor* GetOpposite(PixelDescriptor* target) const;
+    virtual void ForEach(const PerPixelFunc& op) const override;
+    virtual void ForEachRandom(const PerPixelFunc& op) const override;
+    virtual void Around(const PerPixelFunc& op) const override;
+    virtual void AroundRandom(const PerPixelFunc& op) const override;
+    virtual void SetPosition(PixelDescriptor* pd) override;
+    virtual PixelDescriptor* GetOpposite(PixelDescriptor* target) const override;
     virtual void Apply(PixelDescriptor* pd) override;
     virtual unsigned int Size() const override;
     virtual Rect GetAABB() const override;
@@ -58,12 +42,12 @@ namespace komorki
   public:
     BigCell(PixelDescriptor* pd) : m_pd(pd) {}
     virtual ~BigCell(){}
-    virtual void ForEach(const PerPixelFunc& op) const;
-    virtual void ForEachRandom(const PerPixelFunc& op) const;
-    virtual void Around(const PerPixelFunc& op) const;
-    virtual void AroundRandom(const PerPixelFunc& op) const;
-    virtual void SetPosition(PixelDescriptor* pd);
-    virtual PixelDescriptor* GetOpposite(PixelDescriptor* target) const;
+    virtual void ForEach(const PerPixelFunc& op) const override;
+    virtual void ForEachRandom(const PerPixelFunc& op) const override;
+    virtual void Around(const PerPixelFunc& op) const override;
+    virtual void AroundRandom(const PerPixelFunc& op) const override;
+    virtual void SetPosition(PixelDescriptor* pd) override;
+    virtual PixelDescriptor* GetOpposite(PixelDescriptor* target) const override;
     virtual void Apply(PixelDescriptor* pd) override;
     virtual unsigned int Size() const override;
     virtual Rect GetAABB() const override;

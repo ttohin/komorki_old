@@ -8,7 +8,7 @@
 
 #include "Map.h"
 #include "PixelDescriptorProvider.h"
-#include "b2Utilites.h"
+#include "Random.h"
 
 namespace
 {

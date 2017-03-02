@@ -23,7 +23,7 @@ public:
   unsigned char GetUpdateId();
   std::string GetCurrentJobString();
   
-  komorki::ui::Viewport::Ptr GetViewport();
+  komorki::graphic::Viewport::Ptr GetViewport();
   std::shared_ptr<komorki::IPixelDescriptorProvider> GetProvider();
   
 private:
@@ -42,7 +42,7 @@ private:
   std::shared_ptr<komorki::Config> m_config;
   std::shared_ptr<komorki::IPixelDescriptorProvider> m_provider;
   std::string m_currentJob;
-  komorki::ui::Viewport::Ptr m_viewport;
+  komorki::graphic::Viewport::Ptr m_viewport;
 };
 
 #endif /* defined(__prsv__AsyncMapLoader__) */

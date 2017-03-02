@@ -1,5 +1,5 @@
 //
-//  PixelMapPartial.h
+//  CellsLayer.h
 //  komorki
 //
 //  Created by ttohin on 11.03.15.
@@ -11,8 +11,8 @@
 
 #include "cocos2d.h"
 #include "PixelDescriptorProvider.h"
-#include "b2Utilites.h"
-#include "PixelMapPartial.h"
+#include "Random.h"
+#include "CellsLayer.h"
 #include "CellDescriptor.h"
 #include "Common.h"
 
@@ -38,7 +38,7 @@ public:
   bool IsInAABB(const int& x, const int& y);
   cocos2d::Vec2 spriteVector(const komorki::Vec2& vec, const cocos2d::Vec2& vector = cocos2d::Vec2());
   cocos2d::Vec2 spriteVector(komorki::PixelDescriptor* pd, const cocos2d::Vec2& vector = cocos2d::Vec2());
-  void Update(const std::list<komorki::PixelDescriptorProvider::UpdateResult>& updateResult, float updateTime);
+  void Update(const WorldUpdateList& updateResult, float updateTime);
   bool init();
 private:
   void Reset();

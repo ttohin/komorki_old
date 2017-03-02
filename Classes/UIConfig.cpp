@@ -10,7 +10,7 @@
 
 namespace komorki
 {
-  namespace ui
+  namespace graphic
   {
     const float kTileFrameSize = 32.f;
     const int kSpritePosition = 32;

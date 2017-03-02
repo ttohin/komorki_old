@@ -13,16 +13,16 @@
 #include "Viewport.h"
 #include "PixelProviderConfig.h"
 
-class PartialMapScene : public cocos2d::Layer, cocos2d::TextFieldDelegate
+class MainScene : public cocos2d::Layer, cocos2d::TextFieldDelegate
 {
 public:
 
-  virtual bool init(const komorki::ui::Viewport::Ptr& viewport);
-  static cocos2d::Scene* createScene(const komorki::ui::Viewport::Ptr& viewport)
+  virtual bool init(const komorki::graphic::Viewport::Ptr& viewport);
+  static cocos2d::Scene* createScene(const komorki::graphic::Viewport::Ptr& viewport)
   {
     auto scene = cocos2d::Scene::create();
     
-    PartialMapScene *pRet = new(std::nothrow) PartialMapScene();
+    MainScene *pRet = new(std::nothrow) MainScene();
     if (pRet && pRet->init(viewport))
     {
       pRet->autorelease();
@@ -37,7 +37,7 @@ public:
     }
   }
   
-  virtual ~PartialMapScene(){}
+  virtual ~MainScene(){}
   
 private:
   
@@ -52,7 +52,7 @@ private:
   Speed m_speed;
   Speed m_prevSpeed;
   
-  komorki::ui::Viewport::Ptr m_viewport;
+  komorki::graphic::Viewport::Ptr m_viewport;
   cocos2d::Node* m_rootNode;
   cocos2d::Sprite* m_bg;
   cocos2d::ui::Button* m_speed1Button;
@@ -86,12 +86,9 @@ private:
   void timerForUpdate(float dt);
   void timerForViewportUpdate(float dt);
   void timerForMove(float dt);
-  void CreateMap(const komorki::ui::Viewport::Ptr& viewport);
+  void CreateMap(const komorki::graphic::Viewport::Ptr& viewport);
   
   void ShowMainMenu();
-  void ShowOptionsMenu();
-  void ShowSaveAsMenu();
-  void ShowLoadMenu();
   void SetCurrentMenu(const std::shared_ptr<IFullScreenMenu> menu);
   void Exit();
   void ShowMainScreen();
@@ -99,9 +96,7 @@ private:
   void ConfirmNewOptions();
   void CancelOptionSelection();
   
-  void SetBackgroundPosition(float animationDuration = 0.0f);
   void CreateSpeedToolBar();
-  void CreateToolBar();
   
   void SetSpeed(Speed speed);
   void CreateRenderTextures(const cocos2d::Size& size);

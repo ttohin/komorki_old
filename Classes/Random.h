@@ -40,9 +40,6 @@ inline int cRandABInt(int a, int b)
   return rand()%abs(b - a) + a;
 }
 
-
-
-
 #define cBoolRandPercent(percent) (RANDOM_0_1() <= percent)
 #define cRandPlusMinus() (rand()%2 == 0 ? -1 : 1)
 
@@ -54,16 +51,6 @@ inline int cRandAorB(int a, int b, float percent = 0.5f)
 
 #define cccb2(cgp) (CGPointMake(cgp.x * PTM_RATIO, cgp.y  * PTM_RATIO))
 
-//#define KOMORKI_DEBUG_UI
-#ifdef KOMORKI_DEBUG_UI
-#define KOMORKI_LOG(...) cocos2d::log(__VA_ARGS__)
-#else
-#define KOMORKI_LOG(...) {}
-#endif
 
-//#define LOG_UPDATES
-
-//#define DEBUG_PARTIAL_MAP
-//#define DEBUG_VIEWPORT
 
 #endif // Komorki_Utilites_h

@@ -1,5 +1,5 @@
 #include "PixelDescriptorProvider.h"
-#include "b2Utilites.h"
+#include "Random.h"
 #include <math.h>
 #include <assert.h>
 #include "CellsLogic.h"
@@ -20,90 +20,9 @@ int nextId = 0;
 int kMaxNumberOfGroups = 64;
 int kInitialNumberOfGroups = 32;
   
-IPixelDescriptorProvider::UpdateResult::UpdateResult(CellDescriptor* desc):
-desc(desc->parent), userData(desc->userData)
-{
-//  assert(userData);
-}
 
 Config::Config()
 {
-//  this->terrainSize = 8;
-//  this->mapWidth = 150;
-//  this->mapHeight = 100;
-//
-//  this->green.health = 301;
-//  this->green.sleepTime = 2;
-//  this->green.attack = 14;
-//  this->green.passiveHealthChunkMin = -1;
-//  this->green.passiveHealthChunkMax = -1;
-//  this->green.armor = 10;
-//  this->green.lifeTime = 830;
-//  this->green.percentOfMutations = 0.0;
-//  this->green.healthPerAttack = 90;
-//  this->green.food = (CellType)(eCellTypeImprovedSalad | eCellTypeSalad);
-//  this->green.danger = (CellType)(eCellTypeHunter);
-//  this->green.friends = eCellTypeGreen;
-//  
-//  this->orange.health = 1400;
-//  this->orange.sleepTime = 0;
-//  this->orange.attack = 15;
-//  this->orange.passiveHealthChunkMin = -1;
-//  this->orange.passiveHealthChunkMax = -1;
-//  this->orange.armor = 300;
-//  this->orange.lifeTime = 1530;
-//  this->orange.percentOfMutations = 0.0;
-//  this->orange.healthPerAttack = 66;
-//  this->orange.food = (CellType)(eCellTypeGreen);
-//  this->orange.danger = (CellType)(eCellTypeUnknown);
-//  this->orange.friends = (CellType)(eCellTypeHunter);
-//  
-//  this->salad.health = 301;
-//  this->salad.sleepTime = 30;
-//  this->salad.attack = 100;
-//  this->salad.passiveHealthChunkMin = -10;
-//  this->salad.passiveHealthChunkMax = 16;
-//  this->salad.armor = 21;
-//  this->salad.lifeTime = 830;
-//  this->salad.percentOfMutations = 0.0;
-//  this->salad.healthPerAttack = 301;
-//  this->salad.food = (CellType)(eCellTypeBigBlue);
-//  this->salad.danger = (CellType)(eCellTypeUnknown);
-//  this->salad.friends = (CellType)(eCellTypeUnknown);
-//  
-//  this->cyan.health = 301;
-//  this->cyan.sleepTime = 0;
-//  this->cyan.attack = 3;
-//  this->cyan.passiveHealthChunkMin = -10;
-//  this->cyan.passiveHealthChunkMax = 14;
-//  this->cyan.armor = 30;
-//  this->cyan.lifeTime = 830;
-//  this->cyan.percentOfMutations = 0.0;
-//  this->cyan.healthPerAttack = 40;
-//  this->cyan.food = (CellType)(eCellTypeBigBlue);
-//  this->cyan.danger = (CellType)(eCellTypeGreen);
-//  this->cyan.friends = (CellType)(eCellTypeImprovedSalad);
-//
-//  this->blue.health = 301;
-//  this->blue.sleepTime = 1;
-//  this->blue.attack = 20;
-//  this->blue.passiveHealthChunkMin = 0;
-//  this->blue.passiveHealthChunkMax = 6;
-//  this->blue.armor = 30;
-//  this->blue.lifeTime = 830;
-//  this->blue.percentOfMutations = 0.0;
-//  this->blue.healthPerAttack = 150;
-//  this->blue.food = (CellType)(eCellTypeHunter);
-//  this->blue.danger = (CellType)(eCellTypeUnknown);
-//  this->blue.friends = (CellType)(eCellTypeBigBlue);
-// 
-//  this->percentOfCreatures = 0.1;
-//  this->percentOfOrange = 0.05;
-//  this->percentOfGreen = 0.2;
-//  this->percentOfSalad = 0.4;
-//  this->percentOfCyan = 0.4;
-//  this->percentOfBlue = 0.2;
-  
   this->terrainSize = 8;
   this->mapWidth = 300;
   this->mapHeight = 200;
@@ -641,7 +560,7 @@ bool PixelDescriptorProvider::CheckBounds(int x, int y)
   return true;
 }
 
-void PixelDescriptorProvider::ProccessTransaction(bool passUpdateResult, std::list<UpdateResult>& result)
+void PixelDescriptorProvider::ProccessTransaction(bool passUpdateResult, WorldUpdateList& result)
 {
   for (int i = 0; i < m_config->mapWidth; ++i)
   {
@@ -691,7 +610,7 @@ void PixelDescriptorProvider::ProccessTransaction(bool passUpdateResult, std::li
         
         if (passUpdateResult)
         {
-          UpdateResult r(d);
+          WorldUpateDiff r(d);
           r.deleteCreature.SetValueFlag(true);
           r.deleteCreature.value.cellDescriptor = std::shared_ptr<CellDescriptor>(d);
           result.push_back(r);
@@ -714,7 +633,7 @@ void PixelDescriptorProvider::ProccessTransaction(bool passUpdateResult, std::li
           
           if (passUpdateResult)
           {
-            UpdateResult r(d);
+            WorldUpateDiff r(d);
             r.userData = nullptr;
             
             r.addCreature.SetValueFlag(true);
@@ -780,7 +699,7 @@ CellDescriptor* PixelDescriptorProvider::ProcessMutation(CellDescriptor* source)
   return result;
 }
 
-void PixelDescriptorProvider::Update(bool passUpdateResult, std::list<PixelDescriptorProvider::UpdateResult>& result)
+void PixelDescriptorProvider::Update(bool passUpdateResult, WorldUpdateList& result)
 {
 //  return;
 //  if (m_updateId == 0)
@@ -838,7 +757,7 @@ void PixelDescriptorProvider::Update(bool passUpdateResult, std::list<PixelDescr
           
           if (passUpdateResult)
           {
-            UpdateResult r(d);
+            WorldUpateDiff r(d);
             r.addCreature.SetValueFlag(true);
             r.addCreature.value.destinationDesc = pd.get();
             result.push_back(r);
@@ -874,7 +793,7 @@ void PixelDescriptorProvider::Update(bool passUpdateResult, std::list<PixelDescr
         if (m == false && a == false && morph == false && changeRect == false)
           continue;
         
-        UpdateResult updateResult(d);
+        WorldUpateDiff updateResult(d);
         updateResult.desc = pd.get();
         updateResult.action = a;
         updateResult.movement = m;

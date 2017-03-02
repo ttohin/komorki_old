@@ -8,11 +8,11 @@
 
 #include "UICommon.h"
 #include "UIConfig.h"
-#include "b2Utilites.h"
+#include "Random.h"
 
 namespace komorki
 {
-  namespace ui
+  namespace graphic
   {
     float RandomOffset()
     {

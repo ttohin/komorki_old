@@ -6,13 +6,12 @@
 //
 //
 
-#ifndef GenomsGenerator_hpp
-#define GenomsGenerator_hpp
+#pragma once
 
 #include <list>
 #include <memory>
 #include "ShapesGenerator.h"
-#include "CellDescriptor.h"
+
 
 namespace komorki
 {
@@ -33,4 +32,3 @@ namespace komorki
   };
 }
 
-#endif /* GenomsGenerator_hpp */

@@ -1,4 +1,4 @@
-#include "PartialMapScene.h"
+#include "MainScene.h"
 #include "PixelDescriptorProvider.h"
 #include "cocostudio/DictionaryHelper.h"
 #include "cocos2d/cocos/ui/CocosGUI.h"
@@ -27,7 +27,7 @@ static float kViewportUpdateTime = 0.1;
 USING_NS_CC;
 using namespace cocostudio;
 
-void PartialMapScene::CreateMap(const komorki::ui::Viewport::Ptr& viewport)
+void MainScene::CreateMap(const komorki::graphic::Viewport::Ptr& viewport)
 {
   m_viewport = viewport;
   addChild(m_viewport->GetRootNode());
@@ -36,7 +36,7 @@ void PartialMapScene::CreateMap(const komorki::ui::Viewport::Ptr& viewport)
   m_mapPos = cocos2d::Vec2::ZERO;
 }
 
-bool PartialMapScene::init(const komorki::ui::Viewport::Ptr& viewport)
+bool MainScene::init(const komorki::graphic::Viewport::Ptr& viewport)
 {
   if ( !Layer::init() )
   {
@@ -77,11 +77,9 @@ bool PartialMapScene::init(const komorki::ui::Viewport::Ptr& viewport)
   addChild(m_menuNode);
   
   CreateMap(viewport);
-  
-  SetBackgroundPosition();
 
-  schedule(schedule_selector(PartialMapScene::timerForUpdate), m_updateTime, kRepeatForever, m_updateTime);
-  schedule(schedule_selector(PartialMapScene::timerForViewportUpdate), kViewportUpdateTime, kRepeatForever, kViewportUpdateTime);
+  schedule(schedule_selector(MainScene::timerForUpdate), m_updateTime, kRepeatForever, m_updateTime);
+  schedule(schedule_selector(MainScene::timerForViewportUpdate), kViewportUpdateTime, kRepeatForever, kViewportUpdateTime);
 
 #if CC_TARGET_PLATFORM != CC_PLATFORM_IOS
   auto touchListener = EventListenerTouchOneByOne::create();
@@ -153,20 +151,6 @@ bool PartialMapScene::init(const komorki::ui::Viewport::Ptr& viewport)
   };
   
   mouseListener->onMouseMove = [this](Event* event) {
-    
-    EventMouse* mouseEvent = dynamic_cast<EventMouse*>(event);
-    
-    if (m_touchMode == eTouchModeBrush)
-    {
-      m_brush->setPosition(Vec2(mouseEvent->getCursorX(),
-                                mouseEvent->getCursorY()));
-      if(m_eraseBrush == false)
-      {
-//        #warning don't forget
-//        m_mapManager->HightlightCellOnCursorPos(Vec2(mouseEvent->getCursorX(),
-//                                                     mouseEvent->getCursorY()), this->GetCurretnCellType());
-      }
-    }
   };
   
   _eventDispatcher->addEventListenerWithSceneGraphPriority(mouseListener, this);
@@ -194,7 +178,7 @@ bool PartialMapScene::init(const komorki::ui::Viewport::Ptr& viewport)
     
     if (m_moveDirection == Vec2::ZERO)
     {
-      this->unschedule(schedule_selector(PartialMapScene::timerForMove));
+      this->unschedule(schedule_selector(MainScene::timerForMove));
     }
     
     if(this->m_currenMenu)
@@ -205,16 +189,10 @@ bool PartialMapScene::init(const komorki::ui::Viewport::Ptr& viewport)
 
     if (keyCode == EventKeyboard::KeyCode::KEY_ESCAPE)
     {
-      if (m_touchMode == eTouchModeMove)
-      {
-        this->ShowMainMenu();
-        m_moveDirection = Vec2::ZERO;
-        this->unschedule(schedule_selector(PartialMapScene::timerForMove));
-        return;
-      }
-      
-      this->SetEraseMode(false);
-      this->SetDrawingMode(false);
+      this->ShowMainMenu();
+      m_moveDirection = Vec2::ZERO;
+      this->unschedule(schedule_selector(MainScene::timerForMove));
+      return;
     }
     else if (keyCode == EventKeyboard::KeyCode::KEY_EQUAL ||
              keyCode == EventKeyboard::KeyCode::KEY_PLUS)
@@ -228,10 +206,6 @@ bool PartialMapScene::init(const komorki::ui::Viewport::Ptr& viewport)
     else if (keyCode == EventKeyboard::KeyCode::KEY_Q)
     {
       this->Exit();
-    }
-    else if (keyCode == EventKeyboard::KeyCode::KEY_O)
-    {
-      this->ShowOptionsMenu();
     }
   };
   
@@ -258,7 +232,7 @@ bool PartialMapScene::init(const komorki::ui::Viewport::Ptr& viewport)
     if (oldMoveDirection == Vec2::ZERO && m_moveDirection != Vec2::ZERO)
     {
       this->timerForMove(kMoveTimer);
-      schedule(schedule_selector(PartialMapScene::timerForMove), kMoveTimer, kRepeatForever, 0);
+      schedule(schedule_selector(MainScene::timerForMove), kMoveTimer, kRepeatForever, 0);
     }
     
     if(this->m_currenMenu)
@@ -283,69 +257,30 @@ bool PartialMapScene::init(const komorki::ui::Viewport::Ptr& viewport)
   menuButton->setScale(kButtonScale);
   m_menuButton = menuButton;
 
-  //CreateToolBar();
   CreateSpeedToolBar();
   m_speedToolbar->setPosition(Vec2(origin.x + visibleSize.width,
                                    origin.y));
   
   CreateRenderTextures(visibleSize);
 
-  
   return true;
 }
 
-void PartialMapScene::ShowMainMenu()
+void MainScene::ShowMainMenu()
 {
   if (!m_mainMenu)
   {
     m_mainMenu = std::make_shared<MainMenu>();
-    m_mainMenu->Init(std::bind(&PartialMapScene::ShowOptionsMenu, this),
-                     std::bind(&PartialMapScene::Exit, this),
-                     std::bind(&PartialMapScene::ShowMainScreen, this));
+    m_mainMenu->Init(std::bind(&MainScene::ShowMainScreen, this),
+                     std::bind(&MainScene::Exit, this),
+                     std::bind(&MainScene::ShowMainScreen, this));
   }
   
   SetCurrentMenu(m_mainMenu);
 }
 
-void PartialMapScene::ShowOptionsMenu()
-{
-  if (!m_optionsMenu)
-  {
-    m_optionsMenu = std::make_shared<OptionsMenu>();
-    m_optionsMenu->Init(std::bind(&PartialMapScene::ConfirmNewOptions, this),
-                        std::bind(&PartialMapScene::CancelOptionSelection, this),
-                        std::bind(&PartialMapScene::ShowSaveAsMenu, this),
-                        std::bind(&PartialMapScene::ShowLoadMenu, this));
-  }
-  
-  SetCurrentMenu(m_optionsMenu);
-}
 
-void PartialMapScene::ShowSaveAsMenu()
-{
-  if (!m_saveConfigMenu)
-  {
-    m_saveConfigMenu = std::make_shared<SaveConfigMenu>();
-    m_saveConfigMenu->Init(std::bind(&PartialMapScene::ShowOptionsMenu, this),
-                           std::bind(&PartialMapScene::ShowOptionsMenu, this));
-  }
-  
-  SetCurrentMenu(m_saveConfigMenu);
-}
-
-void PartialMapScene::ShowLoadMenu()
-{
-  if (!m_loadConfigMenu)
-  {
-    m_loadConfigMenu = std::make_shared<LoadConfigMenu>();
-    m_loadConfigMenu->Init(std::bind(&PartialMapScene::ShowOptionsMenu, this),
-                           std::bind(&PartialMapScene::ShowOptionsMenu, this));
-  }
-  
-  SetCurrentMenu(m_loadConfigMenu);
-}
-
-void PartialMapScene::SetCurrentMenu(const std::shared_ptr<IFullScreenMenu> menu)
+void MainScene::SetCurrentMenu(const std::shared_ptr<IFullScreenMenu> menu)
 {
   if (m_currenMenu == menu)
   {
@@ -363,29 +298,26 @@ void PartialMapScene::SetCurrentMenu(const std::shared_ptr<IFullScreenMenu> menu
   m_pause = true;
 }
 
-void PartialMapScene::Exit()
+void MainScene::Exit()
 {
   exit(0);
 }
 
-void PartialMapScene::ShowMainScreen()
+void MainScene::ShowMainScreen()
 {
   m_pause = false;
   m_currenMenu->Hide();
   m_currenMenu = nullptr;
-  m_optionsMenu = nullptr;
   m_mainMenu = nullptr;
-  m_loadConfigMenu = nullptr;
-  m_saveConfigMenu = nullptr;
 }
 
-void PartialMapScene::ConfirmNewOptions()
+void MainScene::ConfirmNewOptions()
 {
   m_restartManagerFromOptionMenu = true;
   ShowMainScreen();
 }
 
-void PartialMapScene::CancelOptionSelection()
+void MainScene::CancelOptionSelection()
 {
   if (m_mainMenu)
   {
@@ -397,67 +329,8 @@ void PartialMapScene::CancelOptionSelection()
   }
 }
 
-void PartialMapScene::SetBackgroundPosition(float animationDuration)
-{
-  return;
-  
-  float scaleRatio = (m_mapScale - kMinMapScale)/(kMaxMapScale - kMinMapScale);
-  float bgScale = scaleRatio * (kMaxBgScale - kMinBgScale) + kMinBgScale;
-  
-  Size visibleSize = Director::getInstance()->getVisibleSize();
-  
-  float bgAspect = 1.0;
-  {
-    bgAspect = AspectToFill(m_bg->getContentSize(), visibleSize);
-  }
-  
-  Vec2 centralPos = Vec2(visibleSize.width/2.f, visibleSize.height/2.f);
-  
-  Size mapSize = m_viewport->GetTotalMapSize();
-  Vec2 positionOffset = m_mapPos + Vec2(m_mapScale*mapSize.width/2.f,
-                                        m_mapScale*mapSize.height/2.f) - Vec2(visibleSize.width/2.f,
-                                                                              visibleSize.height/2.f);
-  positionOffset *= 0.1;
-  bgScale *= bgAspect;
-  
-  Vec2 newBgPos = centralPos + positionOffset;
-  Size bgSize = m_bg->getTexture()->getContentSize() * bgScale;
-  
-  if (newBgPos.x - bgSize.width/2.0f > 0)
-  {
-    newBgPos.x = bgSize.width/2.0f;
-  }
-  
-  if (newBgPos.x + bgSize.width/2.0 < visibleSize.width)
-  {
-    newBgPos.x = visibleSize.width - bgSize.width/2.0;
-  }
-  
-  if (newBgPos.y - bgSize.height/2.0f > 0)
-  {
-    newBgPos.y = bgSize.height/2.0f;
-  }
-  
-  if (newBgPos.y + bgSize.height/2.0 < visibleSize.height)
-  {
-    newBgPos.y = visibleSize.height - bgSize.height/2.0;
-  }
-  
-  if (animationDuration == 0.0)
-  {
-    m_bg->setScale(bgScale);
-    m_bg->setPosition(newBgPos);
-  }
-  else
-  {
-    auto scale = ScaleTo::create(animationDuration, bgScale);
-    auto move = MoveTo::create(animationDuration, newBgPos);
-    m_bg->runAction(Spawn::create(scale, move, nullptr));
-  }
 
-}
-
-void PartialMapScene::visit(cocos2d::Renderer *renderer, const cocos2d::Mat4 &parentTransform, uint32_t parentFlags)
+void MainScene::visit(cocos2d::Renderer *renderer, const cocos2d::Mat4 &parentTransform, uint32_t parentFlags)
 {  
   Size viewSize = Director::getInstance()->getVisibleSize();
   Size contentSize = getContentSize();
@@ -507,7 +380,7 @@ void PartialMapScene::visit(cocos2d::Renderer *renderer, const cocos2d::Mat4 &pa
   if (m_currenMenu) m_menuNode->visit(renderer, parentTransform, parentFlags);
 }
 
-void PartialMapScene::timerForUpdate(float dt)
+void MainScene::timerForUpdate(float dt)
 {
   if (m_pause) return;
   
@@ -545,24 +418,24 @@ void PartialMapScene::timerForUpdate(float dt)
     {
       updateTimeEstimated = 0.f;
     }
-    schedule(schedule_selector(PartialMapScene::timerForUpdate), updateTimeEstimated, kRepeatForever, updateTimeEstimated);
+    schedule(schedule_selector(MainScene::timerForUpdate), updateTimeEstimated, kRepeatForever, updateTimeEstimated);
   }
   else if (m_speed == eSpeedMax)
   {
     float updateTimeEstimated = m_updateTime;
     m_viewport->UpdateAsync(updateTimeEstimated);
-    schedule(schedule_selector(PartialMapScene::timerForUpdate), 0, kRepeatForever, 0);
+    schedule(schedule_selector(MainScene::timerForUpdate), 0, kRepeatForever, 0);
   }
   
   m_prevSpeed = m_speed;
 }
 
-void PartialMapScene::timerForViewportUpdate(float dt)
+void MainScene::timerForViewportUpdate(float dt)
 {
   m_viewport->Calculate();
 }
 
-void PartialMapScene::timerForMove(float dt)
+void MainScene::timerForMove(float dt)
 {
   if (m_currenMenu) return;
   
@@ -576,7 +449,7 @@ void PartialMapScene::timerForMove(float dt)
   Move(moveDirection, dt);
 }
 
-void PartialMapScene::Zoom(float direction)
+void MainScene::Zoom(float direction)
 {
   Size visibleSize = Director::getInstance()->getVisibleSize();
   float cursorX = visibleSize.width/2;
@@ -585,31 +458,22 @@ void PartialMapScene::Zoom(float direction)
   m_viewport->Zoom({cursorX, cursorY}, direction);
 }
 
-void PartialMapScene::ZoomIn()
+void MainScene::ZoomIn()
 {
   Zoom(-kZoomStep);
 }
 
-void PartialMapScene::ZoomOut()
+void MainScene::ZoomOut()
 {
   Zoom(+kZoomStep);
 }
 
-void PartialMapScene::Move(const Vec2& direction, float animationDuration)
+void MainScene::Move(const Vec2& direction, float animationDuration)
 {
-  if (animationDuration == 0.0f)
-  {
-    m_viewport->Move(direction);
-//    SetBackgroundPosition(0.0f);
-  }
-  else
-  {
-    m_viewport->Move(direction);
-//    SetBackgroundPosition(animationDuration);
-  }
+  m_viewport->Move(direction);
 }
 
-void PartialMapScene::CreateSpeedToolBar()
+void MainScene::CreateSpeedToolBar()
 {
   m_speedToolbar = Node::create();
   addChild(m_speedToolbar, 999);
@@ -650,158 +514,7 @@ void PartialMapScene::CreateSpeedToolBar()
   SetSpeed(eSpeedNormal);
 }
 
-void PartialMapScene::CreateToolBar()
-{
-  m_toolbarNode = Node::create();
-  addChild(m_toolbarNode, 999);
-  m_toolbarNode->setVisible(false);
-  
-  auto brushButton = ui::Button::create("add_icon.png", "add_icon_hl.png");
-  brushButton->addTouchEventListener(CC_CALLBACK_2(PartialMapScene::SelectBrushTouchDownAction, this));
-  m_toolbarNode->addChild(brushButton);
-  brushButton->setPosition(Vec2(-kButtonSize/2.f, -kButtonSize/2.f));
-  brushButton->setScale(kButtonScale);
-  m_brushButton = brushButton;
-  
-  auto removeBrushButton = ui::Button::create("remove_brush.png", "remove_brush_hl.png");
-  removeBrushButton->addTouchEventListener(CC_CALLBACK_2(PartialMapScene::SelectRemoveBrushTouchDownAction, this));
-  m_toolbarNode->addChild(removeBrushButton);
-  removeBrushButton->setPosition(Vec2(-kButtonSize/2.f, -kButtonSize/2.f -kButtonSize));
-  removeBrushButton->setScale(kButtonScale);
-  m_eraseButton = removeBrushButton;
-  
-  auto cleanAllButton = ui::Button::create("remove.png", "remove_hl.png");
-  cleanAllButton->addTouchEventListener([this](Ref*,ui::Widget::TouchEventType controlEvent)
-                                        {
-                                          if (controlEvent == ui::Widget::TouchEventType::ENDED)
-                                            m_viewport->CleanMap();
-                                        });
-  m_toolbarNode->addChild(cleanAllButton);
-  cleanAllButton->setPosition(Vec2(-kButtonSize/2.f, -kButtonSize/2.f -2*kButtonSize));
-  cleanAllButton->setScale(kButtonScale);
-  
-  auto restartButton = ui::Button::create("restartButton.png", "restartButton_hl.png");
-  restartButton->addTouchEventListener([this](Ref*,ui::Widget::TouchEventType controlEvent)
-                                        {
-                                          if (controlEvent == ui::Widget::TouchEventType::ENDED)
-                                            m_stopManager = true;
-                                        });
-  m_toolbarNode->addChild(restartButton);
-  restartButton->setPosition(Vec2(-kButtonSize/2.f, -kButtonSize/2.f -3*kButtonSize));
-  restartButton->setScale(kButtonScale);
-  
-  //
-  // Create brush selector
-  //
-  m_cellsSelectoToolbar = Node::create();
-  m_toolbarNode->addChild(m_cellsSelectoToolbar);
-  m_cellsSelectoToolbar->setPosition(-kButtonSize, 0);
-  
-  auto greenCell = ui::Button::create("greenButton.png", "greenButton_hl.png");
-  greenCell->addTouchEventListener([this](Ref*,ui::Widget::TouchEventType controlEvent)
-                                   {
-                                     if (controlEvent == ui::Widget::TouchEventType::ENDED)
-                                      this->SetBrushMode(eBrushModeGreen);
-                                   });
-  m_cellsSelectoToolbar->addChild(greenCell);
-  greenCell->setPosition(Vec2(-kButtonSize/2.f - kButtonSize*3, -kButtonSize/2.f));
-  greenCell->setScale(kButtonScale);
-  m_green = greenCell;
-  
-  auto hunterCell = ui::Button::create("hunterButton.png", "hunterButton_hl.png");
-  hunterCell->addTouchEventListener([this](Ref*,ui::Widget::TouchEventType controlEvent)
-                                    {
-                                      if (controlEvent == ui::Widget::TouchEventType::ENDED)
-                                        this->SetBrushMode(eBrushModeHunter);
-                                    });
-  m_cellsSelectoToolbar->addChild(hunterCell);
-  hunterCell->setPosition(Vec2(-kButtonSize/2.f - kButtonSize*2, -kButtonSize/2.f));
-  hunterCell->setScale(kButtonScale);
-  m_hunter = hunterCell;
-  
-  auto saladCell = ui::Button::create("saladButton.png", "saladButton_hl.png");
-  saladCell->addTouchEventListener([this](Ref*,ui::Widget::TouchEventType controlEvent)
-                                   {
-                                     if (controlEvent == ui::Widget::TouchEventType::ENDED)
-                                       this->SetBrushMode(eBrushModeSalad);
-                                   });
-  m_cellsSelectoToolbar->addChild(saladCell);
-  saladCell->setPosition(Vec2(-kButtonSize/2.f - kButtonSize*1, -kButtonSize/2.f));
-  saladCell->setScale(kButtonScale);
-  m_salad = saladCell;
-  
-  auto improvedSaladCell = ui::Button::create("improvedSaladButton.png", "improvedSaladButton_hl.png");
-  improvedSaladCell->addTouchEventListener([this](Ref*,ui::Widget::TouchEventType controlEvent)
-                                           {
-                                             if (controlEvent == ui::Widget::TouchEventType::ENDED)
-                                               this->SetBrushMode(eBrushModeImprovedSalad);
-                                           });
-  m_cellsSelectoToolbar->addChild(improvedSaladCell);
-  improvedSaladCell->setPosition(Vec2(-kButtonSize/2.f, -kButtonSize/2.f));
-  improvedSaladCell->setScale(kButtonScale);
-  m_improvedSalad = improvedSaladCell;
-  
-  SetDrawingMode(false);
-  SetBrushMode(eBrushModeGreen);
-}
-
-void PartialMapScene::SelectBrushTouchDownAction(Ref *sender, ui::Widget::TouchEventType controlEvent)
-{
-  if (controlEvent == ui::Widget::TouchEventType::ENDED)
-  {
-    bool enableBrush = (m_touchMode == eTouchModeMove) || m_eraseBrush == true;
-    SetDrawingMode(enableBrush);
-  }
-}
-
-void PartialMapScene::SelectRemoveBrushTouchDownAction(Ref *sender, ui::Widget::TouchEventType controlEvent)
-{
-  if (controlEvent == ui::Widget::TouchEventType::ENDED)
-  {
-    SetEraseMode(!m_eraseBrush);
-  }
-}
-
-void PartialMapScene::SetBrushEnabled(bool enabled)
-{
-  if (enabled)
-    m_touchMode = eTouchModeBrush;
-  else
-    m_touchMode = eTouchModeMove;
-  
-  m_brush->setVisible(enabled);
-  m_viewport->StopHightlighting();
-}
-
-void PartialMapScene::SetDrawingMode(bool enabled)
-{
-  if(enabled)
-  {
-    SetEraseMode(false);
-  }
-  
-  SetBrushEnabled(enabled);
-  m_cellsSelectoToolbar->setVisible(enabled);
-}
-
-void PartialMapScene::SetEraseMode(bool enabled)
-{
-  if (enabled)
-  {
-    m_eraseBrush = true;
-    SetDrawingMode(false);
-    SetBrushEnabled(true);
-    m_eraseButton->loadTextureNormal( "remove_brush_sel.png");
-  }
-  else
-  {
-    m_eraseBrush = false;
-    SetBrushEnabled(false);
-    m_eraseButton->loadTextureNormal( "remove_brush.png");
-  }
-}
-
-void PartialMapScene::SetSpeed(Speed speed)
+void MainScene::SetSpeed(Speed speed)
 {
   if (m_speed == eSpeedNormal)
     m_speed1Button->loadTextureNormal("speed1.png");
@@ -820,16 +533,7 @@ void PartialMapScene::SetSpeed(Speed speed)
     m_speed10Button->loadTextureNormal("speed10_sel.png");
 }
 
-void PartialMapScene::SetBrushMode(BrushMode mode)
-{
-}
-
-komorki::CellType PartialMapScene::GetCurretnCellType()
-{
-  return komorki::eCellTypeGreen;
-}
-
-void PartialMapScene::CreateRenderTextures(const cocos2d::Size& visibleSize)
+void MainScene::CreateRenderTextures(const cocos2d::Size& visibleSize)
 {
   if (m_mainTexture)
   {
@@ -871,14 +575,14 @@ void PartialMapScene::CreateRenderTextures(const cocos2d::Size& visibleSize)
                                                           m_lightTexture->getSprite()->getTexture());
 }
 
-float PartialMapScene::AspectToFit(const Size& source, const Size& target)
+float MainScene::AspectToFit(const Size& source, const Size& target)
 {
   float wAspect = target.width/source.width;
   float hAspect = target.height/source.height;
   return MIN(wAspect, hAspect);
 }
 
-float PartialMapScene::AspectToFill(const Size& source, const Size& target)
+float MainScene::AspectToFill(const Size& source, const Size& target)
 {
   float wAspect = target.width/source.width;
   float hAspect = target.height/source.height;

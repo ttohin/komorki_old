@@ -12,10 +12,12 @@
 #include <list>
 #include "PixelMap.hpp"
 #include "CellShapes.h"
-#include "CellDescriptor.h"
+#include "Genom.h"
 
 namespace komorki
 {
+  class PixelDescriptor;
+  
   class ShapesGenerator
   {
   public:

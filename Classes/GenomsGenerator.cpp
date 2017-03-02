@@ -6,8 +6,8 @@
 //
 //
 
-#include "GenomsGenerator.hpp"
-#include "b2Utilites.h"
+#include "GenomsGenerator.h"
+#include "Random.h"
 
 namespace komorki
 {

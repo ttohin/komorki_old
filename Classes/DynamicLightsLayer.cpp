@@ -1,24 +1,22 @@
 //
-//  GlowMapOverlay.cpp
+//  DynamicLightsLayer.cpp
 //  prsv
 //
 //  Created by ttohin on 07.06.15.
 //
 //
 
-#include "GlowMapOverlay.h"
+#include "DynamicLightsLayer.h"
 #include "UIConfig.h"
 #include "UICommon.h"
 
-#define PMP_PULL_SIZE 32
+USING_NS_CC;
 
 namespace komorki
 {
-  namespace ui
+  namespace graphic
   {
-    USING_NS_CC;
-
-    bool GlowMapOverlay::init()
+    bool DynamicLightsLayer::init()
     {
       m_pullSize = 32;
       
@@ -31,19 +29,19 @@ namespace komorki
     }
   
    
-    cocos2d::Vec2 GlowMapOverlay::SpriteVector(const komorki::Vec2& vec, const cocos2d::Vec2& vector)
+    cocos2d::Vec2 DynamicLightsLayer::SpriteVector(const komorki::Vec2& vec, const cocos2d::Vec2& vector)
     {
       auto result = cocos2d::Vec2(vec.x * kSpritePosition + kSpritePosition/2.f, vec.y * kSpritePosition+ kSpritePosition/2.f) + vector;
       return result;
     }
     
-    cocos2d::Rect GlowMapOverlay::OffsetForType(komorki::CellDescriptor* d)
+    cocos2d::Rect DynamicLightsLayer::OffsetForType(komorki::CellDescriptor* d)
     {
       int index = 0;
       return cocos2d::Rect(index*160, 0, 160, 160);
     }
     
-    Sprite* GlowMapOverlay::CreateSprite()
+    Sprite* DynamicLightsLayer::CreateSprite()
     {
       if( ! m_spritesPull.empty() )
       {
@@ -63,7 +61,7 @@ namespace komorki
       }
     }
     
-    void GlowMapOverlay::RemoveSprite(Sprite* sprite)
+    void DynamicLightsLayer::RemoveSprite(Sprite* sprite)
     {
       if (m_spritesPull.size() < m_pullSize)
       {
@@ -77,7 +75,7 @@ namespace komorki
       }
     }
     
-    void GlowMapOverlay::Reset()
+    void DynamicLightsLayer::Reset()
     {
       removeAllChildren();
       return;

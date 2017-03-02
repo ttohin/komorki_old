@@ -8,7 +8,7 @@
 
 #include "CellShapes.h"
 #include "PixelDescriptor.h"
-#include "b2Utilites.h"
+#include "Random.h"
 #include <assert.h>
 
 using namespace komorki;

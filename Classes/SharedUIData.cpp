@@ -10,7 +10,7 @@
 
 namespace komorki
 {
-namespace ui
+namespace graphic
 {
   // singleton stuff
   static SharedUIData *s_SharedDirector = nullptr;

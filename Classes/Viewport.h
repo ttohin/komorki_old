@@ -19,7 +19,7 @@ namespace komorki
 {
   class AsyncPixelManager;
   
-  namespace ui
+  namespace graphic
   {
     class PartialMap;
     

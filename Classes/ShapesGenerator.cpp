@@ -7,8 +7,8 @@
 //
 
 #include "ShapesGenerator.h"
-#include "b2Utilites.h"
-#include <assert.h>
+#include "Random.h"
+#include "PixelDescriptor.h"
 
 namespace komorki
 {

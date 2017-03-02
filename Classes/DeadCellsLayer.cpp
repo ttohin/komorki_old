@@ -1,14 +1,18 @@
 //
-//  DeadCellsPartialMap.cpp
+//  DeadCellsLayer.cpp
 //  prsv
 //
 //  Created by ttohin on 06.06.15.
 //
 //
 
-#include "DeadCellsPartialMap.h"
+#include "DeadCellsLayer.h"
 #include "UIConfig.h"
 #include "UICommon.h"
+#include "ObjectContext.h"
+#include "CellContext.h"
+#include "AmorphCellContext.h"
+#include "CellDescriptor.h"
 
 #define ANIMATE_DEAD_CELLS 1
 #define PMP_MAX_NUMBER_OF_CHILDREN 2000
@@ -16,14 +20,13 @@
 #define ANIMATED 1
 
 
-namespace komorki
-{
-namespace ui
-{
-  
 USING_NS_CC;
 
-  DeadCellsPartialMap::DeadCellsPartialMap(int a, int b, int width, int height)
+namespace komorki
+{
+namespace graphic
+{
+  DeadCellsLayer::DeadCellsLayer(int a, int b, int width, int height)
   {
     m_a1 = a;
     m_a2 = a + width;
@@ -34,7 +37,7 @@ USING_NS_CC;
     m_pullSize = PMP_PULL_SIZE;
   }
   
-  Sprite* DeadCellsPartialMap::CreateSprite()
+  Sprite* DeadCellsLayer::CreateSprite()
   {
     Sprite* s = nullptr;
     if( ! m_spritesPull.empty() )
@@ -59,7 +62,7 @@ USING_NS_CC;
     return s;
   }
   
-  void DeadCellsPartialMap::RemoveSprite(Sprite* sprite)
+  void DeadCellsLayer::RemoveSprite(Sprite* sprite)
   {
     if (m_spritesPull.size() < m_pullSize)
     {
@@ -73,12 +76,12 @@ USING_NS_CC;
     }
   }
   
-  bool DeadCellsPartialMap::IsInAABB(const Vec2& vec)
+  bool DeadCellsLayer::IsInAABB(const Vec2& vec)
   {
     return IsInAABB(vec.x, vec.y);
   }
   
-  bool DeadCellsPartialMap::IsInAABB(const int& x, const int& y)
+  bool DeadCellsLayer::IsInAABB(const int& x, const int& y)
   {
     if(x < m_a1 || x >= m_a2 ||
        y < m_b1 || y >= m_b2)
@@ -89,7 +92,7 @@ USING_NS_CC;
     return true;
   }
   
-  cocos2d::Vec2 DeadCellsPartialMap::spriteVector(const komorki::Vec2& vec, const cocos2d::Vec2& vector)
+  cocos2d::Vec2 DeadCellsLayer::spriteVector(const komorki::Vec2& vec, const cocos2d::Vec2& vector)
   {
     auto result = cocos2d::Vec2(((int)vec.x - m_a1) * kSpritePosition, ((int)vec.y - m_b1) * kSpritePosition) + vector;
     return result;
@@ -101,13 +104,13 @@ USING_NS_CC;
     return result;
   }
   
-  cocos2d::Vec2 DeadCellsPartialMap::spriteVector(komorki::PixelDescriptor* pd, const cocos2d::Vec2& vector)
+  cocos2d::Vec2 DeadCellsLayer::spriteVector(komorki::PixelDescriptor* pd, const cocos2d::Vec2& vector)
   {
     auto result = cocos2d::Vec2(((int)pd->x - m_a1) * kSpritePosition, ((int)pd->y - m_b1) * kSpritePosition) + vector;
     return result;
   }
   
-  void DeadCellsPartialMap::Update(const std::list<komorki::PixelDescriptorProvider::UpdateResult>& updateResult, float updateTime)
+  void DeadCellsLayer::Update(const WorldUpdateList& updateResult, float updateTime)
   {
     for (auto& u : updateResult)
     {
@@ -124,21 +127,21 @@ USING_NS_CC;
       {
         if (ANIMATED && ANIMATE_DEAD_CELLS)
         {
-          auto context = static_cast<PixelMap::ObjectContext*>(u.deleteCreature.value.cellDescriptor->userData);
-          if (context && context->GetType() == PixelMap::ContextType::SinglePixel)
+          auto context = static_cast<ObjectContext*>(u.deleteCreature.value.cellDescriptor->userData);
+          if (context && context->GetType() == ContextType::SinglePixel)
           {
-            auto singleCellContext = static_cast<PixelMap::SingleCellContext*>(context);
+            auto CellContext = static_cast<class CellContext*>(context);
             
-            auto posOffset = singleCellContext->m_posOffset;
-            auto offset = singleCellContext->m_offset;
-            auto size = singleCellContext->m_size;
-            auto pos = singleCellContext->m_pos;
+            auto posOffset = CellContext->m_posOffset;
+            auto offset = CellContext->m_offset;
+            auto size = CellContext->m_size;
+            auto pos = CellContext->m_pos;
             
             cocos2d::Vec2 rectOffset = spriteVectorWithOutOffset(size, {0, 0}) * 0.5;
             
             auto s = CreateSprite();
             
-            s->setTextureRect(singleCellContext->m_textureRect);
+            s->setTextureRect(CellContext->m_textureRect);
             s->setPosition(spriteVectorWithOutOffset(pos + posOffset, offset + rectOffset));
             
 
@@ -151,9 +154,9 @@ USING_NS_CC;
             
             s->runAction(Sequence::createWithTwoActions(fade, removeSelf));
           }
-          else if (context && context->GetType() == PixelMap::ContextType::ManyPixels)
+          else if (context && context->GetType() == ContextType::ManyPixels)
           {
-            auto amorphContext = static_cast<PixelMap::AmorphCellContext*>(context);
+            auto amorphContext = static_cast<AmorphCellContext*>(context);
             
             for (auto &spriteContext : amorphContext->m_spriteMap)
             {
@@ -181,7 +184,7 @@ USING_NS_CC;
     
   }
   
-  bool DeadCellsPartialMap::init()
+  bool DeadCellsLayer::init()
   {
     std::string mapName = "Komorki/tmp/cells.png";
     
@@ -197,7 +200,7 @@ USING_NS_CC;
     return true;
   }
   
-  void DeadCellsPartialMap::Reset()
+  void DeadCellsLayer::Reset()
   {
     removeAllChildren();
   }

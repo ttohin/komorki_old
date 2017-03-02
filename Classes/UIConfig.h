@@ -14,7 +14,7 @@
 
 namespace komorki
 {
-  namespace ui
+  namespace graphic
   {
     extern const float kTileFrameSize;
     extern const int kSpritePosition;

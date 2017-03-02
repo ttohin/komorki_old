@@ -8,7 +8,7 @@
 
 #include "StaticLightsSprite.h"
 #include "UIConfig.h"
-#include "b2Utilites.h"
+#include "Random.h"
 #include <cocos2d.h>
 
 
@@ -38,13 +38,13 @@ bool StaticLightsSprite::init(komorki::IPixelDescriptorProvider* pixelMap, const
       
       auto sprite = cocos2d::Sprite::createWithTexture(spritePatchNode->getTexture());
       cocos2d::Vec2 pos(i, j);
-      pos *= komorki::ui::kSpritePosition;
+      pos *= komorki::graphic::kSpritePosition;
       
       const int kMaxLight = 255;
       const int kMinLight = 0;
       
       sprite->setOpacity(kMinLight + (kMaxLight - kMinLight) * light);
-      sprite->setScale(komorki::ui::kSpritePosition);
+      sprite->setScale(komorki::graphic::kSpritePosition);
       sprite->setAnchorPoint({0, 0});
       
 //      sprite->setColor(cocos2d::Color3B(cRandABInt(0, 255), cRandABInt(0, 255), cRandABInt(0, 255)));
@@ -62,8 +62,8 @@ bool StaticLightsSprite::init(komorki::IPixelDescriptorProvider* pixelMap, const
 //  spritePatchNode->setOpacityModifyRGB(false);
   addChild(spritePatchNode);
   
-  m_textureSize = cocos2d::Size(rect.size.x * komorki::ui::kSpritePosition,
-                                rect.size.y * komorki::ui::kSpritePosition);
+  m_textureSize = cocos2d::Size(rect.size.x * komorki::graphic::kSpritePosition,
+                                rect.size.y * komorki::graphic::kSpritePosition);
 
   return true;
 }

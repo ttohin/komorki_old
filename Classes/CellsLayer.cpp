@@ -1,21 +1,22 @@
 //
-//  PixelMapPartial.cpp
+//  CellsLayer.cpp
 //  prsv
 //
 //  Created by ttohin on 06.06.15.
 //
 //
 
-#include "PixelMapPartial.h"
+#include "CellsLayer.h"
 
 #include "cocos2d.h"
 #include "PixelDescriptorProvider.h"
-#include "b2Utilites.h"
+#include "Random.h"
 #include "CellDescriptor.h"
 #include "UIConfig.h"
 #include "UICommon.h"
 #include "Utilities.h"
 #include "CellShapes.h"
+#include "Logging.h"
 
 #define CREATURE_LINE_START 0
 #define CREATURE_LINE_END 4
@@ -30,30 +31,24 @@
 
 #define SMALL_ANIMATION_TAG 99
 
-#ifdef DEBUG_PARTIAL_MAP
-#define LOG_W(...) KOMORKI_LOG(__VA_ARGS__)
-#else
-#define LOG_W(...) {}
-#endif
-
 USING_NS_CC;
 
 namespace komorki
 {
-  namespace ui
+  namespace graphic
   {
-    PixelMapPartial::PixelMapPartial()
+    CellsLayer::CellsLayer()
     {
       m_hlSprite = nullptr;
       m_pullSize = PMP_PULL_SIZE;
     }
     
-    PixelMapPartial::~PixelMapPartial()
+    CellsLayer::~CellsLayer()
     {
       LOG_W("%s, %p", __FUNCTION__, this);
     }
 
-    Sprite* PixelMapPartial::CreateSprite()
+    Sprite* CellsLayer::CreateSprite()
     {
       Sprite* s = nullptr;
       if( ! m_spritesPull.empty() )
@@ -75,7 +70,7 @@ namespace komorki
       return s;
     }
     
-    void PixelMapPartial::RemoveSprite(Sprite* sprite)
+    void CellsLayer::RemoveSprite(Sprite* sprite)
     {
       assert(sprite->getParent() == this);
       if (m_spritesPull.size() < m_pullSize)
@@ -90,7 +85,7 @@ namespace komorki
       }
     }
     
-    bool PixelMapPartial::init()
+    bool CellsLayer::init()
     {
       std::string mapName = "Komorki/tmp/cells.png";
       
@@ -107,7 +102,7 @@ namespace komorki
       return true;
     }
     
-    void PixelMapPartial::Reset()
+    void CellsLayer::Reset()
     {
       removeAllChildren();
 //      m_pullSize += _children.size() + 1;
@@ -121,7 +116,7 @@ namespace komorki
 //      m_pullSize = PMP_PULL_SIZE;
     }
     
-    void PixelMapPartial::SetUpdateTime(float updateTime)
+    void CellsLayer::SetUpdateTime(float updateTime)
     {
       m_updateTime = updateTime;
     }

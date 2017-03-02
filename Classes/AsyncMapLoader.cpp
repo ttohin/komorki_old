@@ -11,6 +11,7 @@
 #include "TestPixelProvider.h"
 #include "SharedUIData.h"
 #include "UIConfig.h"
+#include "WorldUpdateResult.h"
 
 USING_NS_CC;
 
@@ -41,12 +42,12 @@ void AsyncMapLoader::WorkerThread()
   komorki::ConfigManager::GetInstance()->CreateNewConfig();
   m_provider = std::make_shared<komorki::PixelDescriptorProvider>();
   m_provider->InitWithConfig(komorki::ConfigManager::GetInstance()->GetCurrentConfig().get(),
-                             komorki::ui::SharedUIData::getInstance()->m_genomsGenerator->m_genomsList);
+                             komorki::graphic::SharedUIData::getInstance()->m_genomsGenerator->m_genomsList);
 #endif
   
   SetCurrentJobString("Runnig few generations");
-  std::list<komorki::PixelDescriptorProvider::UpdateResult> result;
-  for (int i = 0; i < komorki::ui::kNumberOfUpdatesOnStartup; i++)
+  komorki::WorldUpdateList result;
+  for (int i = 0; i < komorki::graphic::kNumberOfUpdatesOnStartup; i++)
   {
     m_provider->Update(false, result);
   }
@@ -68,7 +69,7 @@ std::string AsyncMapLoader::GetCurrentJobString()
   return m_currentJob;
 }
 
-komorki::ui::Viewport::Ptr AsyncMapLoader::GetViewport()
+komorki::graphic::Viewport::Ptr AsyncMapLoader::GetViewport()
 {
   return m_viewport;
 }

@@ -14,7 +14,7 @@
 
 namespace komorki
 {
-  namespace ui
+  namespace graphic
   {
     float RandomOffset();
     cocos2d::Vec2 RandomVectorOffset();

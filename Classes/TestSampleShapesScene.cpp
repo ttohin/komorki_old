@@ -78,7 +78,7 @@ CellCanvasSprite* CreateCanvasWithGenomsGenerator()
   auto cellCanvas = new CellCanvasSprite();
   cellCanvas->init();
   
-  const komorki::Vec2 maxTextureSize = komorki::ui::kCellsTextureSizeInPixels;
+  const komorki::Vec2 maxTextureSize = komorki::graphic::kCellsTextureSizeInPixels;
   
   komorki::Vec2 currentPos;
   komorki::PixelPos line = 0;
@@ -110,7 +110,7 @@ CellCanvasSprite* CreateCanvasWithGenomsGenerator()
                      originalBuffer->Set(pos.x, pos.y, true);
                    });
     
-    unsigned int scale = komorki::ui::kCellShapeSegments;
+    unsigned int scale = komorki::graphic::kCellShapeSegments;
     komorki::ShapeAnalizer analizer(originalBuffer, scale);
     
     cellCanvas->SetBuffer(analizer.m_result, komorki::Vec2(currentPos.x * scale, currentPos.y * scale), true);
@@ -123,9 +123,9 @@ CellCanvasSprite* CreateCanvasWithGenomsGenerator()
     currentPos.x += aabb.size.x;
    
     komorki::Genom::GroupIdType groupId;
-    if (komorki::ui::SharedUIData::getInstance()->m_genomsGenerator->AddShape(result, groupId))
+    if (komorki::graphic::SharedUIData::getInstance()->m_genomsGenerator->AddShape(result, groupId))
     {
-      komorki::ui::SharedUIData::getInstance()->m_textureMap[groupId] = textureRect;
+      komorki::graphic::SharedUIData::getInstance()->m_textureMap[groupId] = textureRect;
     }
     
     std::cout << "group " << groupId << " textureRext " <<
@@ -161,8 +161,8 @@ bool TestSampleShapesScene::init()
   auto renderer = _director->getRenderer();
   auto& parentTransform = _director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
   
-  auto rt = RenderTexture::create(komorki::ui::kCellShapeSegments * komorki::ui::kCellsTextureSizeInPixels.x * CellCanvasSprite::kSpriteSize,
-                                  komorki::ui::kCellShapeSegments * komorki::ui::kCellsTextureSizeInPixels.y * CellCanvasSprite::kSpriteSize);
+  auto rt = RenderTexture::create(komorki::graphic::kCellShapeSegments * komorki::graphic::kCellsTextureSizeInPixels.x * CellCanvasSprite::kSpriteSize,
+                                  komorki::graphic::kCellShapeSegments * komorki::graphic::kCellsTextureSizeInPixels.y * CellCanvasSprite::kSpriteSize);
   
   rt->begin();
   cellCanvas->visit(renderer, parentTransform, true);

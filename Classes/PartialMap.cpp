@@ -9,9 +9,9 @@
 #include "PartialMap.h"
 #include "DeadCellsLayer.h"
 #include "PixelDebugView.h"
-#include "PixelMapLightOverlay.hpp"
-#include "PixelMapPartial.h"
-#include "GlowMapOverlay.h"
+#include "StaticLightsLayer.h"
+#include "CellsLayer.h"
+#include "DynamicLightsLayer.h"
 #include "PixelDescriptorProvider.h"
 #include "Utilities.h"
 #include "UIConfig.h"
@@ -19,6 +19,11 @@
 #include <sstream> //for std::stringstream
 #include <string>  //for std::string
 #include "SharedUIData.h"
+#include "ObjectContext.h"
+#include "CellContext.h"
+#include "AmorphCellContext.h"
+#include "TerrainBatchSprite.h"
+#include "TerrainSprite.h"
 
 
 #ifdef DEBUG_PARTIAL_MAP
@@ -29,7 +34,7 @@
 
 namespace komorki
 {
-namespace ui
+namespace graphic
 {
 PartialMap::PartialMap()
 {
@@ -47,7 +52,7 @@ PartialMap::~PartialMap()
       continue;
     }
     
-    auto context = static_cast<PixelMap::ObjectContext*>(cell->userData);
+    auto context = static_cast<ObjectContext*>(cell->userData);
     // Remove only context that hasn't been adopted by other pratial maps
     if (context->m_owner == this || context->m_owner == nullptr)
     {
@@ -67,7 +72,7 @@ PartialMap::~PartialMap()
       auto pd = m_provider->GetDescriptor(i, j);
       if (pd->m_cellDescriptor && pd->m_cellDescriptor->userData != nullptr)
       {
-        auto context = static_cast<PixelMap::ObjectContext*>(pd->m_cellDescriptor->userData);
+        auto context = static_cast<ObjectContext*>(pd->m_cellDescriptor->userData);
         assert(context->m_owner);
         if (context->m_owner == this)
         {
@@ -83,8 +88,6 @@ PartialMap::~PartialMap()
   m_cellMap->removeFromParentAndCleanup(true);
   m_background->removeFromParentAndCleanup(true);
   m_lightOverlay->removeFromParentAndCleanup(true);
-  m_debugView->removeFromParentAndCleanup(true);
-  m_glow->removeFromParentAndCleanup(true);
   m_terrainSprite->removeFromParentAndCleanup(true);
   m_terrainBgSprite->removeFromParentAndCleanup(true);
 }
@@ -100,24 +103,18 @@ bool PartialMap::Init(int a, int b, int width, int height,
   m_height = height;
   m_provider = provider;
   
-  m_cellMap = std::make_shared<PixelMapPartial>();
-  m_debugView = std::make_shared<PixelDebugView>(a, b, width, height, provider);
-  m_background = std::make_shared<PixelMapBackground>(a, b, width, height);
-  m_glow = std::make_shared<GlowMapOverlay>();
+  m_cellMap = std::make_shared<CellsLayer>();
+  m_background = std::make_shared<DeadCellsLayer>(a, b, width, height);
   m_terrainSprite = TerrainSprite::create(a, b, width, height, "fg");
   m_terrainBgSprite = TerrainSprite::create(a, b, width, height, "bg");
-  m_lightOverlay = PixelMapLightOverlay::create(a, b, width, height, "light_map");
+  m_lightOverlay = StaticLightsLayer::create(a, b, width, height, "light_map");
   
   m_cellMap->init();
-  m_debugView->init();
   m_background->init();
-  m_glow->init();
   
   m_cellMap->setPosition(offset);
-  m_debugView->setPosition(offset);
   m_lightOverlay->setPosition(offset);
   m_background->setPosition(offset);
-  m_glow->setPosition(offset);
   m_terrainSprite->setPosition(offset);
   m_terrainBgSprite->setPosition(offset);
   
@@ -126,11 +123,8 @@ bool PartialMap::Init(int a, int b, int width, int height,
   superView->addChild(m_cellMap.get(), 1);
   superView->addChild(m_terrainSprite, 2);
   lightNode->addChild(m_lightOverlay, 3);
-  lightNode->addChild(m_glow.get(), 4);
-  superView->addChild(m_debugView.get(), 5);
  
   m_cellMap->SetUpdateTime(0.2);
-  m_glow->SetUpdateTime(0.2);
   
   for (int i = m_a1; i < m_a2; ++i)
   {
@@ -167,7 +161,7 @@ void PartialMap::DeleteOutgoingItems()
       continue;
     }
     
-    auto context = static_cast<PixelMap::ObjectContext*>(cell->userData);
+    auto context = static_cast<ObjectContext*>(cell->userData);
     // Remove only context that hasn't been adopted by other pratial maps
     if (context->m_owner == this || context->m_owner == nullptr)
     {
@@ -182,11 +176,11 @@ void PartialMap::DeleteOutgoingItems()
   m_outgoingCells.clear();
 }
   
-void PartialMap::HandleItemsOnBounds(const std::list<IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime)
+void PartialMap::HandleItemsOnBounds(const WorldUpdateList& updateResult, float updateTime)
 {
 }
 
-void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime)
+void PartialMap::Update(WorldUpdateList& updateResult, float updateTime)
 {
   if (kRedrawEachUpdate)
   {
@@ -200,16 +194,11 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
         InitPixel(pd);
       }
     }
-
-    m_debugView->Update(updateResult,updateTime);
     return;
   }
   
   m_background->Update(updateResult,updateTime);
-  m_debugView->Update(updateResult,updateTime);
   m_cellMap->SetUpdateTime(updateTime);
-  m_glow->SetUpdateTime(updateTime);
-
   
   for (auto& u : updateResult)
   {
@@ -222,7 +211,7 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
    
     Vec2 destinationPos(0,0);
     PixelDescriptor* destinationDesc = nullptr;
-    PixelMap::ObjectContext* context = nullptr;
+    ObjectContext* context = nullptr;
     if(u.addCreature == true)
     {
       destinationPos = Vec2(u.addCreature.value.destinationDesc->x, u.addCreature.value.destinationDesc->y);
@@ -230,13 +219,13 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
     }
     else if(m == true)
     {
-      context = static_cast<PixelMap::ObjectContext*>(u.userData);
+      context = static_cast<ObjectContext*>(u.userData);
       destinationPos = Vec2(m.value.destinationDesc->x, m.value.destinationDesc->y);
       destinationDesc = m.value.destinationDesc;
     }
     else
     {
-      context = static_cast<PixelMap::ObjectContext*>(u.userData);
+      context = static_cast<ObjectContext*>(u.userData);
     }
     
     if (u.morph == true && m == false && !IsInAABB(initialPos))
@@ -264,13 +253,13 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
         continue;
       }
       
-      static_cast<PixelMap::SingleCellContext*>(context)->ChangeRect(u.desc->m_cellDescriptor, u.changeRect.value.rect, updateTime * 0.9);
+      static_cast<CellContext*>(context)->ChangeRect(u.desc->m_cellDescriptor, u.changeRect.value.rect, updateTime * 0.9);
       continue;
     }
     else if (u.morph == true && m == false)
     {
       auto aabb = u.desc->m_cellDescriptor->GetShape()->GetAABB();
-      static_cast<PixelMap::AmorphCellContext*>(context)->MoveAmorphCells(initialPos, u.morph.value, aabb, updateTime * 0.9);
+      static_cast<AmorphCellContext*>(context)->MoveAmorphCells(initialPos, u.morph.value, aabb, updateTime * 0.9);
     }
     else if (m == true || u.addCreature == true)
     {
@@ -353,20 +342,9 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
 
 }
   
-  void PartialMap::HightlightCellOnPos(int x, int y, komorki::CellType type)
-  {
-    m_cellMap->HightlightCellOnPos(x, y, type);
-  }
-  
-  void PartialMap::StopHightlighting()
-  {
-    m_cellMap->StopHightlighting();
-  }
-  
   void PartialMap::Reset()
   {
     m_cellMap->Reset();
-    m_glow->Reset();
   }
   
   void PartialMap::EnableSmallAnimations(bool enable)
@@ -389,7 +367,7 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
             // We are creating map current cell is incomming
             if (pd->m_cellDescriptor->userData != nullptr)
             {
-              auto context = static_cast<PixelMap::ObjectContext*>(pd->m_cellDescriptor->userData);
+              auto context = static_cast<ObjectContext*>(pd->m_cellDescriptor->userData);
               context->EnableSmallAnimations(m_enableSmallAnimations);
             }
           }
@@ -407,19 +385,13 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
   {
     m_cellMap->setPosition(pos);
     m_background->setPosition(pos);
-    m_debugView->setPosition(pos);
     m_lightOverlay->setPosition(pos);
-    m_glow->setPosition(pos);
-//    m_terrain->setPosition(pos);
     m_terrainSprite->setPosition(pos);
     m_terrainBgSprite->setPosition(pos);
     
     m_cellMap->setScale(scale);
     m_background->setScale(scale);
-    m_debugView->setScale(scale);
     m_lightOverlay->setScale(scale * kLightMapScale);
-    m_glow->setScale(scale);
-//    m_terrain->setScale(scale);
     m_terrainSprite->setScale(scale * 4.f);
     m_terrainBgSprite->setScale(scale * 4.f);
   }
@@ -448,7 +420,7 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
         // We are creating map current cell is incomming
         if (pd->m_cellDescriptor->userData != nullptr)
         {
-          auto context = static_cast<PixelMap::ObjectContext*>(pd->m_cellDescriptor->userData);
+          auto context = static_cast<ObjectContext*>(pd->m_cellDescriptor->userData);
           Vec2 initialPos = Vec2(pd->x, pd->y);
           LOG_W("%s [%s] adopting: context:[%s][%s]", __FUNCTION__,
                        Description().c_str(),
@@ -469,20 +441,16 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
         CreateCell(pd);
       }
     }
-    else
-    {
-      m_cellMap->AddSprite(pd, LocalVector(Vec2(pd->x, pd->y)));
-    }
   }
   
-  PixelMap::ObjectContext* PartialMap::AddCreature(const Vec2& source, PixelDescriptor* dest, Morphing& morphing, float duration)
+  ObjectContext* PartialMap::AddCreature(const Vec2& source, PixelDescriptor* dest, Morphing& morphing, float duration)
   {
-    PixelMap::ObjectContext* context = nullptr;
+    ObjectContext* context = nullptr;
     if (dest->m_cellDescriptor->GetShapeType() == eShapeTypeAmorph)
     {
       auto groupId = dest->m_cellDescriptor->m_genom.m_groupId;
-      auto textureRect = komorki::ui::SharedUIData::getInstance()->m_textureMap[groupId];
-      auto c = new PixelMap::AmorphCellContext(this, textureRect);
+      auto textureRect = SharedUIData::getInstance()->m_textureMap[groupId];
+      auto c = new AmorphCellContext(this, textureRect);
       auto aabb = dest->m_cellDescriptor->GetShape()->GetAABB();
       
       dest->m_cellDescriptor->Shape([&](PixelDescriptor* pd, bool& stop)
@@ -499,8 +467,8 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
              || dest->m_cellDescriptor->GetShapeType() == eShapeTypeFixed)
     {
       auto groupId = dest->m_cellDescriptor->m_genom.m_groupId;
-      auto textureRect = komorki::ui::SharedUIData::getInstance()->m_textureMap[groupId];
-      auto c = new PixelMap::SingleCellContext(this,
+      auto textureRect = SharedUIData::getInstance()->m_textureMap[groupId];
+      auto c = new CellContext(this,
                                                textureRect,
                                                dest->m_cellDescriptor->parent->GetPos(),
                                                dest->m_cellDescriptor->GetShape()->GetAABB());
@@ -518,7 +486,7 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
     return context;
   }
   
-  PixelMap::ObjectContext* PartialMap::CreateCell(PixelDescriptor* dest)
+  ObjectContext* PartialMap::CreateCell(PixelDescriptor* dest)
   {
     komorki::Morphing m;
     return AddCreature(Vec2(), dest, m, 0.f);
@@ -526,34 +494,34 @@ void PartialMap::Update(std::list<IPixelDescriptorProvider::UpdateResult>& updat
   
   void PartialMap::Move(const komorki::Vec2 &source,
                         const komorki::Vec2 &dest,
-                        PixelMap::ObjectContext *context,
+                        ObjectContext *context,
                         float duration,
                         int steps,
                         komorki::Morphing &morphing,
                         komorki::CellDescriptor* cd)
   {
-    if (context->GetType() == PixelMap::ContextType::ManyPixels)
+    if (context->GetType() == ContextType::ManyPixels)
     {
       auto aabb = cd->GetShape()->GetAABB();
-      static_cast<PixelMap::AmorphCellContext*>(context)->MoveAmorphCells(source, morphing, aabb, duration*0.9*(steps + 1));
+      static_cast<AmorphCellContext*>(context)->MoveAmorphCells(source, morphing, aabb, duration*0.9*(steps + 1));
       return;
     }
     
-    if (context->GetType() == PixelMap::ContextType::SinglePixel)
+    if (context->GetType() == ContextType::SinglePixel)
     {
-      static_cast<PixelMap::SingleCellContext*>(context)->Move(source, dest, duration*0.9*(steps + 1));
+      static_cast<CellContext*>(context)->Move(source, dest, duration*0.9*(steps + 1));
       return;
     }
     
     assert(0);
   }
   
-  void PartialMap::Attack(PixelMap::ObjectContext* context, const Vec2& pos, const Vec2& offset, float animationDuration)
+  void PartialMap::Attack(ObjectContext* context, const Vec2& pos, const Vec2& offset, float animationDuration)
   {
     context->Attack(pos, offset, animationDuration);
   }
   
-  void PartialMap::Delete(PixelMap::ObjectContext* context)
+  void PartialMap::Delete(ObjectContext* context)
   {
     if (context == nullptr)
     {

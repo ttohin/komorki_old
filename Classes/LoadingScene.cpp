@@ -7,7 +7,7 @@
 //
 
 #include "LoadingScene.h"
-#include "PartialMapScene.h"
+#include "MainScene.h"
 #include "Common.h"
 #include "UIConfig.h"
 #include "TerrainBatchSprite.h"
@@ -17,6 +17,8 @@
 #include "CellCanvasSprite.h"
 #include "ShapeAnalizer.hpp"
 #include "ShapesGenerator.h"
+
+USING_NS_CC;
 
 bool LoadingScene::init()
 {
@@ -65,7 +67,7 @@ void LoadingScene::SaveTerrain(const TerrainAnalizer::Result& terrainAnalizerRes
                                const std::string& prefix,
                                const std::string& mapDirName)
 {
-  auto terrainBatch = new TerrainBatchSprite();
+  auto terrainBatch = new komorki::graphic::TerrainBatchSprite();
   terrainBatch->init(terrainAnalizerResult);
   terrainBatch->autorelease();
   
@@ -74,8 +76,8 @@ void LoadingScene::SaveTerrain(const TerrainAnalizer::Result& terrainAnalizerRes
   
   int aspect = 4;
   
-  auto rt = RenderTexture::create(32.f * komorki::ui::kSegmentSize / aspect,
-                                  32.f * komorki::ui::kSegmentSize / aspect);
+  auto rt = RenderTexture::create(32.f * komorki::graphic::kSegmentSize / aspect,
+                                  32.f * komorki::graphic::kSegmentSize / aspect);
   
   terrainBatch->setScale(1.f / float(aspect));
   
@@ -111,7 +113,7 @@ void LoadingScene::LoadTerrainMaps(float dt)
   
   komorki::Rect totalSize = {{0, 0}, {terrain.ground->GetWidth(), terrain.ground->GetHeight()}};
   std::vector<komorki::Rect> mapRects;
-  komorki::SplitRectOnChunks(totalSize, {{0, 0}, {0, 0}}, komorki::ui::kSegmentSize * 2, mapRects);
+  komorki::SplitRectOnChunks(totalSize, {{0, 0}, {0, 0}}, komorki::graphic::kSegmentSize * 2, mapRects);
   
   auto sharedFileUtils = FileUtils::getInstance();
   
@@ -152,7 +154,7 @@ void LoadingScene::LoadLightMaps(float dt)
 {
   komorki::Rect totalSize = {{0, 0}, {m_provider->GetSize().x, m_provider->GetSize().y}};
   std::vector<komorki::Rect> mapRects;
-  komorki::SplitRectOnChunks(totalSize, {{0, 0}, {0, 0}}, komorki::ui::kSegmentSize, mapRects);
+  komorki::SplitRectOnChunks(totalSize, {{0, 0}, {0, 0}}, komorki::graphic::kSegmentSize, mapRects);
   
   auto sharedFileUtils = FileUtils::getInstance();
   
@@ -170,7 +172,7 @@ void LoadingScene::LoadLightMaps(float dt)
     auto renderer = _director->getRenderer();
     auto& parentTransform = _director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
     
-    int aspect = komorki::ui::kLightMapScale;
+    int aspect = komorki::graphic::kLightMapScale;
     
     auto rt = RenderTexture::create(staticLights->textureSize().width / aspect,
                                     staticLights->textureSize().height / aspect);
@@ -206,7 +208,7 @@ void LoadingScene::LoadLightMaps(float dt)
 void DrawCellShapes(cocos2d::Renderer* renderer, const Mat4& parentTransform)
 {
   komorki::ShapesGenerator gen;
-  const komorki::Vec2 maxTextureSize = komorki::ui::kCellsTextureSizeInPixels;
+  const komorki::Vec2 maxTextureSize = komorki::graphic::kCellsTextureSizeInPixels;
   
   komorki::Vec2 currentPos;
   komorki::PixelPos line = 0;
@@ -241,7 +243,7 @@ void DrawCellShapes(cocos2d::Renderer* renderer, const Mat4& parentTransform)
                      originalBuffer->Set(pos.x, pos.y, true);
                    });
     
-    unsigned int scale = komorki::ui::kCellShapeSegments;
+    unsigned int scale = komorki::graphic::kCellShapeSegments;
     komorki::ShapeAnalizer analizer(originalBuffer, scale);
     
     bool drowCorner = result.type != komorki::ShapeType::eShapeTypeAmorph;
@@ -256,9 +258,9 @@ void DrawCellShapes(cocos2d::Renderer* renderer, const Mat4& parentTransform)
     currentPos.x += aabb.size.x;
     
     komorki::Genom::GroupIdType groupId;
-    if (komorki::ui::SharedUIData::getInstance()->m_genomsGenerator->AddShape(result, groupId))
+    if (komorki::graphic::SharedUIData::getInstance()->m_genomsGenerator->AddShape(result, groupId))
     {
-      komorki::ui::SharedUIData::getInstance()->m_textureMap[groupId] = textureRect;
+      komorki::graphic::SharedUIData::getInstance()->m_textureMap[groupId] = textureRect;
     }
     
     cellCanvas->visit(renderer, parentTransform, true);
@@ -280,8 +282,8 @@ void LoadingScene::LoadCellShapes(float dt)
   auto renderer = _director->getRenderer();
   auto& parentTransform = _director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
   
-  auto rt = RenderTexture::create(komorki::ui::kCellShapeSegments * komorki::ui::kCellsTextureSizeInPixels.x * CellCanvasSprite::kSpriteSize,
-                                  komorki::ui::kCellShapeSegments * komorki::ui::kCellsTextureSizeInPixels.y * CellCanvasSprite::kSpriteSize);
+  auto rt = RenderTexture::create(komorki::graphic::kCellShapeSegments * komorki::graphic::kCellsTextureSizeInPixels.x * CellCanvasSprite::kSpriteSize,
+                                  komorki::graphic::kCellShapeSegments * komorki::graphic::kCellsTextureSizeInPixels.y * CellCanvasSprite::kSpriteSize);
   
   rt->begin();
   DrawCellShapes(renderer, parentTransform);
@@ -302,9 +304,9 @@ void LoadingScene::CreateViewport(float dt)
   auto rootNode = cocos2d::Node::create();
   rootNode->retain();
   Size visibleSize = Director::getInstance()->getVisibleSize();
-  m_viewport = std::make_shared<komorki::ui::Viewport>(rootNode, visibleSize, m_provider);
+  m_viewport = std::make_shared<komorki::graphic::Viewport>(rootNode, visibleSize, m_provider);
   
-  auto mapScene = PartialMapScene::createScene(m_viewport);
+  auto mapScene = MainScene::createScene(m_viewport);
   Director::getInstance()->replaceScene(mapScene);
 }
 

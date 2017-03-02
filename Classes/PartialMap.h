@@ -6,30 +6,32 @@
 //
 //
 
-#ifndef __prsv__PartialMap__
-#define __prsv__PartialMap__
+#pragma once
 
 #include <memory>
 #include <unordered_map>
 #include <list>
 #include "Common.h"
-#include "IPixelDescriptorProvider.h"
 #include "cocos2d.h"
-#include "TerrainBatchSprite.h"
-#include "TerrainSprite.h"
-#include "PixelMapContext.h"
+#include "WorldUpdateResult.h"
+#include "PixelDescriptor.h"
+
 
 namespace komorki
 {
-  class PixelDescriptorProvider;
+  class IPixelDescriptorProvider;
   
-  namespace ui
+  namespace graphic
   {
-    class PixelMapPartial;
-    class PixelDebugView;
-    class PixelMapLightOverlay;
-    class PixelMapBackground;
-    class GlowMapOverlay;
+    class CellsLayer;
+    class StaticLightsLayer;
+    class DeadCellsLayer;
+    class DynamicLightsLayer;
+    class AmorphCellContext;
+    class ObjectContext;
+    class CellContext;
+    class TerrainSprite;
+    class TerrainBatchSprite;
     
     class PartialMap
     {
@@ -38,7 +40,10 @@ namespace komorki
       PartialMap();
       virtual ~PartialMap();
       
-      bool Init(int a, int b, int width, int height,
+      bool Init(int a,
+                int b,
+                int width,
+                int height,
                 IPixelDescriptorProvider* provider,
                 cocos2d::Node* superView,
                 cocos2d::Node* lightNode,
@@ -48,11 +53,8 @@ namespace komorki
       
       void AdoptIncomingItems();
       void DeleteOutgoingItems();
-      void HandleItemsOnBounds(const std::list<IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime);
-      void Update(std::list<IPixelDescriptorProvider::UpdateResult>& updateResult, float updateTime);
-      
-      void HightlightCellOnPos(int x, int y, komorki::CellType type);
-      void StopHightlighting();
+      void HandleItemsOnBounds(const WorldUpdateList& updateResult, float updateTime);
+      void Update(WorldUpdateList& updateResult, float updateTime);
       
       void Reset();
       
@@ -70,35 +72,32 @@ namespace komorki
       int m_height;
       int m_a2;
       int m_b2;
-      std::shared_ptr<PixelMapPartial> m_cellMap;
+      std::shared_ptr<CellsLayer> m_cellMap;
       bool m_enableAnimations = true;
       
     private:
    
       void InitPixel(PixelDescriptor* pd);
-      PixelMap::ObjectContext* AddCreature(const Vec2& source, PixelDescriptor* dest, Morphing& morphing, float duration);
-      PixelMap::ObjectContext* CreateCell(PixelDescriptor* dest);
-      PixelMap::ObjectContext* CreatePolymorphCell(PixelDescriptor* dest);
-      void Delete(PixelMap::ObjectContext* context);
-      void Move(const Vec2& source, const Vec2& dest, PixelMap::ObjectContext* context, float duration, int steps, Morphing& morphing, CellDescriptor* cd);
-      void Attack(PixelMap::ObjectContext* context, const Vec2& pos, const Vec2& offset, float animationDuration);
+      ObjectContext* AddCreature(const Vec2& source, PixelDescriptor* dest, Morphing& morphing, float duration);
+      ObjectContext* CreateCell(PixelDescriptor* dest);
+      ObjectContext* CreatePolymorphCell(PixelDescriptor* dest);
+      void Delete(ObjectContext* context);
+      void Move(const Vec2& source, const Vec2& dest, ObjectContext* context, float duration, int steps, Morphing& morphing, CellDescriptor* cd);
+      void Attack(ObjectContext* context, const Vec2& pos, const Vec2& offset, float animationDuration);
       
       inline bool IsInAABB(const Vec2& vec);
       inline bool IsInAABB(const int& x, const int& y);
       inline Vec2 LocalVector(const komorki::Vec2& input) const;
 
-      std::shared_ptr<PixelDebugView> m_debugView;
       cocos2d::Sprite* m_lightOverlay;
-      std::shared_ptr<PixelMapBackground> m_background;
-      std::shared_ptr<GlowMapOverlay> m_glow;
+      std::shared_ptr<DeadCellsLayer> m_background;
       cocos2d::Sprite* m_terrainSprite;
       cocos2d::Sprite* m_terrainBgSprite;
       IPixelDescriptorProvider* m_provider;
-      std::list<PixelMap::ObjectContext*> m_upcomingContexts;
+      std::list<ObjectContext*> m_upcomingContexts;
       std::list<CellDescriptor*> m_outgoingCells;
       bool m_enableSmallAnimations = false;
     };
   }
 }
 
-#endif /* defined(__prsv__PartialMap__) */

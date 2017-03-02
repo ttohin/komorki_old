@@ -14,11 +14,11 @@
 #include <cocos2d.h>
 #include "ShapesGenerator.h"
 #include "CellDescriptor.h"
-#include "GenomsGenerator.hpp"
+#include "GenomsGenerator.h"
 
 namespace komorki
 {
-  namespace ui
+  namespace graphic
   {
     class SharedUIData
     {
@@ -31,7 +31,6 @@ namespace komorki
       
       CellShapeTexturesMap m_textureMap;
       GenomsGenerator::Ptr m_genomsGenerator;
-      
     };
   }
 }

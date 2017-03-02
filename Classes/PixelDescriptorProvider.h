@@ -41,12 +41,12 @@ public:
   virtual PixelDescriptor* GetDescriptor(komorki::PixelPos x, komorki::PixelPos y) const;
   virtual TerrainAnalizer::Result GetTerrain() const;
   virtual komorki::Vec2 GetSize() const;
-  virtual void Update(bool passUpdateResult, std::list<UpdateResult>& result);
+  virtual void Update(bool passUpdateResult, WorldUpdateList& result);
   virtual ~PixelDescriptorProvider () {};
   CellDescriptor* ProcessMutation(CellDescriptor* source);
   void KillAllCells();
   void KillCellAtPostiion(const Vec2& pos);
-  void ProccessTransaction(bool passUpdateResult, std::list<UpdateResult>& result);
+  void ProccessTransaction(bool passUpdateResult, WorldUpdateList& result);
   bool CheckBounds(int x, int y);
   void SetCreatureType(const Vec2& pos, CellType type);
   CellDescriptor* CreateRandomCell(PixelDescriptor* pd, Group& group);

@@ -1,22 +1,24 @@
 //
-//  GlowMapOverlay.h
+//  DynamicLightsLayer.h
 //  prsv
 //
 //  Created by ttohin on 07.06.15.
 //
 //
 
-#ifndef __prsv__GlowMapOverlay__
-#define __prsv__GlowMapOverlay__
+#ifndef __prsv__DynamicLightsLayer__
+#define __prsv__DynamicLightsLayer__
 
 #include "cocos2d.h"
 #include "PartialMap.h"
 
 namespace komorki
 {
-  namespace ui
+  class CellDescriptor;
+  
+  namespace graphic
   {
-    class GlowMapOverlay : public cocos2d::SpriteBatchNode
+    class DynamicLightsLayer : public cocos2d::SpriteBatchNode
     {
     public:
       bool init();
@@ -35,4 +37,4 @@ namespace komorki
   }
 }
 
-#endif /* defined(__prsv__GlowMapOverlay__) */
+#endif /* defined(__prsv__DynamicLightsLayer__) */

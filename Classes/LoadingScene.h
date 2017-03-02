@@ -10,7 +10,7 @@
 #define __prsv__LoadingScene__
 
 #include "AsyncMapLoader.h"
-USING_NS_CC;
+
 
 class LoadingScene: public cocos2d::Layer
 {
@@ -52,7 +52,7 @@ private:
   cocos2d::LabelProtocol* m_info;
   std::shared_ptr<AsyncMapLoader> m_mapLoader;
   std::shared_ptr<komorki::IPixelDescriptorProvider> m_provider;
-  komorki::ui::Viewport::Ptr m_viewport;
+  komorki::graphic::Viewport::Ptr m_viewport;
   std::vector<std::string> m_mapList;
   
 };

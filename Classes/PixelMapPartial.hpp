@@ -1,17 +1,17 @@
 //
-//  PixelMapPartial.h
+//  CellsLayer.h
 //  komorki
 //
 //  Created by ttohin on 11.03.15.
 //
 //
 
-#ifndef __komorki__PixelMapPartial__
-#define __komorki__PixelMapPartial__
+#ifndef __komorki__CellsLayer__
+#define __komorki__CellsLayer__
 
 #include "cocos2d.h"
 #include "PixelDescriptorProvider.h"
-#include "b2Utilites.h"
+#include "Random.h"
 #include "CellDescriptor.h"
 
 #define CREATURE_LINE_START 0
@@ -43,7 +43,7 @@ static double kSpriteScale = kSpritePosition/kTileFrameSize;
 
 USING_NS_CC;
 
-class PixelMapPartial : public cocos2d::SpriteBatchNode
+class CellsLayer : public cocos2d::SpriteBatchNode
 {
 public:
   
@@ -55,7 +55,7 @@ public:
     int j;
   };
   
-  PixelMapPartial(int a, int b, int width, int height, komorki::PixelDescriptorProvider* provider)
+  CellsLayer(int a, int b, int width, int height, komorki::PixelDescriptorProvider* provider)
   {
     m_a1 = a;
     m_a2 = a + width;
@@ -192,7 +192,7 @@ public:
     return result;
   }
 
-  void PreUpdate(const std::list<komorki::PixelDescriptorProvider::UpdateResult>& updateResult)
+  void PreUpdate(const WorldUpdateList& updateResult)
   {
 #if RECREATE_EACH_UPDATE == 0
     for (auto context : m_upcomingDescriptors)
@@ -209,7 +209,7 @@ public:
 #endif
   }
   
-  void PostUpdate(const std::list<komorki::PixelDescriptorProvider::UpdateResult>& updateResult)
+  void PostUpdate(const WorldUpdateList& updateResult)
   {
 #if RECREATE_EACH_UPDATE == 0
     for (auto u : updateResult)
@@ -260,7 +260,7 @@ public:
 #endif
   }
   
-  void Update(const std::list<komorki::PixelDescriptorProvider::UpdateResult>& updateResult, float updateTime)
+  void Update(const WorldUpdateList& updateResult, float updateTime)
   {
 #if RECREATE_EACH_UPDATE == 0
     for (auto u : updateResult)
@@ -543,4 +543,4 @@ public:
   std::vector<PixelDescriptorContext*> m_upcomingDescriptors;
 };
 
-#endif /* defined(__komorki__PixelMapPartial__) */
+#endif /* defined(__komorki__CellsLayer__) */

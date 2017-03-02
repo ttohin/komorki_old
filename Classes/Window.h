@@ -14,7 +14,7 @@ namespace komorki
 {
   namespace ui
   {
-    class PixelMapPartial;
+    class CellsLayer;
     
     class Window
     {
