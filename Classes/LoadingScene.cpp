@@ -39,9 +39,7 @@ bool LoadingScene::init()
   
   m_info = CreateLabel("Loading", Vec2(visibleSize.width / 2, visibleSize.height / 2));
   
-  Director::getInstance()->getTextureCache()->addImage("tile_32x32.png");
   Director::getInstance()->getTextureCache()->addImage("ground.png");
-  Director::getInstance()->getTextureCache()->addImage("debugFrames.png");
 
   schedule(schedule_selector(LoadingScene::LoadCellShapes), 0, 0, 0);
   

@@ -6,8 +6,8 @@
 //
 //
 
-#ifndef komorki_AsyncPixelManager_h
-#define komorki_AsyncPixelManager_h
+#ifndef komorki_AsyncPixelWorld_h
+#define komorki_AsyncPixelWorld_h
 
 #include <thread>
 #include <mutex>
@@ -17,10 +17,10 @@
 
 namespace komorki
 {
-  class AsyncPixelManager
+  class AsyncPixelWorld
   {
   public:
-    AsyncPixelManager(IPixelWorld* provider)
+    AsyncPixelWorld(IPixelWorld* provider)
     : m_provider(provider)
     , m_performUpdate(false)
     , m_shouldStop(false)
@@ -29,10 +29,10 @@ namespace komorki
     , m_nuberOfUpdates(0)
     , m_updateId(0)
     {
-      m_thread = std::thread(&AsyncPixelManager::WorkerThread, this);
+      m_thread = std::thread(&AsyncPixelWorld::WorkerThread, this);
     }
     
-    ~AsyncPixelManager()
+    ~AsyncPixelWorld()
     {
       m_thread.join();
     }
@@ -144,4 +144,4 @@ namespace komorki
 }
 
 
-#endif /* defined(komorki_AsyncPixelManager_h) */
+#endif /* defined(komorki_AsyncPixelWorld_h) */

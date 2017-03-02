@@ -64,8 +64,6 @@
 		8F48DE701AB676B50075D222 /* MainScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F48DE611AB676B50075D222 /* MainScene.cpp */; };
 		8F48DE711AB676B50075D222 /* PixelWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F48DE641AB676B50075D222 /* PixelWorld.cpp */; };
 		8F48DE721AB676B50075D222 /* PixelWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F48DE641AB676B50075D222 /* PixelWorld.cpp */; };
-		8F48DE7A1AB678B40075D222 /* tile_32x32.png in Resources */ = {isa = PBXBuildFile; fileRef = 8F48DE791AB678B40075D222 /* tile_32x32.png */; };
-		8F48DE7B1AB678B40075D222 /* tile_32x32.png in Resources */ = {isa = PBXBuildFile; fileRef = 8F48DE791AB678B40075D222 /* tile_32x32.png */; };
 		8F48DE7D1AB7797B0075D222 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8F48DE7C1AB7797B0075D222 /* Images.xcassets */; };
 		8F4991FC1DBC0C2D00480F13 /* glow_white.png in Resources */ = {isa = PBXBuildFile; fileRef = 8F4991FB1DBC0C2D00480F13 /* glow_white.png */; };
 		8F4991FD1DBC0C2D00480F13 /* glow_white.png in Resources */ = {isa = PBXBuildFile; fileRef = 8F4991FB1DBC0C2D00480F13 /* glow_white.png */; };
@@ -93,8 +91,6 @@
 		8F906BBE1ABE099600A8EF90 /* mapBackground.png in Resources */ = {isa = PBXBuildFile; fileRef = 8F906BBC1ABE099600A8EF90 /* mapBackground.png */; };
 		8F906BC11ABE186500A8EF90 /* CellsLogic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F906BBF1ABE186500A8EF90 /* CellsLogic.cpp */; };
 		8F906BC21ABE186500A8EF90 /* CellsLogic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F906BBF1ABE186500A8EF90 /* CellsLogic.cpp */; };
-		8FAC4C051B093B28004991B1 /* debugFrames.png in Resources */ = {isa = PBXBuildFile; fileRef = 8FAC4C041B093B28004991B1 /* debugFrames.png */; };
-		8FAC4C061B093B28004991B1 /* debugFrames.png in Resources */ = {isa = PBXBuildFile; fileRef = 8FAC4C041B093B28004991B1 /* debugFrames.png */; };
 		8FAFB1221ABE35220006A0E7 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8F48DE7C1AB7797B0075D222 /* Images.xcassets */; };
 		8FB7C3E31BA495AE00194722 /* LoadingScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FB7C3E11BA495AE00194722 /* LoadingScene.cpp */; };
 		8FB7C3E41BA495AE00194722 /* LoadingScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FB7C3E11BA495AE00194722 /* LoadingScene.cpp */; };
@@ -134,8 +130,6 @@
 		8FDE8CD01B2325D8000EE52C /* game.glsl in Resources */ = {isa = PBXBuildFile; fileRef = 8FDE8CCD1B2325D8000EE52C /* game.glsl */; };
 		8FDE8CD11B2325D8000EE52C /* generic.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 8FDE8CCE1B2325D8000EE52C /* generic.vsh */; };
 		8FDE8CD21B2325D8000EE52C /* generic.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 8FDE8CCE1B2325D8000EE52C /* generic.vsh */; };
-		8FDE8CD51B236D46000EE52C /* Window.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FDE8CD31B236D46000EE52C /* Window.cpp */; };
-		8FDE8CD61B236D46000EE52C /* Window.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FDE8CD31B236D46000EE52C /* Window.cpp */; };
 		8FDE8CDC1B23742E000EE52C /* CellsLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FDE8CDB1B23742E000EE52C /* CellsLayer.cpp */; };
 		8FDE8CDD1B23742E000EE52C /* CellsLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FDE8CDB1B23742E000EE52C /* CellsLayer.cpp */; };
 		8FDE8CDF1B2376D6000EE52C /* DeadCellsLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FDE8CDE1B2376D6000EE52C /* DeadCellsLayer.cpp */; };
@@ -269,7 +263,6 @@
 		8F48DE651AB676B50075D222 /* PixelWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PixelWorld.h; sourceTree = "<group>"; };
 		8F48DE6B1AB676B50075D222 /* CellsLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CellsLayer.h; sourceTree = "<group>"; };
 		8F48DE6C1AB676B50075D222 /* Statistic.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Statistic.hpp; sourceTree = "<group>"; };
-		8F48DE791AB678B40075D222 /* tile_32x32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = tile_32x32.png; sourceTree = "<group>"; };
 		8F48DE7C1AB7797B0075D222 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = "prsv Mac/Images.xcassets"; sourceTree = SOURCE_ROOT; };
 		8F4991FB1DBC0C2D00480F13 /* glow_white.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = glow_white.png; sourceTree = "<group>"; };
 		8F4991FE1DBC0CCB00480F13 /* StaticLightsSprite.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StaticLightsSprite.cpp; sourceTree = "<group>"; };
@@ -289,7 +282,6 @@
 		8F906BC01ABE186500A8EF90 /* CellsLogic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CellsLogic.h; sourceTree = "<group>"; };
 		8FAC4C021AFE9E06004991B1 /* Common.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Common.h; sourceTree = "<group>"; };
 		8FAC4C031B0938CD004991B1 /* PixelDebugView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PixelDebugView.h; sourceTree = "<group>"; };
-		8FAC4C041B093B28004991B1 /* debugFrames.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = debugFrames.png; sourceTree = "<group>"; };
 		8FAFB1201ABE33550006A0E7 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = ios/Info.plist; sourceTree = SOURCE_ROOT; };
 		8FB7C3E11BA495AE00194722 /* LoadingScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LoadingScene.cpp; sourceTree = "<group>"; };
 		8FB7C3E21BA495AE00194722 /* LoadingScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoadingScene.h; sourceTree = "<group>"; };
@@ -305,7 +297,6 @@
 		8FBF24EE1DB8CFBE00AE7991 /* ParallaxSprite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParallaxSprite.h; sourceTree = "<group>"; };
 		8FBF24F01DB8CFBE00AE7991 /* ObjectContext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ObjectContext.cpp; sourceTree = "<group>"; };
 		8FBF24F11DB8CFBE00AE7991 /* ObjectContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ObjectContext.h; sourceTree = "<group>"; };
-		8FBF24F41DB8CFBE00AE7991 /* PixelMapPartial.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PixelMapPartial.hpp; sourceTree = "<group>"; };
 		8FBF24F71DB8CFBE00AE7991 /* SharedUIData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SharedUIData.cpp; sourceTree = "<group>"; };
 		8FBF24F81DB8CFBE00AE7991 /* SharedUIData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SharedUIData.h; sourceTree = "<group>"; };
 		8FBF24F91DB8CFBE00AE7991 /* Statistic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Statistic.h; sourceTree = "<group>"; };
@@ -333,8 +324,6 @@
 		8FDE8CCA1B232531000EE52C /* ShaderLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShaderLayer.h; sourceTree = "<group>"; };
 		8FDE8CCD1B2325D8000EE52C /* game.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = game.glsl; sourceTree = "<group>"; };
 		8FDE8CCE1B2325D8000EE52C /* generic.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = generic.vsh; sourceTree = "<group>"; };
-		8FDE8CD31B236D46000EE52C /* Window.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Window.cpp; sourceTree = "<group>"; };
-		8FDE8CD41B236D46000EE52C /* Window.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Window.h; sourceTree = "<group>"; };
 		8FDE8CD81B237033000EE52C /* PartialMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PartialMap.h; sourceTree = "<group>"; };
 		8FDE8CDB1B23742E000EE52C /* CellsLayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CellsLayer.cpp; sourceTree = "<group>"; };
 		8FDE8CDE1B2376D6000EE52C /* DeadCellsLayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DeadCellsLayer.cpp; sourceTree = "<group>"; };
@@ -354,7 +343,7 @@
 		8FEFC74C1AD058FC001E97A7 /* cursor.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cursor.png; sourceTree = "<group>"; };
 		8FEFC75E1AD07542001E97A7 /* restartButton_hl.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = restartButton_hl.png; sourceTree = "<group>"; };
 		8FEFC75F1AD07542001E97A7 /* restartButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = restartButton.png; sourceTree = "<group>"; };
-		8FEFC7831AD173B6001E97A7 /* AsyncPixelManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AsyncPixelManager.h; sourceTree = "<group>"; };
+		8FEFC7831AD173B6001E97A7 /* AsyncPixelWorld.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AsyncPixelWorld.h; sourceTree = "<group>"; };
 		8FF2213C1B7BDBF700E911ED /* Common.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Common.cpp; sourceTree = "<group>"; };
 		8FF338691AEC2D7100CF6F6B /* ListView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ListView.h; sourceTree = "<group>"; };
 		8FF3386A1AEC36F800CF6F6B /* TextButton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TextButton.h; sourceTree = "<group>"; };
@@ -519,8 +508,6 @@
 				8FEFC74C1AD058FC001E97A7 /* cursor.png */,
 				8F906BBC1ABE099600A8EF90 /* mapBackground.png */,
 				8F48DE7C1AB7797B0075D222 /* Images.xcassets */,
-				8FAC4C041B093B28004991B1 /* debugFrames.png */,
-				8F48DE791AB678B40075D222 /* tile_32x32.png */,
 				521A8EA819F11F5000D177D7 /* fonts */,
 			);
 			name = Resources;
@@ -534,31 +521,21 @@
 				8FFE7FDD1B9F517D008D2289 /* PartialMap */,
 				8FFE7FDE1B9F5192008D2289 /* UI */,
 				8FBF251E1DBA237B00AE7991 /* ShapeGenerator */,
-				8FFE7FDF1B9F522C008D2289 /* Buffer2D.h */,
-				8FFE7FE01B9F522C008D2289 /* TerrainAnalizer.cpp */,
-				8FFE7FE11B9F522D008D2289 /* TerrainAnalizer.h */,
-				8FBF24FA1DB8CFBE00AE7991 /* TestPixelProvider.cpp */,
-				8FBF24FB1DB8CFBE00AE7991 /* TestPixelProvider.h */,
-				8F48DE5D1AB676B50075D222 /* Random.h */,
 				8FBF24F71DB8CFBE00AE7991 /* SharedUIData.cpp */,
 				8FBF24F81DB8CFBE00AE7991 /* SharedUIData.h */,
 				8FBF24ED1DB8CFBE00AE7991 /* ParallaxSprite.cpp */,
 				8FBF24EE1DB8CFBE00AE7991 /* ParallaxSprite.h */,
-				8FBF24F41DB8CFBE00AE7991 /* PixelMapPartial.hpp */,
 				8FDE8CC91B232531000EE52C /* ShaderLayer.cpp */,
 				8FDE8CCA1B232531000EE52C /* ShaderLayer.h */,
 				8F48DE6C1AB676B50075D222 /* Statistic.hpp */,
 				46880B8419C43A87006E1F66 /* AppDelegate.cpp */,
 				46880B8519C43A87006E1F66 /* AppDelegate.h */,
-				8FEFC7831AD173B6001E97A7 /* AsyncPixelManager.h */,
 				8FB7C3EB1BA4A69500194722 /* AsyncMapLoader.cpp */,
 				8FB7C3EC1BA4A69500194722 /* AsyncMapLoader.h */,
 				8F12C23B1AE3C6BC00C14BBE /* tinydir.h */,
 				8F12C2561AE444E600C14BBE /* IFullScreenMenu.h */,
 				8FF338691AEC2D7100CF6F6B /* ListView.h */,
 				8FF3386A1AEC36F800CF6F6B /* TextButton.h */,
-				8FDE8CD31B236D46000EE52C /* Window.cpp */,
-				8FDE8CD41B236D46000EE52C /* Window.h */,
 				8FDE8CE11B2378BC000EE52C /* UIConfig.h */,
 				8FDE8CE21B23793E000EE52C /* UIConfig.cpp */,
 				8FDE8CE51B237A29000EE52C /* UICommon.cpp */,
@@ -597,40 +574,35 @@
 		8F108B1C1AF826B100580096 /* komorki */ = {
 			isa = PBXGroup;
 			children = (
-				8FBF24E91DB8CFBE00AE7991 /* CellShapesHelper.cpp */,
-				8FBF24EA1DB8CFBE00AE7991 /* CellShapesHelper.h */,
-				8FBF24F91DB8CFBE00AE7991 /* Statistic.h */,
+				8FC07C531E68E7CD008780CE /* Cells */,
+				8FC07C511E68E705008780CE /* Terrain */,
+				8FC07C501E68E6BB008780CE /* Genom */,
+				8FC07C4F1E68E69F008780CE /* Shapes */,
 				8FAB25201B80FBA600F2C0E4 /* Random */,
+				8FBF24F91DB8CFBE00AE7991 /* Statistic.h */,
 				8F48DE5E1AB676B50075D222 /* GreatPixel.h */,
 				8F108B161AF820ED00580096 /* GreatPixel.cpp */,
-				8F48DE631AB676B50075D222 /* CellDescriptor.h */,
-				8F108B191AF8241900580096 /* CellDescriptor.cpp */,
-				8F108B1D1AF8272100580096 /* CellShapes.cpp */,
-				8F108B1E1AF8272100580096 /* CellShapes.h */,
 				8FAC4C021AFE9E06004991B1 /* Common.h */,
 				8FF2213C1B7BDBF700E911ED /* Common.cpp */,
 				8F48DE5F1AB676B50075D222 /* IPixelWorld.h */,
 				8F48DE641AB676B50075D222 /* PixelWorld.cpp */,
 				8F48DE651AB676B50075D222 /* PixelWorld.h */,
-				8F906BBF1ABE186500A8EF90 /* CellsLogic.cpp */,
-				8F906BC01ABE186500A8EF90 /* CellsLogic.h */,
 				8FDE8CC51B1BCFFB000EE52C /* PhysicalDescriptor.cpp */,
 				8FDE8CC61B1BCFFB000EE52C /* PhysicalDescriptor.h */,
+				8FEFC7831AD173B6001E97A7 /* AsyncPixelWorld.h */,
 				8FDE8CEF1B239560000EE52C /* Utilities.h */,
 				8FDE8CF71B2447BC000EE52C /* Map.cpp */,
 				8FDE8CF81B2447BC000EE52C /* Map.h */,
-				8FBF25201DBA882000AE7991 /* GenomsGenerator.cpp */,
-				8FBF25211DBA882000AE7991 /* GenomsGenerator.h */,
-				8F1B88BF1DBAAD9F006F2CAE /* ShapesGenerator.cpp */,
-				8F1B88C01DBAAD9F006F2CAE /* ShapesGenerator.h */,
 				8FBF25241DBA891E00AE7991 /* PixelMap.cpp */,
 				8FBF25251DBA891E00AE7991 /* PixelMap.hpp */,
 				8F473DD71E68C2200030CD52 /* Logging.h */,
-				8FC07C3E1E68CB94008780CE /* Genom.h */,
 				8FC07C441E68CD7E008780CE /* WorldUpdateResult.h */,
 				8FC07C451E68CE54008780CE /* WorldUpdateResult.cpp */,
-				8FC07C3F1E68CC0A008780CE /* IShape.h */,
 				8FC07C4E1E68D9DF008780CE /* PixelWorldConfig.h */,
+				8FFE7FDF1B9F522C008D2289 /* Buffer2D.h */,
+				8F48DE5D1AB676B50075D222 /* Random.h */,
+				8FBF24FA1DB8CFBE00AE7991 /* TestPixelProvider.cpp */,
+				8FBF24FB1DB8CFBE00AE7991 /* TestPixelProvider.h */,
 			);
 			name = komorki;
 			sourceTree = "<group>";
@@ -655,6 +627,50 @@
 				8FBF251B1DB935E100AE7991 /* ShapeAnalizer.hpp */,
 			);
 			name = ShapeGenerator;
+			sourceTree = "<group>";
+		};
+		8FC07C4F1E68E69F008780CE /* Shapes */ = {
+			isa = PBXGroup;
+			children = (
+				8F108B1D1AF8272100580096 /* CellShapes.cpp */,
+				8F108B1E1AF8272100580096 /* CellShapes.h */,
+				8F1B88BF1DBAAD9F006F2CAE /* ShapesGenerator.cpp */,
+				8F1B88C01DBAAD9F006F2CAE /* ShapesGenerator.h */,
+				8FC07C3F1E68CC0A008780CE /* IShape.h */,
+				8FBF24E91DB8CFBE00AE7991 /* CellShapesHelper.cpp */,
+				8FBF24EA1DB8CFBE00AE7991 /* CellShapesHelper.h */,
+			);
+			name = Shapes;
+			sourceTree = "<group>";
+		};
+		8FC07C501E68E6BB008780CE /* Genom */ = {
+			isa = PBXGroup;
+			children = (
+				8FBF25201DBA882000AE7991 /* GenomsGenerator.cpp */,
+				8FBF25211DBA882000AE7991 /* GenomsGenerator.h */,
+				8FC07C3E1E68CB94008780CE /* Genom.h */,
+			);
+			name = Genom;
+			sourceTree = "<group>";
+		};
+		8FC07C511E68E705008780CE /* Terrain */ = {
+			isa = PBXGroup;
+			children = (
+				8FFE7FE01B9F522C008D2289 /* TerrainAnalizer.cpp */,
+				8FFE7FE11B9F522D008D2289 /* TerrainAnalizer.h */,
+			);
+			name = Terrain;
+			sourceTree = "<group>";
+		};
+		8FC07C531E68E7CD008780CE /* Cells */ = {
+			isa = PBXGroup;
+			children = (
+				8F906BC01ABE186500A8EF90 /* CellsLogic.h */,
+				8F906BBF1ABE186500A8EF90 /* CellsLogic.cpp */,
+				8F48DE631AB676B50075D222 /* CellDescriptor.h */,
+				8F108B191AF8241900580096 /* CellDescriptor.cpp */,
+			);
+			name = Cells;
 			sourceTree = "<group>";
 		};
 		8FFE7FDD1B9F517D008D2289 /* PartialMap */ = {
@@ -796,8 +812,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				8F62883A1AD19D8600526404 /* speed10.png in Resources */,
-				8F48DE7A1AB678B40075D222 /* tile_32x32.png in Resources */,
-				8FAC4C051B093B28004991B1 /* debugFrames.png in Resources */,
 				8FBF25121DB8D0C400AE7991 /* blank.png in Resources */,
 				8FEFC7681AD07542001E97A7 /* restartButton.png in Resources */,
 				8F6288321AD19D8600526404 /* speed2_sel.png in Resources */,
@@ -838,7 +852,6 @@
 				8FFE7FEE1B9F52B0008D2289 /* ground.png in Resources */,
 				8F48DE7D1AB7797B0075D222 /* Images.xcassets in Resources */,
 				503AE0F817EB97AB00D1A890 /* Icon.icns in Resources */,
-				8FAC4C061B093B28004991B1 /* debugFrames.png in Resources */,
 				8F6288351AD19D8600526404 /* speed2.png in Resources */,
 				8F6288371AD19D8600526404 /* speed10_hl.png in Resources */,
 				8F12C22F1ADEFF3100C14BBE /* prsv.png in Resources */,
@@ -853,7 +866,6 @@
 				8F12C2291ADEFF3100C14BBE /* button.png in Resources */,
 				8F906BBE1ABE099600A8EF90 /* mapBackground.png in Resources */,
 				8F62882B1AD19D8600526404 /* speed1_hl.png in Resources */,
-				8F48DE7B1AB678B40075D222 /* tile_32x32.png in Resources */,
 				8FDE8CD01B2325D8000EE52C /* game.glsl in Resources */,
 				8FDE8CD21B2325D8000EE52C /* generic.vsh in Resources */,
 				8FEFC7671AD07542001E97A7 /* restartButton_hl.png in Resources */,
@@ -904,7 +916,6 @@
 				503AE10017EB989F00D1A890 /* AppController.mm in Sources */,
 				503AE10217EB989F00D1A890 /* RootViewController.mm in Sources */,
 				8FFE7FE61B9F522D008D2289 /* TerrainBatchSprite.cpp in Sources */,
-				8FDE8CD51B236D46000EE52C /* Window.cpp in Sources */,
 				8FBF25021DB8CFBE00AE7991 /* ObjectContext.cpp in Sources */,
 				8FDE8CDF1B2376D6000EE52C /* DeadCellsLayer.cpp in Sources */,
 				8FBF25071DB8CFBE00AE7991 /* TestSampleShapesScene.cpp in Sources */,
@@ -953,7 +964,6 @@
 				8F48DE701AB676B50075D222 /* MainScene.cpp in Sources */,
 				8FBF251D1DB935E100AE7991 /* ShapeAnalizer.cpp in Sources */,
 				8FC07C491E68D0F8008780CE /* PartialMap.cpp in Sources */,
-				8FDE8CD61B236D46000EE52C /* Window.cpp in Sources */,
 				8FDE8CE01B2376D6000EE52C /* DeadCellsLayer.cpp in Sources */,
 				8FFE7FEB1B9F524B008D2289 /* DiamondSquareGenerator.cpp in Sources */,
 				8FDE8CEE1B237DF0000EE52C /* StaticLightsLayer.cpp in Sources */,

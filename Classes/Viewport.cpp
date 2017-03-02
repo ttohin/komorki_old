@@ -8,7 +8,7 @@
 
 #include "Viewport.h"
 #include "PartialMap.h"
-#include "AsyncPixelManager.h"
+#include "AsyncPixelWorld.h"
 #include "UIConfig.h"
 #include "Random.h"
 #include "Logging.h"
@@ -152,7 +152,7 @@ namespace komorki
       
       m_provider = provider;
       
-      m_manager = std::make_shared<AsyncPixelManager>(m_provider.get());
+      m_manager = std::make_shared<AsyncPixelWorld>(m_provider.get());
       m_lastUpdateId = 0;
       
       CreateMap();

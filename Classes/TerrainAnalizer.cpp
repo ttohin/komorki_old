@@ -12,7 +12,6 @@
 
 namespace komorki
 {
-  
   TerrainAnalizer::TerrainAnalizer(const Buffer2DPtr<float>& buffer)
   : m_buffer(buffer)
   , m_bg(new Buffer2D<TerrainInfo>(buffer->GetWidth() * 2, buffer->GetHeight() * 2))

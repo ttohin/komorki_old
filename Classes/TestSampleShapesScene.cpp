@@ -179,9 +179,7 @@ namespace komorki
                        schedule(schedule_selector(TestSampleShapesScene::CreateViewport), 0, 1, 0);
                      });
       
-      Director::getInstance()->getTextureCache()->addImage("tile_32x32.png");
       Director::getInstance()->getTextureCache()->addImage("ground.png");
-      Director::getInstance()->getTextureCache()->addImage("debugFrames.png");
       
       return true;
     }

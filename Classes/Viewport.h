@@ -17,7 +17,7 @@
 
 namespace komorki
 {
-  class AsyncPixelManager;
+  class AsyncPixelWorld;
   
   namespace graphic
   {
@@ -95,7 +95,7 @@ namespace komorki
       bool m_enableAnimations;
      
       std::shared_ptr<IPixelWorld> m_provider;
-      std::shared_ptr<AsyncPixelManager> m_manager;
+      std::shared_ptr<AsyncPixelWorld> m_manager;
       MapList m_maps;
       MapList m_mapsToRemove;
       MapList m_mapsToCreate;
