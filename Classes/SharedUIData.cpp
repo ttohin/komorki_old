@@ -10,26 +10,24 @@
 
 namespace komorki
 {
-namespace graphic
-{
-  // singleton stuff
-  static SharedUIData *s_SharedDirector = nullptr;
-  
-  SharedUIData* SharedUIData::getInstance()
+  namespace graphic
   {
-    if (!s_SharedDirector)
+    // singleton stuff
+    static SharedUIData *s_SharedDirector = nullptr;
+    
+    SharedUIData* SharedUIData::getInstance()
     {
-      s_SharedDirector = new (std::nothrow) SharedUIData();
+      if (!s_SharedDirector)
+      {
+        s_SharedDirector = new (std::nothrow) SharedUIData();
+      }
+      
+      return s_SharedDirector;
     }
     
-    return s_SharedDirector;
+    SharedUIData::SharedUIData()
+    : m_genomsGenerator(new GenomsGenerator())
+    {
+    }
   }
-  
-  
-  SharedUIData::SharedUIData()
-  : m_genomsGenerator(new GenomsGenerator())
-  {
-  }
-  
-}
 }

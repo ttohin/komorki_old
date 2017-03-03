@@ -60,7 +60,6 @@ bool AsyncMapLoader::IsAvailable()
   return !m_inProccess;
 }
 
-
 std::string AsyncMapLoader::GetCurrentJobString()
 {
   std::lock_guard<std::mutex> lk(m_lock);

@@ -100,7 +100,6 @@
 		8FB7C3EE1BA4A69500194722 /* AsyncMapLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FB7C3EB1BA4A69500194722 /* AsyncMapLoader.cpp */; };
 		8FBF24FE1DB8CFBE00AE7991 /* CellCanvasSprite.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBF24E71DB8CFBE00AE7991 /* CellCanvasSprite.cpp */; };
 		8FBF24FF1DB8CFBE00AE7991 /* CellShapesHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBF24E91DB8CFBE00AE7991 /* CellShapesHelper.cpp */; };
-		8FBF25001DB8CFBE00AE7991 /* ParallaxSprite.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBF24ED1DB8CFBE00AE7991 /* ParallaxSprite.cpp */; };
 		8FBF25021DB8CFBE00AE7991 /* ObjectContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBF24F01DB8CFBE00AE7991 /* ObjectContext.cpp */; };
 		8FBF25051DB8CFBE00AE7991 /* SharedUIData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBF24F71DB8CFBE00AE7991 /* SharedUIData.cpp */; };
 		8FBF25071DB8CFBE00AE7991 /* TestSampleShapesScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FBF24FC1DB8CFBE00AE7991 /* TestSampleShapesScene.cpp */; };
@@ -293,8 +292,6 @@
 		8FBF24E81DB8CFBE00AE7991 /* CellCanvasSprite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CellCanvasSprite.h; sourceTree = "<group>"; };
 		8FBF24E91DB8CFBE00AE7991 /* CellShapesHelper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CellShapesHelper.cpp; sourceTree = "<group>"; };
 		8FBF24EA1DB8CFBE00AE7991 /* CellShapesHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CellShapesHelper.h; sourceTree = "<group>"; };
-		8FBF24ED1DB8CFBE00AE7991 /* ParallaxSprite.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ParallaxSprite.cpp; sourceTree = "<group>"; };
-		8FBF24EE1DB8CFBE00AE7991 /* ParallaxSprite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParallaxSprite.h; sourceTree = "<group>"; };
 		8FBF24F01DB8CFBE00AE7991 /* ObjectContext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ObjectContext.cpp; sourceTree = "<group>"; };
 		8FBF24F11DB8CFBE00AE7991 /* ObjectContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ObjectContext.h; sourceTree = "<group>"; };
 		8FBF24F71DB8CFBE00AE7991 /* SharedUIData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SharedUIData.cpp; sourceTree = "<group>"; };
@@ -345,8 +342,6 @@
 		8FEFC75F1AD07542001E97A7 /* restartButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = restartButton.png; sourceTree = "<group>"; };
 		8FEFC7831AD173B6001E97A7 /* AsyncPixelWorld.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AsyncPixelWorld.h; sourceTree = "<group>"; };
 		8FF2213C1B7BDBF700E911ED /* Common.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Common.cpp; sourceTree = "<group>"; };
-		8FF338691AEC2D7100CF6F6B /* ListView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ListView.h; sourceTree = "<group>"; };
-		8FF3386A1AEC36F800CF6F6B /* TextButton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TextButton.h; sourceTree = "<group>"; };
 		8FF338721AED933900CF6F6B /* DeadCellsLayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DeadCellsLayer.h; sourceTree = "<group>"; };
 		8FFE7FDF1B9F522C008D2289 /* Buffer2D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Buffer2D.h; sourceTree = "<group>"; };
 		8FFE7FE01B9F522C008D2289 /* TerrainAnalizer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TerrainAnalizer.cpp; sourceTree = "<group>"; };
@@ -517,35 +512,24 @@
 		46880B8319C43A87006E1F66 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				8FD06A621E69AFA600AB8B21 /* Sprites */,
+				8FD06A611E69AEBD00AB8B21 /* Scenes */,
 				8F108B1C1AF826B100580096 /* komorki */,
 				8FFE7FDD1B9F517D008D2289 /* PartialMap */,
 				8FFE7FDE1B9F5192008D2289 /* UI */,
 				8FBF251E1DBA237B00AE7991 /* ShapeGenerator */,
-				8FBF24F71DB8CFBE00AE7991 /* SharedUIData.cpp */,
-				8FBF24F81DB8CFBE00AE7991 /* SharedUIData.h */,
-				8FBF24ED1DB8CFBE00AE7991 /* ParallaxSprite.cpp */,
-				8FBF24EE1DB8CFBE00AE7991 /* ParallaxSprite.h */,
-				8FDE8CC91B232531000EE52C /* ShaderLayer.cpp */,
-				8FDE8CCA1B232531000EE52C /* ShaderLayer.h */,
 				8F48DE6C1AB676B50075D222 /* Statistic.hpp */,
 				46880B8419C43A87006E1F66 /* AppDelegate.cpp */,
 				46880B8519C43A87006E1F66 /* AppDelegate.h */,
 				8FB7C3EB1BA4A69500194722 /* AsyncMapLoader.cpp */,
 				8FB7C3EC1BA4A69500194722 /* AsyncMapLoader.h */,
 				8F12C23B1AE3C6BC00C14BBE /* tinydir.h */,
-				8F12C2561AE444E600C14BBE /* IFullScreenMenu.h */,
-				8FF338691AEC2D7100CF6F6B /* ListView.h */,
-				8FF3386A1AEC36F800CF6F6B /* TextButton.h */,
+				8FBF24F71DB8CFBE00AE7991 /* SharedUIData.cpp */,
+				8FBF24F81DB8CFBE00AE7991 /* SharedUIData.h */,
 				8FDE8CE11B2378BC000EE52C /* UIConfig.h */,
 				8FDE8CE21B23793E000EE52C /* UIConfig.cpp */,
 				8FDE8CE51B237A29000EE52C /* UICommon.cpp */,
 				8FDE8CE61B237A29000EE52C /* UICommon.h */,
-				8FFE7FE21B9F522D008D2289 /* TerrainBatchSprite.cpp */,
-				8FFE7FE31B9F522D008D2289 /* TerrainBatchSprite.h */,
-				8F4991FE1DBC0CCB00480F13 /* StaticLightsSprite.cpp */,
-				8F4991FF1DBC0CCB00480F13 /* StaticLightsSprite.h */,
-				8FB7C3E11BA495AE00194722 /* LoadingScene.cpp */,
-				8FB7C3E21BA495AE00194722 /* LoadingScene.h */,
 			);
 			name = Classes;
 			path = ../Classes;
@@ -673,13 +657,35 @@
 			name = Cells;
 			sourceTree = "<group>";
 		};
+		8FD06A611E69AEBD00AB8B21 /* Scenes */ = {
+			isa = PBXGroup;
+			children = (
+				8FB7C3E11BA495AE00194722 /* LoadingScene.cpp */,
+				8FB7C3E21BA495AE00194722 /* LoadingScene.h */,
+				8F48DE611AB676B50075D222 /* MainScene.cpp */,
+				8F48DE621AB676B50075D222 /* MainScene.h */,
+			);
+			name = Scenes;
+			sourceTree = "<group>";
+		};
+		8FD06A621E69AFA600AB8B21 /* Sprites */ = {
+			isa = PBXGroup;
+			children = (
+				8FFE7FE21B9F522D008D2289 /* TerrainBatchSprite.cpp */,
+				8FFE7FE31B9F522D008D2289 /* TerrainBatchSprite.h */,
+				8F4991FE1DBC0CCB00480F13 /* StaticLightsSprite.cpp */,
+				8F4991FF1DBC0CCB00480F13 /* StaticLightsSprite.h */,
+				8FDE8CC91B232531000EE52C /* ShaderLayer.cpp */,
+				8FDE8CCA1B232531000EE52C /* ShaderLayer.h */,
+			);
+			name = Sprites;
+			sourceTree = "<group>";
+		};
 		8FFE7FDD1B9F517D008D2289 /* PartialMap */ = {
 			isa = PBXGroup;
 			children = (
 				8FDE8CFB1B2462F4000EE52C /* Viewport.cpp */,
 				8FDE8CFC1B2462F4000EE52C /* Viewport.h */,
-				8F48DE611AB676B50075D222 /* MainScene.cpp */,
-				8F48DE621AB676B50075D222 /* MainScene.h */,
 				8F48DE6B1AB676B50075D222 /* CellsLayer.h */,
 				8FDE8CDB1B23742E000EE52C /* CellsLayer.cpp */,
 				8FF338721AED933900CF6F6B /* DeadCellsLayer.h */,
@@ -705,6 +711,7 @@
 		8FFE7FDE1B9F5192008D2289 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				8F12C2561AE444E600C14BBE /* IFullScreenMenu.h */,
 				8F12C2301ADEFF5300C14BBE /* MainMenu.cpp */,
 				8F12C2311ADEFF5300C14BBE /* MainMenu.h */,
 			);
@@ -890,7 +897,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				8FBF24FE1DB8CFBE00AE7991 /* CellCanvasSprite.cpp in Sources */,
-				8FBF25001DB8CFBE00AE7991 /* ParallaxSprite.cpp in Sources */,
 				8FBF25051DB8CFBE00AE7991 /* SharedUIData.cpp in Sources */,
 				8F48DE711AB676B50075D222 /* PixelWorld.cpp in Sources */,
 				8FDE8CC71B1BCFFB000EE52C /* PhysicalDescriptor.cpp in Sources */,

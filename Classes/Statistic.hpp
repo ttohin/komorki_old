@@ -10,7 +10,8 @@
 #define komorki_Statistic_h
 
 template <typename T>
-class StatisticCounter {
+class StatisticCounter
+{
 public:
   T maxValue;
   T minValue;
@@ -42,7 +43,8 @@ public:
   
   std::string ToString() const
   {
-    return "max: " + std::to_string(maxValue) +
+    return
+    "max: " + std::to_string(maxValue) +
     " min: " + std::to_string(minValue) +
     " av: " + std::to_string(avaregeValue) +
     " num: " + std::to_string(number);
