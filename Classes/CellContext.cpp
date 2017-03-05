@@ -10,9 +10,9 @@
 #include "Logging.h"
 #include "UICommon.h"
 #include "PartialMap.h"
-#include "CellsLayer.h"
 #include "UIConfig.h"
-#include "DeadCellsLayer.h"
+#include "SpriteBatch.h"
+#include "CellDescriptor.h"
 
 namespace
 {

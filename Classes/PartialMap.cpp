@@ -7,10 +7,7 @@
 //
 
 #include "PartialMap.h"
-#include "DeadCellsLayer.h"
-#include "PixelDebugView.h"
 #include "StaticLightsLayer.h"
-#include "CellsLayer.h"
 #include "DynamicLightsLayer.h"
 #include "PixelWorld.h"
 #include "Utilities.h"
@@ -26,6 +23,7 @@
 #include "TerrainSprite.h"
 #include "UICommon.h"
 #include "Logging.h"
+#include "SpriteBatch.h"
 
 #define DEBUG_PARTIAL_MAP
 #ifdef DEBUG_PARTIAL_MAP
@@ -74,8 +72,10 @@ namespace komorki
       m_height = height;
       m_provider = provider;
       
-      m_cellMap = std::make_shared<CellsLayer>();
-      m_background = std::make_shared<DeadCellsLayer>(a, b, width, height);
+
+      
+      m_cellMap = new SpriteBatch(); m_cellMap->autorelease();
+      m_background = new SpriteBatch();  m_background->autorelease();
       m_terrainSprite = TerrainSprite::create(a, b, width, height, "fg");
       m_terrainBgSprite = TerrainSprite::create(a, b, width, height, "bg");
       m_lightOverlay = StaticLightsLayer::create(a, b, width, height, "light_map");
@@ -86,8 +86,10 @@ namespace komorki
       m_terrainBgSprite->setName("m_terrainBgSprite " + Description());
       m_lightOverlay->setName("m_lightOverlay " + Description());
       
-      m_cellMap->init();
-      m_background->init();
+      std::string writablePath = cocos2d::FileUtils::getInstance()->getWritablePath();
+      std::string cellTextureFileName = "Komorki/tmp/cells.png";
+      m_cellMap->init(writablePath + cellTextureFileName);
+      m_background->init(writablePath + cellTextureFileName);
       
       m_cellMap->setPosition(offset);
       m_lightOverlay->setPosition(offset);
@@ -96,12 +98,10 @@ namespace komorki
       m_terrainBgSprite->setPosition(offset);
       
       superView->addChild(m_terrainBgSprite, -1);
-      superView->addChild(m_background.get(), 0);
-      superView->addChild(m_cellMap.get(), 1);
+      superView->addChild(m_background, 0);
+      superView->addChild(m_cellMap, 1);
       superView->addChild(m_terrainSprite, 2);
       lightNode->addChild(m_lightOverlay, 3);
-      
-      m_cellMap->SetUpdateTime(0.2);
       
       if (kRandomColorPerPartialMap)
         m_terrainBgSprite->setColor(randomColor(100, 255));
@@ -168,29 +168,8 @@ namespace komorki
     std::string PartialMap::Description()
     {
       char buf[1024];
-      snprintf(buf, 1024 - 1, "%p x:[%d,%d] y:[%d,%d] %p", this, m_a1, m_a2, m_b1, m_b2, m_cellMap.get());
+      snprintf(buf, 1024 - 1, "%p x:[%d,%d] y:[%d,%d] %p", this, m_a1, m_a2, m_b1, m_b2, m_cellMap);
       return std::string(buf);
-    }
-    
-    inline bool PartialMap::IsInAABB(const Vec2& vec)
-    {
-      return IsInAABB(vec.x, vec.y);
-    }
-    
-    inline bool PartialMap::IsInAABB(const int& x, const int& y)
-    {
-      if(x < m_a1 || x >= m_a2 ||
-         y < m_b1 || y >= m_b2)
-      {
-        return false;
-      }
-      
-      return true;
-    }
-    
-    inline Vec2 PartialMap::LocalVector(const komorki::Vec2& input) const
-    {
-      return Vec2(input.x - m_a1, input.y - m_b1);
     }
   }
 }

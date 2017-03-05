@@ -11,8 +11,7 @@
 #include "UIConfig.h"
 #include "PartialMap.h"
 #include "Logging.h"
-#include "CellsLayer.h"
-#include "DeadCellsLayer.h"
+#include "SpriteBatch.h"
 
 
 namespace komorki

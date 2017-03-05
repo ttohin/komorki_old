@@ -25,5 +25,6 @@ namespace komorki
     const unsigned int kNumberOfUpdatesOnStartup = 50;
     const komorki::Vec2 kCellsTextureSizeInPixels = komorki::Vec2(32, 32);
     const unsigned int kCellShapeSegments = 4;
+    const unsigned int kSpriteBatchNodePullSize = 32;
   }
 }

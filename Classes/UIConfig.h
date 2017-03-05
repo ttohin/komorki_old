@@ -29,6 +29,7 @@ namespace komorki
     extern const unsigned int kNumberOfUpdatesOnStartup;
     extern const komorki::Vec2 kCellsTextureSizeInPixels;
     extern const unsigned int kCellShapeSegments;
+    extern const unsigned int kSpriteBatchNodePullSize;
     
   }
 }
