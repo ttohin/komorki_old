@@ -20,6 +20,7 @@ namespace komorki
     const bool kAnimated = true;
     const bool kRedrawEachUpdate = false;
     const bool kSimpleDraw = false;
+    const bool kRandomColorPerPartialMap = true;
     const float kLightMapScale = 4.f;
     const unsigned int kNumberOfUpdatesOnStartup = 50;
     const komorki::Vec2 kCellsTextureSizeInPixels = komorki::Vec2(32, 32);

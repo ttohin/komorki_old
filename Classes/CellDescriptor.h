@@ -1,10 +1,11 @@
 
 #pragma once
 
+#include <vector>
 #include "GreatPixel.h"
 #include "CellShapes.h"
 #include "Genom.h"
-#include <vector>
+#include "WorldUpdateResult.h"
 
 namespace komorki
 {
@@ -63,6 +64,7 @@ namespace komorki
     std::vector<Transaction> nextTurnTransaction;
     
     Genom m_genom;
+    std::list<WorldUpateDiff> m_updates;
   };
   
 } // namespace komorki;

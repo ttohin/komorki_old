@@ -155,6 +155,11 @@ namespace komorki
       m_manager = std::make_shared<AsyncPixelWorld>(m_provider.get());
       m_lastUpdateId = 0;
       
+      m_mapManager.m_mainNode = m_mainView;
+      m_mapManager.m_lightNode = m_lightNode;
+      m_mapManager.m_provider = m_provider;
+      m_mainView->setName("SuperView");
+      
       CreateMap();
       
       Test();
@@ -348,8 +353,6 @@ namespace komorki
     
     void Viewport::CreateMap()
     {
-      m_maps.clear();
-      
       Vec2 size = m_provider->GetSize();
       for (int i = 0; i < size.x; ++i)
       {
@@ -399,11 +402,16 @@ namespace komorki
       bool res = SplitRectOnChunks(pixelMapRect, {{0, 0}, {0, 0}}, mapRects);
       assert(res);
       
+      PartialMapsManager::CreateMapArgs args;
       res = CreatePartialMapsInRects(mapRects,
                                      -pixelMapRect.origin,
                                      cocos2d::Vec2::ZERO,
                                      pixelsScale,
-                                     m_maps);
+                                     args);
+      for (auto& arg : args)
+      {
+        m_mapManager.CreateMap(arg);
+      }
       assert(res);
       
       m_prevPos = pixelMapRect;
@@ -443,19 +451,35 @@ namespace komorki
             continue;
           }
           
-          auto map = std::make_shared<graphic::PartialMap>();
-          map->Init(rect.origin.x + i*m_mapSegmentSize,
-                    rect.origin.y +j*m_mapSegmentSize,
-                    width,
-                    height,
-                    m_provider.get(),
-                    m_mainView,
-                    m_lightNode,
-                    cocos2d::Vec2::ZERO);
-          map->Transfrorm(offset + cocos2d::Vec2(i*m_mapSegmentSize * kSpritePosition * m_initialScale * scale,
-                                                 j*m_mapSegmentSize * kSpritePosition * m_initialScale * scale),
-                          m_initialScale * scale);
-          m_maps.push_back(map);
+//          auto map = std::make_shared<graphic::PartialMap>();
+          
+          Rect rectForMap = Rect(rect.origin.x + i*m_mapSegmentSize,
+                                 rect.origin.y +j*m_mapSegmentSize,
+                                 width,
+                                 height);
+          
+//          map->InitF(rect.origin.x + i*m_mapSegmentSize,
+//                    rect.origin.y +j*m_mapSegmentSize,
+//                    width,
+//                    height,
+//                    m_provider.get(),
+//                    m_mainView,
+//                    m_lightNode,
+//                    cocos2d::Vec2::ZERO);
+//          map->Transfrorm(offset + cocos2d::Vec2(i*m_mapSegmentSize * kSpritePosition * m_initialScale * scale,
+//                                                 j*m_mapSegmentSize * kSpritePosition * m_initialScale * scale),
+//                          m_initialScale * scale);
+//          m_maps.push_back(map);
+          
+          PartialMapsManager::CreateMapArg createMapArg;
+          createMapArg.animated = m_enableAnimations;
+          createMapArg.enableSmallAnimations = m_enableSmallAnimations;
+          createMapArg.rect = rectForMap;
+          createMapArg.graphicPos = offset + cocos2d::Vec2(i*m_mapSegmentSize * kSpritePosition * m_initialScale * scale,
+                                                           j*m_mapSegmentSize * kSpritePosition * m_initialScale * scale);
+          createMapArg.scale = scale;
+          
+          m_mapManager.CreateMap(createMapArg);
           
         }
       }
@@ -517,36 +541,6 @@ namespace komorki
       
     }
     
-    void Viewport::UpdateWarp(float& updateTime, unsigned int numberOfUpdates)
-    {
-      if ( false == m_manager->IsAvailable() )
-      {
-        return;
-      }
-      
-      assert(m_lastUpdateId >= m_manager->GetUpdateId());
-      if ( m_lastUpdateId != m_manager->GetUpdateId() )
-      {
-        return;
-      }
-      
-      float lastUpdateDuration = m_manager->GetLastUpdateTime();
-      
-      for (const auto& map : m_maps)
-      {
-        map->Reset();
-      }
-      
-      if (lastUpdateDuration > updateTime)
-      {
-        updateTime = lastUpdateDuration;
-      }
-      
-      m_lastUpdateId++;
-      
-      m_manager->StartUpdate(numberOfUpdates);
-    }
-    
     void Viewport::Update(float updateTime, float& outUpdateTime)
     {
       assert(m_lastUpdateId == m_manager->GetUpdateId());
@@ -561,13 +555,13 @@ namespace komorki
       
       double elapsed = 0.0;
       
-      WorldUpdateList& result = m_manager->GetUpdateResult();
+      WorldUpdateResult& worldUpdateResult = m_manager->GetUpdateResult();
       
-      LOG_W("Update %d. updates: %lu", m_lastUpdateId, result.size());
+      LOG_W("Update %d. updates: %lu", m_lastUpdateId, worldUpdateResult.list.size());
       
       
 #ifdef LOG_UPDATES
-      for (const auto& u : result)
+      for (const auto& u : worldUpdateResult)
       {
         std::string operationType;
         
@@ -625,55 +619,18 @@ namespace komorki
         }
         
       }
-      
-      for (const auto& map : m_maps)
-      {
-        map->EnableSmallAnimations(m_enableSmallAnimations);
-        
-        map->EnableAnimations(m_enableAnimations);
-        
-        map->AdoptIncomingItems();
-      }
-      
-      for (const auto& map : m_maps)
-      {
-        LOG_W("map: %s", map->Description().c_str());
-      }
-      
-      for (const auto& map : m_maps)
-      {
-        map->Update(result, updateTime);
-      }
-      
-      MapList mapsToCreate;
-      MapList mapsToRemove;
+    
+      PartialMapsManager::RemoveMapArgs mapsToRemove;
+      PartialMapsManager::CreateMapArgs newMaps;
       
       if (m_performMove)
       {
         m_performMove = false;
-        PerformMove(mapsToCreate, mapsToRemove);
+        PerformMove(newMaps, mapsToRemove);
       }
       
-      for (const auto& map : m_maps)
-      {
-        map->DeleteOutgoingItems();
-      }
-      
-      if (!mapsToCreate.empty())
-      {
-        m_maps.insert(m_maps.end(), mapsToCreate.begin(), mapsToCreate.end());
-      }
-      
-      m_mapsToRemove.swap(mapsToRemove);
-      
-      if (!m_mapsToRemove.empty())
-      {
-        m_maps.erase(std::remove_if(m_maps.begin(), m_maps.end(), [&](const PartialMapPtr& map)
-                                    {
-                                      return std::find(m_mapsToRemove.begin(), m_mapsToRemove.end(), map) != m_mapsToRemove.end();
-                                    }), m_maps.end());
-        m_mapsToRemove.clear();
-      }
+      m_mapManager.m_pos = m_pos;
+      m_mapManager.Update(newMaps, mapsToRemove, worldUpdateResult, updateTime);
       
       gettimeofday(&tv, NULL);
       elapsed = (tv.tv_sec - start_tv.tv_sec) + (tv.tv_usec - start_tv.tv_usec) / 1000000.0;
@@ -683,11 +640,11 @@ namespace komorki
       if (m_lastUpdateId >= 3)
       {
         m_mapsUpdateTime.AddValue(elapsed);
-        m_numberOfUpdates.AddValue(result.size());
+        m_numberOfUpdates.AddValue(worldUpdateResult.list.size());
         m_updateTime.AddValue(m_manager->GetLastUpdateTime());
       }
       
-      if (m_numberOfUpdates.number % 100 == 0)
+      if (m_numberOfUpdates.number % 100 == 0 && m_numberOfUpdates.number != 0)
       {
         cocos2d::log("Update time: %s", m_updateTime.ToString().c_str());
         cocos2d::log("Map update: %s", m_mapsUpdateTime.ToString().c_str());
@@ -695,7 +652,6 @@ namespace komorki
       }
       
       HealthCheck();
-      
     }
     
     void Viewport::HealthCheck()
@@ -724,7 +680,8 @@ namespace komorki
       }
     }
     
-    void Viewport::PerformMove(MapList& mapsToCreate, MapList& mapsToRemove)
+    void Viewport::PerformMove(PartialMapsManager::CreateMapArgs& newMapsArgs,
+                               PartialMapsManager::RemoveMapArgs& mapsToRemove)
     {
       float pixelsScale = m_originalSize.width / m_pixelWorldPos.size.width;
       float screenScale = 1.0 / m_superView->getScale();
@@ -762,9 +719,10 @@ namespace komorki
       m_superViewOffset = offset;
       m_superView->setScale(1.f);
       
-      bool res = RemoveMapsOutsideOfRect(extendedRect, mapsToRemove);
+      auto currentMaps = m_mapManager.GetMaps();
+      bool res = RemoveMapsOutsideOfRect(extendedRect, currentMaps, mapsToRemove);
       assert(res);
-      res = MoveMaps(-extendedRect.origin, -cocos2d::Vec2(offsetFromRect.x, offsetFromRect.y) * pixelSize, pixelsScale);
+      res = MoveMaps(-extendedRect.origin, -cocos2d::Vec2(offsetFromRect.x, offsetFromRect.y) * pixelSize, pixelsScale, currentMaps);
       assert(res);
       
       std::vector<Rect> mapRects;
@@ -775,11 +733,8 @@ namespace komorki
                                      -extendedRect.origin,
                                      -cocos2d::Vec2(offsetFromRect.x, offsetFromRect.y) * pixelSize,
                                      pixelsScale,
-                                     mapsToCreate);
-      for (const auto& map : m_mapsToCreate)
-      {
-        LOG_W("new map: %s", map->Description().c_str());
-      }
+                                     newMapsArgs);
+
       assert(res);
       
       m_prevPos = extendedRect;
@@ -821,34 +776,37 @@ namespace komorki
       return result;
     }
     
-    bool Viewport::RemoveMapsOutsideOfRect(const Rect& rect, MapList& toRemove)
+    bool Viewport::RemoveMapsOutsideOfRect(const Rect& rect,
+                                           const Maps& currentMaps,
+                                           PartialMapsManager::RemoveMapArgs& mapsToRemove)
     {
-      for (const auto& map : m_maps)
+      for (const auto& map : currentMaps)
       {
         Rect mapRect;
-        mapRect.origin.x = map->m_a1;
-        mapRect.origin.y = map->m_b1;
-        mapRect.size.x = map->m_width;
-        mapRect.size.y = map->m_height;
+        mapRect.origin.x = map.second->m_a1;
+        mapRect.origin.y = map.second->m_b1;
+        mapRect.size.x = map.second->m_width;
+        mapRect.size.y = map.second->m_height;
         
         Rect newMapRect = mapRect.Extract(rect);
         if (newMapRect.size.x == 0 || newMapRect.size.y == 0)
         {
-          toRemove.push_back(map);
+          mapsToRemove.push_back(mapRect.origin);
         }
       }
       
       return true;
     }
     
-    bool Viewport::MoveMaps(const Vec2& offset, const cocos2d::Vec2& pointOffset, float scale)
+    bool Viewport::MoveMaps(const Vec2& offset, const cocos2d::Vec2& pointOffset, float scale, const Maps& maps)
     {
-      for (auto map : m_maps)
+      for (auto map : maps)
       {
-        cocos2d::Vec2 resultOffset = cocos2d::Vec2(map->m_a1 + offset.x, map->m_b1 + offset.y) *  kSpritePosition * m_initialScale * scale;
+        cocos2d::Vec2 resultOffset = cocos2d::Vec2(map.second->m_a1 + offset.x,
+                                                   map.second->m_b1 + offset.y) *  kSpritePosition * m_initialScale * scale;
         resultOffset += pointOffset;
-        map->Transfrorm(resultOffset,
-                        m_initialScale * scale);
+        map.second->Transfrorm(resultOffset,
+                               m_initialScale * scale);
       }
       
       return true;
@@ -863,30 +821,22 @@ namespace komorki
                                                 const Vec2& pixelOffset,
                                                 const cocos2d::Vec2& offset,
                                                 float scale,
-                                                MapList& maps)
+                                            PartialMapsManager::CreateMapArgs& newMapsArgs)
     {
       for (auto rect : rects)
       {
-        Rect newMapRect = rect;
-        auto map = std::make_shared<graphic::PartialMap>();
-        map->Init(newMapRect.origin.x,
-                  newMapRect.origin.y,
-                  newMapRect.size.x,
-                  newMapRect.size.y,
-                  m_provider.get(),
-                  m_mainView,
-                  m_lightNode,
-                  cocos2d::Vec2::ZERO);
-        cocos2d::Vec2 offsetPoints = cocos2d::Vec2(newMapRect.origin.x + pixelOffset.x, newMapRect.origin.y + pixelOffset.y) *  kSpritePosition * m_initialScale * scale;
+        cocos2d::Vec2 offsetPoints = cocos2d::Vec2(rect.origin.x + pixelOffset.x,
+                                                   rect.origin.y + pixelOffset.y) *  kSpritePosition * m_initialScale * scale;
         offsetPoints += offset;
-        map->Transfrorm(offsetPoints,
-                        m_initialScale * scale);
+
+        PartialMapsManager::CreateMapArg createMapArg;
+        createMapArg.animated = m_enableAnimations;
+        createMapArg.enableSmallAnimations = m_enableSmallAnimations;
+        createMapArg.rect = rect;
+        createMapArg.graphicPos = offsetPoints;
+        createMapArg.scale = m_initialScale * scale;
         
-        map->EnableSmallAnimations(m_enableSmallAnimations);
-        
-        map->EnableAnimations(m_enableAnimations);
-        
-        maps.push_back(map);
+        newMapsArgs.push_back(createMapArg);
       }
       
       return true;

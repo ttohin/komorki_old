@@ -14,6 +14,7 @@
 #include "Common.h"
 #include "PixelWorld.h"
 #include "Statistic.hpp"
+#include "PartialMapsManager.h"
 
 namespace komorki
 {
@@ -44,7 +45,6 @@ namespace komorki
       
       void Update(float updateTime, float& outUpdateTime);
       void UpdateAsync(float& updateTime);
-      void UpdateWarp(float& updateTime, unsigned int numberOfUpdates);
       bool IsAvailable();
       cocos2d::Node* GetRootNode() const;
       cocos2d::Node* GetMainNode() const;
@@ -57,21 +57,22 @@ namespace komorki
      
       void HealthCheck();
       
-      void PerformMove(MapList& mapsToCreate, MapList& mapsToRemove);
+      void PerformMove(PartialMapsManager::CreateMapArgs& newMapsArgs,
+                       PartialMapsManager::RemoveMapArgs& mapsToRemove);
       void CreateMap(const cocos2d::Rect& viewSize, float scale);
       void CreatePixelMaps(const Rect& rect, const cocos2d::Vec2& offset, float scale);
       
       Rect PixelRect(const cocos2d::Rect& rect, float scale) const;
       Rect PixelRectInner(const cocos2d::Rect& rect, float scale) const;
       cocos2d::Rect CocosRect(const Rect& rect, float scale) const;
-      bool RemoveMapsOutsideOfRect(const Rect& rect, MapList& toRemove);
-      bool MoveMaps(const Vec2& offset, const cocos2d::Vec2& pointOffset, float scale);
+      bool RemoveMapsOutsideOfRect(const Rect& rect, const Maps& currentMaps, PartialMapsManager::RemoveMapArgs& mapsToRemove);
+      bool MoveMaps(const Vec2& offset, const cocos2d::Vec2& pointOffset, float scale, const Maps& maps);
       bool SplitRectOnChunks(const Rect& rect, const Rect& existingRect, std::vector<Rect>& result) const;
       bool CreatePartialMapsInRects(const std::vector<Rect>& rects,
                                     const Vec2& pixelOffset,
                                     const cocos2d::Vec2& offset,
                                     float scale,
-                                    MapList& maps);
+                                    PartialMapsManager::CreateMapArgs& newMapsArgs);
       Rect GetUpcommingRect() const;
       Rect GetCurrentVisibleRect() const;
       
@@ -96,13 +97,11 @@ namespace komorki
      
       std::shared_ptr<IPixelWorld> m_provider;
       std::shared_ptr<AsyncPixelWorld> m_manager;
-      MapList m_maps;
-      MapList m_mapsToRemove;
-      MapList m_mapsToCreate;
       unsigned char m_lastUpdateId;
       StatisticCounter<double> m_updateTime;
       StatisticCounter<double> m_mapsUpdateTime;
       StatisticCounter<int> m_numberOfUpdates;
+      PartialMapsManager m_mapManager;
     };
   }
 }

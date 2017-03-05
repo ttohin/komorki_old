@@ -29,21 +29,26 @@ namespace komorki
     class ObjectContext
     {
     public:
-      ObjectContext(PartialMap *_owner);
+      using PartialMapPtr = std::shared_ptr<PartialMap>;
+      
+      ObjectContext(PartialMapPtr _owner);
       virtual ~ObjectContext();
       
       Vec2 GetPosInOwnerBase(Vec2ConstRef pos) const;
       std::string Description() const;
       
+      
+      
       virtual ContextType GetType() const { return ContextType::Unknown; }
-      virtual void BecomeOwner(PartialMap* _owner) = 0;
-      virtual void Destory(PartialMap* _owner) = 0;
-      virtual void Free(PartialMap* _owner);
-      virtual void ForceDestory(PartialMap* _owner);
+      virtual void BecomeOwner(PartialMapPtr _owner) = 0;
+      virtual void Destory(PartialMapPtr _owner) = 0;
+      virtual void ForceDestory(PartialMapPtr _owner);
       virtual void Attack(const Vec2& pos, const Vec2& offset, float animationTime) {}
       virtual void EnableSmallAnimations(bool enable) {}
+      virtual void CellDead() = 0;
       
-      PartialMap* m_owner;
+      PartialMapPtr m_owner;
+      CellDescriptor* m_cell;
       
       constexpr static const float kMaxAmorpghCellOpacity = 200;
       constexpr static const float kCenterAmorpghCellOpacity = 200;

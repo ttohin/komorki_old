@@ -44,7 +44,7 @@ void AsyncMapLoader::WorkerThread()
 #endif
   
   SetCurrentJobString("Runnig few generations");
-  komorki::WorldUpdateList result;
+  komorki::WorldUpdateResult result;
   for (int i = 0; i < komorki::graphic::kNumberOfUpdatesOnStartup; i++)
   {
     m_provider->Update(false, result);

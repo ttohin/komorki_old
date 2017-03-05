@@ -14,7 +14,7 @@ namespace komorki
   WorldUpateDiff::WorldUpateDiff(CellDescriptor* desc)
   : desc(desc->parent)
   , userData(desc->userData)
+  , cell(desc)
   {
-    //  assert(userData);
   }
 }

@@ -24,7 +24,7 @@ namespace komorki
     virtual void Init(const PixelWorldConfig& config,
                       const GenomsGenerator::GenomsList& genoms) = 0;
     
-    virtual void Update(bool passUpdateResult, WorldUpdateList&) = 0;
+    virtual void Update(bool passUpdateResult, WorldUpdateResult&) = 0;
     virtual ~IPixelWorld () {};
   };
 }

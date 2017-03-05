@@ -12,6 +12,7 @@
 #include "PartialMap.h"
 #include "CellsLayer.h"
 #include "UIConfig.h"
+#include "DeadCellsLayer.h"
 
 namespace
 {
@@ -23,12 +24,14 @@ namespace komorki
 {
   namespace graphic
   {
-    CellContext::CellContext(PartialMap *_owner,
+    CellContext::CellContext(PartialMapPtr _owner,
                              const cocos2d::Rect& textureRect,
                              Vec2ConstRef origin,
-                             const Rect& rect)
+                             const Rect& rect,
+                             CellDescriptor* cell)
     : ObjectContext(_owner)
     {
+      m_cell = cell;
       m_posOffset = rect.origin - origin;
       m_offset = RandomVectorOffset();
       m_size = rect.size;
@@ -45,6 +48,8 @@ namespace komorki
       s->setPosition(spriteVector(m_pos + m_posOffset, m_offset + rectOffset));
       s->setTag(static_cast<int>(komorki::GreatPixel::CreatureType));
       m_sprite = s;
+      
+      LOG_W("%s, %s", __FUNCTION__, Description().c_str());
     }
     
     void CellContext::Move(Vec2ConstRef src, Vec2ConstRef dest, float animationTime)
@@ -107,26 +112,25 @@ namespace komorki
       }
     }
     
-    void CellContext::BecomeOwner(PartialMap* _owner)
+    void CellContext::BecomeOwner(PartialMapPtr _owner)
     {
-      LOG_W("%s, %s. New owner: %p", __FUNCTION__, Description().c_str(), _owner);
-      m_owner = _owner;
+      LOG_W("%s, %s. New owner: %p", __FUNCTION__, Description().c_str(), _owner.get());
       
       m_sprite->retain();
       m_sprite->removeFromParentAndCleanup(true);
-      m_owner->m_cellMap->addChild(m_sprite);
+      _owner->m_cellMap->addChild(m_sprite);
       m_sprite->release();
       m_sprite->setPosition(spriteVector(m_pos, m_offset));
+      
+      m_owner = _owner;
     }
     
-    void CellContext::Destory(PartialMap* _owner)
+    void CellContext::Destory(PartialMapPtr _owner)
     {
-      LOG_W("%s, %s. caller: %p", __FUNCTION__, Description().c_str(), _owner);
-      assert(m_owner == _owner || m_owner == nullptr);
+      LOG_W("%s, %s. caller: %p", __FUNCTION__, Description().c_str(), _owner.get());
       
       assert(m_sprite);
-      assert(m_sprite->getParent() == _owner->m_cellMap.get());
-      _owner->m_cellMap->RemoveSprite(m_sprite);
+      m_owner->m_cellMap->RemoveSprite(m_sprite);
       
       delete this;
     }
@@ -178,6 +182,23 @@ namespace komorki
         loop = cocos2d::RepeatForever::create(cocos2d::Sequence::create(s2, s1, NULL));;
       loop->setTag(kSmallAnimationsTag);
       m_sprite->runAction(loop);
+    }
+    
+    void CellContext::CellDead()
+    {
+      auto s = m_owner->m_background->CreateSprite();
+      
+      s->setTextureRect(m_textureRect);
+      s->setPosition(m_sprite->getPosition());
+
+      auto fade = cocos2d::FadeTo::create(5, 0);
+      auto bgLayer = m_owner->m_background;
+      auto removeSelf = cocos2d::CallFunc::create([bgLayer, s]()
+                                         {
+                                           bgLayer->RemoveSprite(s);
+                                         });
+      
+      s->runAction(cocos2d::Sequence::createWithTwoActions(fade, removeSelf));
     }
   }
 }

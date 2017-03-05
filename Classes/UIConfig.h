@@ -24,10 +24,12 @@ namespace komorki
     extern const bool kAnimated;
     extern const bool kRedrawEachUpdate;
     extern const bool kSimpleDraw;
+    extern const bool kRandomColorPerPartialMap;
     extern const float kLightMapScale;
     extern const unsigned int kNumberOfUpdatesOnStartup;
     extern const komorki::Vec2 kCellsTextureSizeInPixels;
     extern const unsigned int kCellShapeSegments;
+    
   }
 }
 

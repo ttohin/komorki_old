@@ -296,10 +296,10 @@ namespace komorki
           auto groupId = groups[groupIndex];
           
           static int count = 1;
-          //        if (count == 0)
-          //        {
-          //          continue;
-          //        }
+                  if (count == 0)
+                  {
+                    continue;
+                  }
           
           if (CreateRandomCell(pd, m_groups[groupId]))
           {
@@ -312,15 +312,26 @@ namespace komorki
   
   void PixelWorld::GenTerrain()
   {
-    komorki::DiamondSquareGenerator gen(512, 512, 60.f, -0.5, false);
-    gen.Generate(nullptr);
+    Buffer2DPtr<float> buffer;
     
-    komorki::DiamondSquareGenerator gen1(512, 512, 20.f, -0.5, false);
-    gen1.Generate(nullptr);
-    
-    gen.Multiply(&gen1, nullptr);
-    
-    auto buffer = gen.GetBuffer(0,0, m_config.width, m_config.height);
+    if (m_config.generateTerrain)
+    {
+      komorki::DiamondSquareGenerator gen(512, 512, 60.f, -0.5, false);
+      gen.Generate(nullptr);
+      
+      komorki::DiamondSquareGenerator gen1(512, 512, 20.f, -0.5, false);
+      gen1.Generate(nullptr);
+      
+      gen.Multiply(&gen1, nullptr);
+      
+      buffer = gen.GetBuffer(0,0, m_config.width, m_config.height);
+    }
+    else
+    {
+      buffer = std::make_shared<Buffer2D<float>>(m_config.width, m_config.height);
+      buffer->Fill(0.36);
+    }
+  
     auto analizer = std::shared_ptr<TerrainAnalizer>(new TerrainAnalizer(buffer));
     auto analizedBuffer = analizer->GetLevels();
     
@@ -340,9 +351,19 @@ namespace komorki
   
   void PixelWorld::GenLights()
   {
-    komorki::DiamondSquareGenerator gen1(512, 512, 10.f, -0.5, false);
-    gen1.Generate(nullptr);
-    auto buffer = gen1.GetBuffer(0,0, m_config.width, m_config.height);
+    Buffer2DPtr<float> buffer;
+    if (m_config.generateLight)
+    {
+      komorki::DiamondSquareGenerator gen1(512, 512, 10.f, -0.5, false);
+      gen1.Generate(nullptr);
+      buffer = gen1.GetBuffer(0,0, m_config.width, m_config.height);
+    }
+    else
+    {
+      buffer = std::make_shared<Buffer2D<float>>(m_config.width, m_config.height);
+      buffer->Fill(1.0f);
+    }
+
     buffer->ForEach([&](const int& x, const int& y, const float& level)
                     {
                       float resultlevel = 0.5 + level * 0.5f;
@@ -385,7 +406,7 @@ namespace komorki
     return true;
   }
   
-  void PixelWorld::ProccessTransaction(bool passUpdateResult, WorldUpdateList& result)
+  void PixelWorld::ProccessTransaction(bool passUpdateResult, WorldUpdateResult& result)
   {
     for (int i = 0; i < m_config.width; ++i)
     {
@@ -438,7 +459,7 @@ namespace komorki
             WorldUpateDiff r(d);
             r.deleteCreature.SetValueFlag(true);
             r.deleteCreature.value.cellDescriptor = std::shared_ptr<CellDescriptor>(d);
-            result.push_back(r);
+            result.list.push_back(r);
           }
           else
           {
@@ -458,12 +479,12 @@ namespace komorki
             
             if (passUpdateResult)
             {
-              WorldUpateDiff r(d);
+              WorldUpateDiff r(destinationDesc);
               r.userData = nullptr;
               
               r.addCreature.SetValueFlag(true);
-              r.addCreature.value.destinationDesc = destinationDesc->parent;
-              result.push_back(r);
+              r.addCreature.value.sourcePixel = d->parent;
+              result.list.push_back(r);
             } // if (passUpdateResult)
           } // (destinationDesc != nullptr)
           
@@ -511,7 +532,7 @@ namespace komorki
     return result;
   }
   
-  void PixelWorld::Update(bool passUpdateResult, WorldUpdateList& result)
+  void PixelWorld::Update(bool passUpdateResult, WorldUpdateResult& result)
   {
     //  return;
     //  if (m_updateId == 0)
@@ -571,8 +592,8 @@ namespace komorki
             {
               WorldUpateDiff r(d);
               r.addCreature.SetValueFlag(true);
-              r.addCreature.value.destinationDesc = pd.get();
-              result.push_back(r);
+              r.addCreature.value.sourcePixel = pd.get();
+              result.list.push_back(r);
             }
             
             continue;
@@ -613,11 +634,19 @@ namespace komorki
           
           if (passUpdateResult)
           {
-            result.push_back(updateResult);
+            result.list.push_back(updateResult);
           }
         }
       }
     }
+    
+    for (auto& u : result.list)
+    {
+      u.step = m_updateId;
+      u.cell->m_updates.push_back(u);
+    }
+    
+    result.updateId = m_updateId;
     
     for (int i = 0; i < m_config.width; ++i)
     {

@@ -64,7 +64,7 @@ namespace komorki
         
         m_lastUpdateDuration = 0.0;
         
-        m_updateResult.clear();
+        m_updateResult.list.clear();
        
         if (m_nuberOfUpdates == 1)
         {
@@ -77,7 +77,7 @@ namespace komorki
             m_provider->Update(false, m_updateResult);
           }
           
-          assert(m_updateResult.size() == 0);
+          assert(m_updateResult.list.size() == 0);
         }
 
         gettimeofday(&tv, NULL);
@@ -111,7 +111,7 @@ namespace komorki
       m_semaphore.notify_one();
     }
     
-    WorldUpdateList& GetUpdateResult()
+    WorldUpdateResult& GetUpdateResult()
     {
       return m_updateResult;
     }
@@ -138,7 +138,7 @@ namespace komorki
     unsigned char m_updateId;
     std::mutex m_lock;
     std::condition_variable m_semaphore;
-    WorldUpdateList m_updateResult;
+    WorldUpdateResult m_updateResult;
     std::thread m_thread;
   };
 }

@@ -12,6 +12,7 @@
 #include "PartialMap.h"
 #include "Logging.h"
 #include "CellsLayer.h"
+#include "DeadCellsLayer.h"
 
 
 namespace komorki
@@ -46,9 +47,10 @@ namespace komorki
       return std::to_string(x) + "_" + std::to_string(y);
     }
     
-    AmorphCellContext::AmorphCellContext(PartialMap *owner, const cocos2d::Rect& textureRect)
-    : ObjectContext(owner)
+    AmorphCellContext::AmorphCellContext(PartialMapPtr _owner, const cocos2d::Rect& textureRect, CellDescriptor* cell)
+    : ObjectContext(_owner)
     {
+      m_cell = cell;
       m_textureRect = textureRect;
       
       m_centerSprite = CreateSprite();
@@ -58,6 +60,8 @@ namespace komorki
       m_centerSprite->setScale(kCenterCellScale);
       m_centerSprite->setAnchorPoint({0.5, 0.5});
       m_centerSprite->setLocalZOrder(10);
+      
+      LOG_W("%s, %s", __FUNCTION__, Description().c_str());
     }
     
     void CalcScale(const Rect& aabb, Vec2ConstRef pos, cocos2d::Vec2& outOffset, float& outScale)
@@ -118,7 +122,7 @@ namespace komorki
     }
     
     void AmorphCellContext::MoveAmorphCells(Vec2ConstRef source,
-                                            komorki::Morphing& morph,
+                                            const komorki::Morphing& morph,
                                             const Rect& aabb,
                                             float animationDuration)
     {
@@ -187,8 +191,6 @@ namespace komorki
                                });
         assert(it == m_spritesPull.end());
       }
-      
-      morph.proccessed = true;
       
       for (auto& s : toRemove) {
         AnimatePart(s, aabb, animationDuration);
@@ -308,10 +310,9 @@ namespace komorki
       return rectOffset + spriteVector(GetPosInOwnerBase(center));
     }
     
-    void AmorphCellContext::BecomeOwner(PartialMap* _owner)
+    void AmorphCellContext::BecomeOwner(PartialMapPtr _owner)
     {
-      LOG_W("%s, %s. New owner: %p", __FUNCTION__, Description().c_str(), _owner);
-      m_owner = _owner;
+      LOG_W("%s, %s. New owner: %p", __FUNCTION__, Description().c_str(), _owner.get());
       
       for (auto& s : m_spritesPull)
       {
@@ -319,7 +320,7 @@ namespace komorki
         source->sprite->retain();
         source->sprite->stopAllActions();
         source->sprite->removeFromParentAndCleanup(true);
-        m_owner->m_cellMap->addChild(source->sprite);
+        _owner->m_cellMap->addChild(source->sprite);
         source->sprite->release();
       }
       
@@ -329,7 +330,7 @@ namespace komorki
         source->retain();
         source->stopAllActions();
         source->removeFromParentAndCleanup(true);
-        m_owner->m_cellMap->addChild(source);
+        _owner->m_cellMap->addChild(source);
         source->release();
         
         cocos2d::Vec2 rectOffset = spriteVector({1, 1}) * 0.5;
@@ -339,39 +340,31 @@ namespace komorki
       m_centerSprite->retain();
       m_centerSprite->stopAllActions();
       m_centerSprite->removeFromParentAndCleanup(true);
-      m_owner->m_cellMap->addChild(m_centerSprite);
+      _owner->m_cellMap->addChild(m_centerSprite);
       m_centerSprite->release();
       m_centerSprite->setPosition(GetCenterPos());
+      
+      m_owner = _owner;
     }
     
-    void AmorphCellContext::Destory(PartialMap* _owner)
+    void AmorphCellContext::Destory(PartialMapPtr _owner)
     {
-      LOG_W("%s, %s. caller: %p", __FUNCTION__, Description().c_str(), _owner);
-      assert(m_owner == _owner || m_owner == nullptr);
+      LOG_W("%s, %s. caller: %p", __FUNCTION__, Description().c_str(), _owner.get());
       
       for (auto& s : m_spritesPull)
       {
         assert(s->sprite);
         
-        if (m_owner)
-          m_owner->m_cellMap->RemoveSprite(s->sprite);
-        else
-          s->sprite->removeFromParentAndCleanup(true);
+        m_owner->m_cellMap->RemoveSprite(s->sprite);
       }
       
       for (auto& s : m_spriteMap)
       {
         assert(s.second->sprite);
-        if (m_owner)
-          m_owner->m_cellMap->RemoveSprite(s.second->sprite);
-        else
-          s.second->sprite->removeFromParentAndCleanup(true);
+        m_owner->m_cellMap->RemoveSprite(s.second->sprite);
       }
       
-      if (m_owner)
-        m_owner->m_cellMap->RemoveSprite(m_centerSprite);
-      else
-        m_centerSprite->removeFromParentAndCleanup(true);
+      m_owner->m_cellMap->RemoveSprite(m_centerSprite);
       
       delete this;
     }
@@ -424,6 +417,27 @@ namespace komorki
                           animationDuration,
                           kCenterCellScale,
                           kCenterCellScale * 1.2);
+    }
+    
+    void AmorphCellContext::CellDead()
+    {
+      for (auto &spriteContext : m_spriteMap)
+      {
+        auto source = spriteContext.second->sprite;
+        
+        auto s = m_owner->m_background->CreateSprite();
+        s->setTextureRect(m_textureRect);
+        s->setPosition(source->getPosition());
+        
+        auto fade = cocos2d::FadeTo::create(5, 0);
+        auto bgLayer = m_owner->m_background;
+        auto removeSelf = cocos2d::CallFunc::create([bgLayer, s]()
+                                           {
+                                             bgLayer->RemoveSprite(s);
+                                           });
+        
+        s->runAction(cocos2d::Sequence::createWithTwoActions(fade, removeSelf));
+      }
     }
   }
 }

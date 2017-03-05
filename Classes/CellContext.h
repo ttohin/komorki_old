@@ -17,19 +17,21 @@ namespace komorki
     class CellContext : public ObjectContext
     {
     public:
-      CellContext(PartialMap *_owner,
+      CellContext(PartialMapPtr _owner,
                   const cocos2d::Rect& textureRect,
                   Vec2ConstRef origin,
-                  const Rect& rect);
+                  const Rect& rect,
+                  CellDescriptor* cell);
       
       void Move(Vec2ConstRef src, Vec2ConstRef dest, float animationDuration);
       void ChangeRect(CellDescriptor* cd, const Rect& newRect, float animationDuration);
       
       virtual ContextType GetType() const override { return ContextType::SinglePixel; }
-      virtual void BecomeOwner(PartialMap* _owner) override;
-      virtual void Destory(PartialMap* _owner) override;
+      virtual void BecomeOwner(PartialMapPtr _owner) override;
+      virtual void Destory(PartialMapPtr _owner) override;
       virtual void Attack(const Vec2& pos, const Vec2& offset, float animationTime) override;
       virtual void EnableSmallAnimations(bool enable) override;
+      virtual void CellDead() override;
       
       cocos2d::Sprite* m_sprite = nullptr;
       cocos2d::Sprite* m_glow = nullptr;

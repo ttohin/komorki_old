@@ -28,5 +28,13 @@ namespace komorki
     {
       return cocos2d::Vec2(vec.x * kSpritePosition, vec.y * kSpritePosition) + vector;
     }
+    
+    cocos2d::Color3B randomColor(uint bottomValue, uint topValue)
+    {
+      int r = cRandABInt(bottomValue, topValue);
+      int g = cRandABInt(bottomValue, topValue);
+      int b = cRandABInt(bottomValue, topValue);
+      return cocos2d::Color3B(r, g, b);
+    }
   }
 }

@@ -16,7 +16,6 @@
 #include "WorldUpdateResult.h"
 #include "GreatPixel.h"
 
-
 namespace komorki
 {
   class IPixelWorld;
@@ -37,10 +36,14 @@ namespace komorki
     {
     public:
       
+      using Ptr = std::shared_ptr<PartialMap>;
+      
+      static uint instanceCounter;
+      
       PartialMap();
       virtual ~PartialMap();
       
-      bool Init(int a,
+      bool InitF(int a,
                 int b,
                 int width,
                 int height,
@@ -53,8 +56,8 @@ namespace komorki
       
       void AdoptIncomingItems();
       void DeleteOutgoingItems();
-      void HandleItemsOnBounds(const WorldUpdateList& updateResult, float updateTime);
-      void Update(WorldUpdateList& updateResult, float updateTime);
+      void HandleItemsOnBounds(const WorldUpdateResult& updateResult, float updateTime);
+      void Update(WorldUpdateResult& updateResult, float updateTime);
       
       void Reset();
       
@@ -73,6 +76,7 @@ namespace komorki
       int m_a2;
       int m_b2;
       std::shared_ptr<CellsLayer> m_cellMap;
+      std::shared_ptr<DeadCellsLayer> m_background;
       bool m_enableAnimations = true;
       
     private:
@@ -90,7 +94,6 @@ namespace komorki
       inline Vec2 LocalVector(const komorki::Vec2& input) const;
 
       cocos2d::Sprite* m_lightOverlay;
-      std::shared_ptr<DeadCellsLayer> m_background;
       cocos2d::Sprite* m_terrainSprite;
       cocos2d::Sprite* m_terrainBgSprite;
       IPixelWorld* m_provider;

@@ -19,9 +19,8 @@ namespace komorki
 {
 namespace graphic
 {
-  ObjectContext::ObjectContext(PartialMap *_owner)
+  ObjectContext::ObjectContext(PartialMapPtr _owner)
   {
-    LOG_W("%s, %s", __FUNCTION__, Description().c_str());
     m_owner = _owner;
   }
   
@@ -30,29 +29,23 @@ namespace graphic
     LOG_W("%s, %s", __FUNCTION__, Description().c_str());
   }
   
-  void ObjectContext::Free(PartialMap* _owner)
-  {
-    LOG_W("%s, %s: argument: %p", __FUNCTION__, Description().c_str(), _owner);
-    if (m_owner == _owner)
-    {
-      m_owner = nullptr;
-    }
-  }
-  
   std::string ObjectContext::Description() const
   {
     std::stringstream ss;
     ss <<
+    "[" <<
     static_cast<const void*>(this) <<
-    "ownwer: " <<
-    static_cast<const void*>(m_owner) <<
-    ";";
+    " ownwer: " <<
+    m_owner->Description() <<
+    " cell: " <<
+    static_cast<const void*>(m_cell) <<
+    "]";
     return ss.str();
   }
   
-  void ObjectContext::ForceDestory(PartialMap* _owner)
+  void ObjectContext::ForceDestory(PartialMapPtr _owner)
   {
-    LOG_W("%s, %s. caller: %p", __FUNCTION__, Description().c_str(), _owner);
+    LOG_W("%s, %s. caller: %p", __FUNCTION__, Description().c_str(), _owner.get());
     delete this;
   }
   

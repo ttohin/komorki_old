@@ -28,7 +28,7 @@ namespace komorki
       bool IsInAABB(const int& x, const int& y);
       cocos2d::Vec2 spriteVector(const komorki::Vec2& vec, const cocos2d::Vec2& vector = cocos2d::Vec2());
       cocos2d::Vec2 spriteVector(komorki::GreatPixel* pd, const cocos2d::Vec2& vector = cocos2d::Vec2());
-      void Update(const WorldUpdateList& updateResult, float updateTime);
+      void Update(const WorldUpdateResult& updateResult, float updateTime);
       bool init();
       void Reset();
       

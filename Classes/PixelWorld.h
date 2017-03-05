@@ -39,12 +39,12 @@ namespace komorki
     virtual GreatPixel* GetDescriptor(komorki::PixelPos x, komorki::PixelPos y) const;
     virtual TerrainAnalizer::Result GetTerrain() const;
     virtual komorki::Vec2 GetSize() const;
-    virtual void Update(bool passUpdateResult, WorldUpdateList& result);
+    virtual void Update(bool passUpdateResult, WorldUpdateResult& result);
     virtual ~PixelWorld () {};
     CellDescriptor* ProcessMutation(CellDescriptor* source);
     void KillAllCells();
     void KillCellAtPostiion(const Vec2& pos);
-    void ProccessTransaction(bool passUpdateResult, WorldUpdateList& result);
+    void ProccessTransaction(bool passUpdateResult, WorldUpdateResult& result);
     bool CheckBounds(int x, int y);
     CellDescriptor* CreateRandomCell(GreatPixel* pd, Group& group);
     

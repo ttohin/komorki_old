@@ -19,7 +19,7 @@ namespace komorki
   
   typedef std::function<void(GreatPixel* pixel, bool& stop)> PerPixelFunc;
   
-  typedef int PixelPos;
+  typedef int32_t PixelPos;
 
   struct Rect;
   
@@ -37,10 +37,23 @@ namespace komorki
     inline Vec2 operator+(const Vec2& pos) const {return Vec2(x + pos.x, y + pos.y);}
     inline Vec2 operator-() const {return Vec2(-x, -y);}
     inline void operator*=(const int& value) {x *= value; y *= value;}
+    inline Vec2 operator/(const int& value) const { return Vec2(x / value,y / value); }
     bool In(const Rect& rect) const;
     Vec2 Normalize() const;
     
     std::string Description()const { return std::to_string(x) + "," + std::to_string(y); }
+  };
+  
+  struct Vec2Hasher
+  {
+    std::size_t operator()(const Vec2& k) const
+    {
+      PixelPos v1 = k.x << 16;
+      PixelPos v2 = v1 + k.y;
+      
+      auto r = std::hash<PixelPos>()(v2);
+      return r;
+    }
   };
   
   typedef const Vec2& Vec2ConstRef;
@@ -49,6 +62,11 @@ namespace komorki
   {
     Vec2 origin;
     Vec2 size;
+    
+    Rect(){}
+    Rect(Vec2 _origin, Vec2 _size) : origin(_origin), size(_size) {}
+    Rect(PixelPos x, PixelPos y, PixelPos width, PixelPos height) : origin(x, y), size(width, height) {}
+    
     Rect Extract(const Rect& rect) const;
     bool In(const Rect& rect) const;
     

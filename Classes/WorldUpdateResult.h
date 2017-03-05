@@ -19,7 +19,7 @@ namespace komorki
   
   struct AddCreature
   {
-    GreatPixel* destinationDesc = nullptr;
+    GreatPixel* sourcePixel = nullptr;
   };
   
   struct Action
@@ -50,7 +50,6 @@ namespace komorki
   {
     typedef std::vector<Morph> Vec;
     Vec vec;
-    bool proccessed = false;
   };
   
   struct DeleteCreature
@@ -105,8 +104,10 @@ namespace komorki
   
   struct WorldUpateDiff
   {
+    uint step = 0;
     void* userData = nullptr;
     GreatPixel* desc = nullptr;
+    CellDescriptor* cell = nullptr;
     komorki::Optional<komorki::Action> action;
     komorki::Optional<komorki::Movement> movement;
     komorki::Optional<komorki::AddCreature> addCreature;
@@ -117,6 +118,13 @@ namespace komorki
   };
   
   typedef std::list<WorldUpateDiff> WorldUpdateList;
+  struct WorldUpdateResult
+  {
+    WorldUpdateList list;
+    unsigned int updateId;
+  };
+  
+  
   
 }
 
