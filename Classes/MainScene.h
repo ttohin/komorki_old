@@ -40,6 +40,7 @@ private:
   
   enum Speed
   {
+    eSpeedPause,
     eSpeedNormal,
     eSpeedDouble,
     eSpeedMax,
@@ -52,6 +53,7 @@ private:
   komorki::graphic::Viewport::Ptr m_viewport;
   cocos2d::Node* m_rootNode;
   cocos2d::Sprite* m_bg;
+  cocos2d::ui::Button* m_pauseButton;
   cocos2d::ui::Button* m_speed1Button;
   cocos2d::ui::Button* m_speed2Button;
   cocos2d::ui::Button* m_speed10Button;

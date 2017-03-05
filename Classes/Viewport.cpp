@@ -18,6 +18,18 @@ namespace komorki
 {
   namespace graphic
   {
+    Rect TTPixelRect(const cocos2d::Rect& rect)
+    {
+      Rect result;
+      
+      result.origin.x = std::floor(rect.origin.x/(kSpritePosition));
+      result.size.x = std::ceil(rect.size.width/(kSpritePosition));
+      result.origin.y = std::floor(rect.origin.y/(kSpritePosition));
+      result.size.y = std::ceil(rect.size.height/(kSpritePosition));
+      
+      return result;
+    }
+    
     PixelPos Ceil(const PixelPos& value, const PixelPos& precision)
     {
       double scaledValue = (double) value / precision;
@@ -109,41 +121,41 @@ namespace komorki
     
     void Viewport::Calculate()
     {
-      float pixelsScale = m_originalSize.width / m_pixelWorldPos.size.width;
-      float screenScale = 1.0 / m_superView->getScale();
+      auto graphicalVisibleRect = GetCurrentGraphicRect();
       
-      cocos2d::Rect rect;
-      rect.size = m_pixelWorldPos.size * screenScale;
-      rect.origin = m_pixelWorldPos.origin - m_superView->getPosition() * screenScale / pixelsScale;
-      
-      Rect pixelRect = PixelRectInner(rect, m_initialScale);
-      Rect innerPrevRect = ResizeByStep(m_pos, pixelRect, kSegmentSize);
+      Rect pixelRect = TTPixelRect(graphicalVisibleRect);
+      Rect innerPrevRect = ResizeByStep(tt_loadedPixelRect, pixelRect, kSegmentSize);
       Rect extendedRect = ExtendRectWithStep(innerPrevRect, pixelRect, kSegmentSize);
       Vec2 size = m_provider->GetSize();
       extendedRect = extendedRect.Extract({Vec2(0, 0), size});
       
-      if ( extendedRect != m_pos )
+      if ( extendedRect != tt_loadedPixelRect )
       {
         m_performMove = true;
       }
     }
     
     Viewport::Viewport(cocos2d::Node* superView,
-                           const cocos2d::Size& originalSize,
-                           const std::shared_ptr<IPixelWorld>& provider)
+                       const cocos2d::Size& originalSize,
+                       const std::shared_ptr<IPixelWorld>& provider)
     
     {
       assert(superView);
       
-      m_originalSize = originalSize;
+      tt_viewSize = originalSize;
+      tt_globalGraphicalOffset = {0, 0};
       m_superView = superView;
+      m_superView->setScale(0.5);
+      
+      m_originalSize = originalSize;
+      
       m_lightNode = cocos2d::Node::create();
       m_mainView = cocos2d::Node::create();
       m_superView->addChild(m_lightNode);
       m_superView->addChild(m_mainView);
       m_performMove = false;
       
-      m_initialScale = 0.2;
+      m_initialScale = 0.5;
       m_enableSmallAnimations = true;
       m_enableAnimations = true;
       
@@ -354,133 +366,33 @@ namespace komorki
     void Viewport::CreateMap()
     {
       Vec2 size = m_provider->GetSize();
-      for (int i = 0; i < size.x; ++i)
+      
       {
-        for (int j = 0; j < size.y; ++j)
+        cocos2d::Rect visibleRect = GetCurrentGraphicRect();
+        komorki::Rect visiblePixels = TTPixelRect(visibleRect);
+        
+        // Ceil to SegmentSize
+        visiblePixels.size.x = Ceil(visiblePixels.size.x, kSegmentSize);
+        visiblePixels.size.y = Ceil(visiblePixels.size.y, kSegmentSize);
+        
+        // Extract PixelWorld size to avoid overflow
+        tt_loadedPixelRect = visiblePixels.Extract({Vec2(0, 0), size});
+        
+        std::vector<Rect> mapRects;
+        bool res = SplitRectOnChunks(tt_loadedPixelRect, Rect(), mapRects);
+        assert(res);
+        
+        PartialMapsManager::CreateMapArgs args;
+        
+        // shif all mapRects
+        for (auto& rect : mapRects)
+          rect.origin = rect.origin - tt_loadedPixelRect.origin;
+        
+        res = CreatePartialMapsInRects(mapRects,
+                                       args);
+        for (auto& arg : args)
         {
-          auto pd = m_provider->GetDescriptor(i, j);
-          if (pd->m_cellDescriptor)
-          {
-            assert(pd->m_cellDescriptor->userData == nullptr);
-          }
-        }
-      }
-      
-      float pixelsScale = m_originalSize.width / m_pixelWorldPos.size.width;
-      float screenScale = 1.0 / m_superView->getScale();
-      
-      // map size in points that visible in viewport
-      m_pixelWorldPos.size = (m_pixelWorldPos.size + cocos2d::Size(kViewportMargin, kViewportMargin)) * screenScale;
-      m_pixelWorldPos.origin += -(m_superView->getPosition() - m_superViewOffset) * screenScale / pixelsScale;
-      
-      auto observableRect = cocos2d::Rect(m_pixelWorldPos.origin.x,
-                                          m_pixelWorldPos.origin.y,
-                                          m_pixelWorldPos.size.width,
-                                          m_pixelWorldPos.size.height);
-      
-      // visible map in pixels
-      Rect rect = PixelRectInner(observableRect, m_initialScale);
-      
-      Rect pixelMapRect = rect;
-      pixelMapRect.size.x = Ceil(pixelMapRect.size.x, kSegmentSize);
-      pixelMapRect.size.y = Ceil(pixelMapRect.size.y, kSegmentSize);
-      pixelMapRect = pixelMapRect.Extract({Vec2(0, 0), size});
-      rect = rect.Extract({Vec2(0, 0), size});
-      
-      pixelsScale = m_originalSize.width / m_pixelWorldPos.size.width;
-      
-      float pixelSize = kSpritePosition * m_initialScale * pixelsScale;
-      
-      Vec2 offsetInPixels = m_visibleRect.origin - rect.origin;
-      cocos2d::Vec2 offset = m_superView->getPosition() - cocos2d::Vec2(offsetInPixels.x * pixelSize, offsetInPixels.y * pixelSize);
-      
-      m_superView->setPosition(offset);
-      m_superViewOffset = offset;
-      m_superView->setScale(1.f);
-      
-      std::vector<Rect> mapRects;
-      bool res = SplitRectOnChunks(pixelMapRect, {{0, 0}, {0, 0}}, mapRects);
-      assert(res);
-      
-      PartialMapsManager::CreateMapArgs args;
-      res = CreatePartialMapsInRects(mapRects,
-                                     -pixelMapRect.origin,
-                                     cocos2d::Vec2::ZERO,
-                                     pixelsScale,
-                                     args);
-      for (auto& arg : args)
-      {
-        m_mapManager.CreateMap(arg);
-      }
-      assert(res);
-      
-      m_prevPos = pixelMapRect;
-      m_pos = pixelMapRect;
-      m_scale = pixelsScale;
-      m_visibleRect = rect;
-    }
-    
-    void Viewport::CreatePixelMaps(const Rect& rect, const cocos2d::Vec2& offset, float scale)
-    {
-      if (rect.size.x < 0 || rect.size.y < 0)
-      {
-        assert(0);
-      }
-      
-      if (rect.size.x == 0 || rect.size.y == 0)
-      {
-        assert(0);
-        return;
-      }
-      
-      m_mapSegmentSize = MIN(kSegmentSize, rect.size.x);
-      m_mapSegmentSize = MIN(m_mapSegmentSize, rect.size.y);
-      
-      int stepsX = rect.size.x/m_mapSegmentSize + 1;
-      int stepsY = rect.size.y/m_mapSegmentSize + 1;
-      
-      for (int i = 0; i < stepsX; ++i)
-      {
-        for (int j = 0; j < stepsY; ++j)
-        {
-          int width = MIN(m_mapSegmentSize, rect.size.x - i*m_mapSegmentSize);
-          int height = MIN(m_mapSegmentSize, rect.size.y - j*m_mapSegmentSize);
-          
-          if (width <= 0 || height <= 0)
-          {
-            continue;
-          }
-          
-//          auto map = std::make_shared<graphic::PartialMap>();
-          
-          Rect rectForMap = Rect(rect.origin.x + i*m_mapSegmentSize,
-                                 rect.origin.y +j*m_mapSegmentSize,
-                                 width,
-                                 height);
-          
-//          map->InitF(rect.origin.x + i*m_mapSegmentSize,
-//                    rect.origin.y +j*m_mapSegmentSize,
-//                    width,
-//                    height,
-//                    m_provider.get(),
-//                    m_mainView,
-//                    m_lightNode,
-//                    cocos2d::Vec2::ZERO);
-//          map->Transfrorm(offset + cocos2d::Vec2(i*m_mapSegmentSize * kSpritePosition * m_initialScale * scale,
-//                                                 j*m_mapSegmentSize * kSpritePosition * m_initialScale * scale),
-//                          m_initialScale * scale);
-//          m_maps.push_back(map);
-          
-          PartialMapsManager::CreateMapArg createMapArg;
-          createMapArg.animated = m_enableAnimations;
-          createMapArg.enableSmallAnimations = m_enableSmallAnimations;
-          createMapArg.rect = rectForMap;
-          createMapArg.graphicPos = offset + cocos2d::Vec2(i*m_mapSegmentSize * kSpritePosition * m_initialScale * scale,
-                                                           j*m_mapSegmentSize * kSpritePosition * m_initialScale * scale);
-          createMapArg.scale = scale;
-          
-          m_mapManager.CreateMap(createMapArg);
-          
+          m_mapManager.CreateMap(arg);
         }
       }
     }
@@ -598,28 +510,28 @@ namespace komorki
       
       if (m_performMove)
       {
-        Rect upcommingRect = GetCurrentVisibleRect();
-        float upcommingRectSquare = upcommingRect.size.x * upcommingRect.size.y;
-        if (upcommingRectSquare > 10 * 50 * 50)
-        {
-          m_enableSmallAnimations = false;
-        }
-        else
-        {
-          m_enableSmallAnimations = true;
-        }
-        
-        if (upcommingRectSquare > 20 * 50 * 50)
-        {
-          m_enableAnimations = false;
-        }
-        else
-        {
-          m_enableAnimations = true;
-        }
+//        Rect upcommingRect = GetCurrentVisibleRect();
+//        float upcommingRectSquare = upcommingRect.size.x * upcommingRect.size.y;
+//        if (upcommingRectSquare > 10 * 50 * 50)
+//        {
+//          m_enableSmallAnimations = false;
+//        }
+//        else
+//        {
+//          m_enableSmallAnimations = true;
+//        }
+//        
+//        if (upcommingRectSquare > 20 * 50 * 50)
+//        {
+//          m_enableAnimations = false;
+//        }
+//        else
+//        {
+//          m_enableAnimations = true;
+//        }
         
       }
-    
+      
       PartialMapsManager::RemoveMapArgs mapsToRemove;
       PartialMapsManager::CreateMapArgs newMaps;
       
@@ -656,6 +568,8 @@ namespace komorki
     
     void Viewport::HealthCheck()
     {
+      return;
+      
       if (kRedrawEachUpdate) return;
       
       Vec2 size = m_provider->GetSize();
@@ -683,63 +597,53 @@ namespace komorki
     void Viewport::PerformMove(PartialMapsManager::CreateMapArgs& newMapsArgs,
                                PartialMapsManager::RemoveMapArgs& mapsToRemove)
     {
-      float pixelsScale = m_originalSize.width / m_pixelWorldPos.size.width;
-      float screenScale = 1.0 / m_superView->getScale();
+      auto graphicalVisibleRect = GetCurrentGraphicRect();
       
-      m_pixelWorldPos.size = m_pixelWorldPos.size * screenScale;
-      m_pixelWorldPos.origin += -(m_superView->getPosition() - m_superViewOffset) * screenScale / pixelsScale;
-      
-      auto observableRect = cocos2d::Rect(m_pixelWorldPos.origin.x,
-                                          m_pixelWorldPos.origin.y,
-                                          m_pixelWorldPos.size.width,
-                                          m_pixelWorldPos.size.height);
-      
-      Rect rect = PixelRectInner(observableRect, m_initialScale);
-      Rect innerPrevRect = ResizeByStep(m_pos, rect, kSegmentSize);
-      Rect extendedRect = ExtendRectWithStep(innerPrevRect, rect, kSegmentSize);
-      Rect reusedRect = m_pos.Extract(extendedRect);
-      
+      Rect pixelRect = TTPixelRect(graphicalVisibleRect);
+      Rect innerPrevRect = ResizeByStep(tt_loadedPixelRect, pixelRect, kSegmentSize);
+      Rect extendedRect = ExtendRectWithStep(innerPrevRect, pixelRect, kSegmentSize);
       Vec2 size = m_provider->GetSize();
       extendedRect = extendedRect.Extract({Vec2(0, 0), size});
+      
+      Rect reusedRect = tt_loadedPixelRect.Extract(extendedRect);
       
       assert(reusedRect.size.x % kSegmentSize == 0);
       assert(reusedRect.size.y % kSegmentSize == 0);
       assert(reusedRect.origin.x % kSegmentSize == 0);
       assert(reusedRect.origin.y % kSegmentSize == 0);
       
-      pixelsScale = m_originalSize.width / m_pixelWorldPos.size.width;
+      cocos2d::Vec2 graphicalOffsetToLoadingRect = cocos2d::Vec2(extendedRect.origin.x,
+                                                                 extendedRect.origin.y) * kSpritePosition * m_superView->getScale();
       
-      float pixelSize = kSpritePosition * m_initialScale * pixelsScale;
+      cocos2d::Vec2 diffFromSuperView = graphicalOffsetToLoadingRect - tt_globalGraphicalOffset;
+      cocos2d::Vec2 currentSuperViewPos = m_superView->getPosition();
+      cocos2d::Vec2 newSupperViewPos = currentSuperViewPos + diffFromSuperView;
+      m_superView->setPosition(newSupperViewPos);
       
-      Vec2 offsetInPixels = m_visibleRect.origin - rect.origin;
-      Vec2 offsetFromRect = rect.origin - extendedRect.origin;
-      cocos2d::Vec2 offset = m_superView->getPosition() - cocos2d::Vec2(offsetInPixels.x * pixelSize, offsetInPixels.y * pixelSize);
-      
-      m_superView->setPosition(offset);
-      m_superViewOffset = offset;
-      m_superView->setScale(1.f);
-      
+      tt_globalGraphicalOffset = graphicalOffsetToLoadingRect;
+      tt_loadedPixelRect = extendedRect;
+
       auto currentMaps = m_mapManager.GetMaps();
       bool res = RemoveMapsOutsideOfRect(extendedRect, currentMaps, mapsToRemove);
-      assert(res);
-      res = MoveMaps(-extendedRect.origin, -cocos2d::Vec2(offsetFromRect.x, offsetFromRect.y) * pixelSize, pixelsScale, currentMaps);
-      assert(res);
+
+      for (const auto& m : currentMaps)
+      {
+        Vec2 pos = m.first - tt_loadedPixelRect.origin;
+        
+        m.second->Transfrorm(cocos2d::Vec2(pos.x, pos.y) * kSpritePosition,
+                             1.f);
+      }
       
       std::vector<Rect> mapRects;
-      res = SplitRectOnChunks(extendedRect, reusedRect, mapRects);
+      res = SplitRectOnChunks(tt_loadedPixelRect, reusedRect, mapRects);
       assert(res);
+      
+      for (auto& rect : mapRects)
+        rect.origin = rect.origin - tt_loadedPixelRect.origin;
       
       res = CreatePartialMapsInRects(mapRects,
-                                     -extendedRect.origin,
-                                     -cocos2d::Vec2(offsetFromRect.x, offsetFromRect.y) * pixelSize,
-                                     pixelsScale,
                                      newMapsArgs);
 
-      assert(res);
-      
-      m_prevPos = extendedRect;
-      m_pos = extendedRect;
-      m_visibleRect = rect;
     }
     
     Rect Viewport::PixelRect(const cocos2d::Rect& rect, float scale) const
@@ -797,20 +701,7 @@ namespace komorki
       
       return true;
     }
-    
-    bool Viewport::MoveMaps(const Vec2& offset, const cocos2d::Vec2& pointOffset, float scale, const Maps& maps)
-    {
-      for (auto map : maps)
-      {
-        cocos2d::Vec2 resultOffset = cocos2d::Vec2(map.second->m_a1 + offset.x,
-                                                   map.second->m_b1 + offset.y) *  kSpritePosition * m_initialScale * scale;
-        resultOffset += pointOffset;
-        map.second->Transfrorm(resultOffset,
-                               m_initialScale * scale);
-      }
-      
-      return true;
-    }
+
     
     bool Viewport::SplitRectOnChunks(const Rect& rect, const Rect& existingRect, std::vector<Rect>& result) const
     {
@@ -818,23 +709,17 @@ namespace komorki
     }
     
     bool Viewport::CreatePartialMapsInRects(const std::vector<Rect>& rects,
-                                                const Vec2& pixelOffset,
-                                                const cocos2d::Vec2& offset,
-                                                float scale,
                                             PartialMapsManager::CreateMapArgs& newMapsArgs)
     {
       for (auto rect : rects)
       {
-        cocos2d::Vec2 offsetPoints = cocos2d::Vec2(rect.origin.x + pixelOffset.x,
-                                                   rect.origin.y + pixelOffset.y) *  kSpritePosition * m_initialScale * scale;
-        offsetPoints += offset;
-
         PartialMapsManager::CreateMapArg createMapArg;
         createMapArg.animated = m_enableAnimations;
         createMapArg.enableSmallAnimations = m_enableSmallAnimations;
         createMapArg.rect = rect;
-        createMapArg.graphicPos = offsetPoints;
-        createMapArg.scale = m_initialScale * scale;
+        createMapArg.graphicPos = cocos2d::Vec2(rect.origin.x * kSpritePosition,
+                                                rect.origin.y * kSpritePosition);
+        createMapArg.scale = 1.0;
         
         newMapsArgs.push_back(createMapArg);
       }
@@ -862,24 +747,25 @@ namespace komorki
       return extendedRect;
     }
     
-    Rect Viewport::GetCurrentVisibleRect() const
+    cocos2d::Rect Viewport::GetCurrentGraphicRect() const
     {
-      float pixelsScale = m_originalSize.width / m_pixelWorldPos.size.width;
-      float screenScale = 1.0 / m_superView->getScale();
+      cocos2d::Vec2 visibleGraphicalOrigin = tt_globalGraphicalOffset - m_superView->getPosition();
+      visibleGraphicalOrigin = visibleGraphicalOrigin / m_superView->getScale();
       
-      cocos2d::Size pixelWorldSize = m_pixelWorldPos.size * screenScale;
-      cocos2d::Vec2 pixelWorldPos = m_pixelWorldPos.origin -(m_superView->getPosition() - m_superViewOffset) * screenScale / pixelsScale;
+      cocos2d::Size visibleGraphicalSize = tt_viewSize / m_superView->getScale();
       
-      auto observableRect = cocos2d::Rect(pixelWorldPos.x,
-                                          pixelWorldPos.y,
-                                          pixelWorldSize.width,
-                                          pixelWorldSize.height);
-      
-      Rect rect = PixelRectInner(observableRect, m_initialScale);
-      
-      return rect;
+      cocos2d::Rect visibleRect (visibleGraphicalOrigin.x,
+                                 visibleGraphicalOrigin.y,
+                                 visibleGraphicalSize.width,
+                                 visibleGraphicalSize.height);
+      return visibleRect;
     }
-
+    
+    komorki::Rect Viewport::GetLoadedPixelRect() const
+    {
+      return komorki::Rect();
+    }
+    
   }
 }
 

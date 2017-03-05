@@ -66,15 +66,12 @@ namespace komorki
       Rect PixelRectInner(const cocos2d::Rect& rect, float scale) const;
       cocos2d::Rect CocosRect(const Rect& rect, float scale) const;
       bool RemoveMapsOutsideOfRect(const Rect& rect, const Maps& currentMaps, PartialMapsManager::RemoveMapArgs& mapsToRemove);
-      bool MoveMaps(const Vec2& offset, const cocos2d::Vec2& pointOffset, float scale, const Maps& maps);
       bool SplitRectOnChunks(const Rect& rect, const Rect& existingRect, std::vector<Rect>& result) const;
       bool CreatePartialMapsInRects(const std::vector<Rect>& rects,
-                                    const Vec2& pixelOffset,
-                                    const cocos2d::Vec2& offset,
-                                    float scale,
                                     PartialMapsManager::CreateMapArgs& newMapsArgs);
       Rect GetUpcommingRect() const;
-      Rect GetCurrentVisibleRect() const;
+      cocos2d::Rect GetCurrentGraphicRect() const;
+      komorki::Rect GetLoadedPixelRect() const;
       
       Rect m_prevPos;
       Rect m_pos;
@@ -102,6 +99,12 @@ namespace komorki
       StatisticCounter<double> m_mapsUpdateTime;
       StatisticCounter<int> m_numberOfUpdates;
       PartialMapsManager m_mapManager;
+      
+      // offset from bottom left corner of world to SuperView corener
+      cocos2d::Vec2 tt_globalGraphicalOffset;
+      float tt_scale;
+      Rect tt_loadedPixelRect;
+      cocos2d::Size tt_viewSize;
     };
   }
 }

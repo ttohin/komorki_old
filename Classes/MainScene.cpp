@@ -362,7 +362,7 @@ void MainScene::visit(cocos2d::Renderer *renderer, const cocos2d::Mat4 &parentTr
 
 void MainScene::timerForUpdate(float dt)
 {
-  if (m_pause) return;
+  if (m_pause || m_speed == eSpeedPause) return;
   
   if(!m_viewport->IsAvailable()) return;
   
@@ -477,6 +477,20 @@ void MainScene::CreateSpeedToolBar()
   speedWarpButton->setScale(kButtonScale);
   m_speed10Button = speedWarpButton;
   
+  {
+    auto button = ui::Button::create("pauseBtn.png.png", "pauseBtn.png");
+    button->addTouchEventListener([this](Ref*,ui::Widget::TouchEventType controlEvent)
+                                  {
+                                    if (controlEvent == ui::Widget::TouchEventType::ENDED)
+                                      this->SetSpeed(eSpeedMax);
+                                  });
+    m_speedToolbar->addChild(button);
+    button->setPosition(Vec2(-kButtonSize/2.f - kButtonSize*3, +kButtonSize/2.f));
+    button->setScale(kButtonScale);
+    m_pauseButton = button;
+  }
+  
+//  SetSpeed(eSpeedPause);
   SetSpeed(eSpeedNormal);
 }
 
@@ -488,6 +502,8 @@ void MainScene::SetSpeed(Speed speed)
     m_speed2Button->loadTextureNormal("speed2.png");
   if (m_speed == eSpeedMax)
     m_speed10Button->loadTextureNormal("speed10.png");
+  if (m_speed == eSpeedPause)
+    m_pauseButton->loadTextureNormal("pauseBtn.png");
   
   m_speed = speed;
   
@@ -497,6 +513,8 @@ void MainScene::SetSpeed(Speed speed)
     m_speed2Button->loadTextureNormal("speed2_sel.png");
   if (m_speed == eSpeedMax)
     m_speed10Button->loadTextureNormal("speed10_sel.png");
+  if (m_speed == eSpeedPause)
+    m_pauseButton->loadTextureNormal("pauseBtn_sel.png");
 }
 
 void MainScene::CreateRenderTextures(const cocos2d::Size& visibleSize)

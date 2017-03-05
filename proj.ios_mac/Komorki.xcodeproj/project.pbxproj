@@ -125,6 +125,10 @@
 		8FC07C5A1E6B6EEB008780CE /* PartialMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FC07C481E68D0F8008780CE /* PartialMap.cpp */; };
 		8FC07C5D1E6C78BD008780CE /* SpriteBatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FC07C5B1E6C78BD008780CE /* SpriteBatch.cpp */; };
 		8FC07C5E1E6C78BD008780CE /* SpriteBatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FC07C5B1E6C78BD008780CE /* SpriteBatch.cpp */; };
+		8FC07C601E6C8C2B008780CE /* pauseBtn.png in Resources */ = {isa = PBXBuildFile; fileRef = 8FC07C5F1E6C8C2B008780CE /* pauseBtn.png */; };
+		8FC07C611E6C8C2B008780CE /* pauseBtn.png in Resources */ = {isa = PBXBuildFile; fileRef = 8FC07C5F1E6C8C2B008780CE /* pauseBtn.png */; };
+		8FC07C631E6C8D18008780CE /* pauseBtn_sel.png in Resources */ = {isa = PBXBuildFile; fileRef = 8FC07C621E6C8D18008780CE /* pauseBtn_sel.png */; };
+		8FC07C641E6C8D18008780CE /* pauseBtn_sel.png in Resources */ = {isa = PBXBuildFile; fileRef = 8FC07C621E6C8D18008780CE /* pauseBtn_sel.png */; };
 		8FDE8CC71B1BCFFB000EE52C /* PhysicalDescriptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FDE8CC51B1BCFFB000EE52C /* PhysicalDescriptor.cpp */; };
 		8FDE8CC81B1BCFFB000EE52C /* PhysicalDescriptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FDE8CC51B1BCFFB000EE52C /* PhysicalDescriptor.cpp */; };
 		8FDE8CCB1B232531000EE52C /* ShaderLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FDE8CC91B232531000EE52C /* ShaderLayer.cpp */; };
@@ -317,6 +321,8 @@
 		8FC07C561E6B5009008780CE /* PartialMapsManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PartialMapsManager.h; sourceTree = "<group>"; };
 		8FC07C5B1E6C78BD008780CE /* SpriteBatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SpriteBatch.cpp; sourceTree = "<group>"; };
 		8FC07C5C1E6C78BD008780CE /* SpriteBatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpriteBatch.h; sourceTree = "<group>"; };
+		8FC07C5F1E6C8C2B008780CE /* pauseBtn.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = pauseBtn.png; sourceTree = "<group>"; };
+		8FC07C621E6C8D18008780CE /* pauseBtn_sel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = pauseBtn_sel.png; sourceTree = "<group>"; };
 		8FDE8CC51B1BCFFB000EE52C /* PhysicalDescriptor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PhysicalDescriptor.cpp; sourceTree = "<group>"; };
 		8FDE8CC61B1BCFFB000EE52C /* PhysicalDescriptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhysicalDescriptor.h; sourceTree = "<group>"; };
 		8FDE8CC91B232531000EE52C /* ShaderLayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ShaderLayer.cpp; sourceTree = "<group>"; };
@@ -488,6 +494,8 @@
 				8F12C2231ADEFF3100C14BBE /* buttonDis.png */,
 				8F12C2241ADEFF3100C14BBE /* buttonHl.png */,
 				8F12C2251ADEFF3100C14BBE /* prsv.png */,
+				8FC07C5F1E6C8C2B008780CE /* pauseBtn.png */,
+				8FC07C621E6C8D18008780CE /* pauseBtn_sel.png */,
 				8F62881D1AD19D8600526404 /* speed1_hl.png */,
 				8F62881E1AD19D8600526404 /* speed1_sel.png */,
 				8F62881F1AD19D8600526404 /* speed1.png */,
@@ -819,10 +827,12 @@
 				8F62883A1AD19D8600526404 /* speed10.png in Resources */,
 				8FBF25121DB8D0C400AE7991 /* blank.png in Resources */,
 				8FEFC7681AD07542001E97A7 /* restartButton.png in Resources */,
+				8FC07C611E6C8C2B008780CE /* pauseBtn.png in Resources */,
 				8F6288321AD19D8600526404 /* speed2_sel.png in Resources */,
 				8FFE7FED1B9F52B0008D2289 /* ground.png in Resources */,
 				8F12C22C1ADEFF3100C14BBE /* buttonHl.png in Resources */,
 				8F0E4B291BB09B1D00705159 /* example_MultiTexture.fsh in Resources */,
+				8FC07C641E6C8D18008780CE /* pauseBtn_sel.png in Resources */,
 				8F6288301AD19D8600526404 /* speed2_hl.png in Resources */,
 				8F62882A1AD19D8600526404 /* speed1_hl.png in Resources */,
 				8F12C22E1ADEFF3100C14BBE /* prsv.png in Resources */,
@@ -854,6 +864,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8F6288391AD19D8600526404 /* speed10_sel.png in Resources */,
+				8FC07C601E6C8C2B008780CE /* pauseBtn.png in Resources */,
 				8FFE7FEE1B9F52B0008D2289 /* ground.png in Resources */,
 				8F48DE7D1AB7797B0075D222 /* Images.xcassets in Resources */,
 				503AE0F817EB97AB00D1A890 /* Icon.icns in Resources */,
@@ -875,6 +886,7 @@
 				8FDE8CD21B2325D8000EE52C /* generic.vsh in Resources */,
 				8FEFC7671AD07542001E97A7 /* restartButton_hl.png in Resources */,
 				8FEFC7691AD07542001E97A7 /* restartButton.png in Resources */,
+				8FC07C631E6C8D18008780CE /* pauseBtn_sel.png in Resources */,
 				8F62883B1AD19D8600526404 /* speed10.png in Resources */,
 				8F62882F1AD19D8600526404 /* speed1.png in Resources */,
 				8FDE8CF61B23B0A6000EE52C /* glow.png in Resources */,

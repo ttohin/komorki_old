@@ -16,7 +16,7 @@ namespace komorki
     PixelPos width = 150;
     PixelPos height = 100;
     float percentOfCellsOnStartup = 0.4;
-    bool generateTerrain = false;
+    bool generateTerrain = true;
     bool generateLight = false;
   };
 }

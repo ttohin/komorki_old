@@ -190,41 +190,41 @@ namespace komorki
         
       }
       
-      auto instanceCounter = PartialMap::instanceCounter;
-      
-      Vec2 size = m_provider->GetSize();
-      for (int i = 0; i < size.x; ++i)
-      {
-        for (int j = 0; j < size.y; ++j)
-        {
-          auto pd = m_provider->GetDescriptor(i, j);
-          
-          if (instanceCounter != m_map.size())
-          {
-            if (pd->m_cellDescriptor && pd->m_cellDescriptor->userData != nullptr)
-            {
-              ObjectContext* context = static_cast<ObjectContext*>(pd->m_cellDescriptor->userData);
-              Vec2 pos = Vec2(context->m_owner->m_a1, context->m_owner->m_b1);
-              auto map = GetMap(pos);
-              assert(map == context->m_owner);
-            }
-          }
-          
-          
-          if (pd->m_cellDescriptor && pd->m_cellDescriptor->parent == pd)
-          {
-            Vec2 point(i, j);
-            if (point.In(m_pos))
-            {
-              assert(pd->m_cellDescriptor->userData);
-            }
-            else
-            {
-              assert(!pd->m_cellDescriptor->userData);
-            }
-          }
-        }
-      }
+//      auto instanceCounter = PartialMap::instanceCounter;
+//      
+//      Vec2 size = m_provider->GetSize();
+//      for (int i = 0; i < size.x; ++i)
+//      {
+//        for (int j = 0; j < size.y; ++j)
+//        {
+//          auto pd = m_provider->GetDescriptor(i, j);
+//          
+//          if (instanceCounter != m_map.size())
+//          {
+//            if (pd->m_cellDescriptor && pd->m_cellDescriptor->userData != nullptr)
+//            {
+//              ObjectContext* context = static_cast<ObjectContext*>(pd->m_cellDescriptor->userData);
+//              Vec2 pos = Vec2(context->m_owner->m_a1, context->m_owner->m_b1);
+//              auto map = GetMap(pos);
+//              assert(map == context->m_owner);
+//            }
+//          }
+//          
+//          
+//          if (pd->m_cellDescriptor && pd->m_cellDescriptor->parent == pd)
+//          {
+//            Vec2 point(i, j);
+//            if (point.In(m_pos))
+//            {
+//              assert(pd->m_cellDescriptor->userData);
+//            }
+//            else
+//            {
+//              assert(!pd->m_cellDescriptor->userData);
+//            }
+//          }
+//        }
+//      }
     }
     
     //********************************************************************************************
