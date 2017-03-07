@@ -30,7 +30,7 @@ void MainScene::CreateMap(const komorki::graphic::Viewport::Ptr& viewport)
 {
   m_viewport = viewport;
   addChild(m_viewport->GetRootNode());
-  
+
   m_mapScale = 0.1;
   m_mapPos = cocos2d::Vec2::ZERO;
 }
@@ -41,7 +41,7 @@ bool MainScene::init(const komorki::graphic::Viewport::Ptr& viewport)
   {
     return false;
   }
-  
+
   auto glview = Director::getInstance()->getOpenGLView();
   bool isRetina = glview->isRetinaDisplay();
   if (isRetina)
@@ -49,32 +49,32 @@ bool MainScene::init(const komorki::graphic::Viewport::Ptr& viewport)
     kButtonScale *= 2.f;
     kButtonSize *= 2.f;
   }
-  
+
   m_moveDirection = Vec2::ZERO;
   m_stopManager = false;
   m_updateTime = kUpdateTime;
   m_pause = false;
 
   Size visibleSize = Director::getInstance()->getVisibleSize();
-  
+
   Vec2 origin = Director::getInstance()->getVisibleOrigin();
   Size winSize = Director::getInstance()->getWinSize();
-  
+
   m_bg = Sprite::create("mapBackground.png");
   m_bg->setAnchorPoint({0, 0});
   addChild(m_bg, -999);
-  
+
   float bgAspect = 1.0;
   {
     bgAspect = AspectToFill(m_bg->getContentSize(), visibleSize);
   }
   m_bg->setScale(bgAspect);
-  
+
   m_rootNode = Node::create();
   addChild(m_rootNode);
   m_menuNode = Node::create();
   addChild(m_menuNode);
-  
+
   CreateMap(viewport);
 
   schedule(schedule_selector(MainScene::timerForUpdate), m_updateTime, kRepeatForever, m_updateTime);
@@ -83,23 +83,23 @@ bool MainScene::init(const komorki::graphic::Viewport::Ptr& viewport)
 #if CC_TARGET_PLATFORM != CC_PLATFORM_IOS
   auto touchListener = EventListenerTouchOneByOne::create();
   touchListener->setSwallowTouches(true);
-  
+
   touchListener->onTouchMoved = [this](Touch* touch, Event* event)
   {
     this->Move(touch->getDelta());
   };
-  
+
   touchListener->onTouchBegan = [this](Touch* touch, Event* event)
   {
     return true;
   };
-  
+
   touchListener->onTouchEnded = [this](Touch* touch, Event* event)
   {
   };
-  
+
 #else // CC_TARGET_PLATFORM == CC_PLATFORM_IOS
-  
+
   auto touchListener = EventListenerTouchAllAtOnce::create();
   touchListener->onTouchesMoved = [this](const std::vector<Touch*>& touches, Event* event)
   {
@@ -111,15 +111,15 @@ bool MainScene::init(const komorki::graphic::Viewport::Ptr& viewport)
     {
       Vec2 delta = (touches[0]->getDelta() + touches[1]->getDelta()) * 0.5;
       this->Move(delta);
-      
+
       float initialDistance = touches[0]->getPreviousLocation().distance(touches[1]->getPreviousLocation());
       float currentDistance = touches[0]->getLocation().distance(touches[1]->getLocation());
-      
+
       float scale = 0.5 * (currentDistance - initialDistance)/initialDistance;
       this->Zoom(scale);
     }
   };
-  
+
 #endif // CC_TARGET_PLATFORM != CC_PLATFORM_IOS
 
   _eventDispatcher->addEventListenerWithSceneGraphPriority(touchListener, this);
@@ -133,11 +133,11 @@ bool MainScene::init(const komorki::graphic::Viewport::Ptr& viewport)
       m_currenMenu->OnMouseScroll(event);
       return;
     }
-    
-    
+
+
     EventMouse* mouseEvent = dynamic_cast<EventMouse*>(event);
     float scrollY = mouseEvent->getScrollY();
-    
+
     if (scrollY > 0)
       scrollY = 0.02;
     else
@@ -145,15 +145,15 @@ bool MainScene::init(const komorki::graphic::Viewport::Ptr& viewport)
 
     float cursorX = mouseEvent->getCursorX();
     float cursorY = mouseEvent->getCursorY();
-    
+
     m_viewport->Zoom({cursorX, cursorY}, scrollY);
   };
-  
+
   mouseListener->onMouseMove = [this](Event* event) {
   };
-  
+
   _eventDispatcher->addEventListenerWithSceneGraphPriority(mouseListener, this);
-  
+
   auto keyboardListener = EventListenerKeyboard::create();
   keyboardListener->onKeyReleased = [this](EventKeyboard::KeyCode keyCode, Event* event)
   {
@@ -174,12 +174,12 @@ bool MainScene::init(const komorki::graphic::Viewport::Ptr& viewport)
     {
       m_moveDirection -= Vec2(0, 1);
     }
-    
+
     if (m_moveDirection == Vec2::ZERO)
     {
       this->unschedule(schedule_selector(MainScene::timerForMove));
     }
-    
+
     if(this->m_currenMenu)
     {
       m_currenMenu->OnKeyRelease(keyCode, event);
@@ -207,7 +207,7 @@ bool MainScene::init(const komorki::graphic::Viewport::Ptr& viewport)
       this->Exit();
     }
   };
-  
+
   keyboardListener->onKeyPressed = [this](EventKeyboard::KeyCode keyCode, Event* event)
   {
     Vec2 oldMoveDirection = m_moveDirection;
@@ -227,22 +227,22 @@ bool MainScene::init(const komorki::graphic::Viewport::Ptr& viewport)
     {
       m_moveDirection += Vec2(0, 1);
     }
-    
+
     if (oldMoveDirection == Vec2::ZERO && m_moveDirection != Vec2::ZERO)
     {
       this->timerForMove(kMoveTimer);
       schedule(schedule_selector(MainScene::timerForMove), kMoveTimer, kRepeatForever, 0);
     }
-    
+
     if(this->m_currenMenu)
     {
       m_currenMenu->OnKeyPressed(keyCode, event);
       return;
     }
   };
-  
+
   _eventDispatcher->addEventListenerWithSceneGraphPriority(keyboardListener, this);
-  
+
 #endif // CC_TARGET_PLATFORM == CC_PLATFORM_IOS
   
   auto menuButton = ui::Button::create("menuButton.png", "menuButton_hl.png");
@@ -259,7 +259,7 @@ bool MainScene::init(const komorki::graphic::Viewport::Ptr& viewport)
   CreateSpeedToolBar();
   m_speedToolbar->setPosition(Vec2(origin.x + visibleSize.width,
                                    origin.y));
-  
+
   CreateRenderTextures(visibleSize);
 
   return true;
@@ -274,7 +274,7 @@ void MainScene::ShowMainMenu()
                      std::bind(&MainScene::Exit, this),
                      std::bind(&MainScene::ShowMainScreen, this));
   }
-  
+
   SetCurrentMenu(m_mainMenu);
 }
 
@@ -285,14 +285,14 @@ void MainScene::SetCurrentMenu(const std::shared_ptr<IFullScreenMenu> menu)
   {
     return;
   }
-  
+
   if (m_currenMenu)
   {
     m_currenMenu->Hide();
   }
-  
+
   m_currenMenu = menu;
-  
+
   m_currenMenu->ShowInView(m_menuNode);
   m_pause = true;
 }
@@ -311,50 +311,50 @@ void MainScene::ShowMainScreen()
 }
 
 void MainScene::visit(cocos2d::Renderer *renderer, const cocos2d::Mat4 &parentTransform, uint32_t parentFlags)
-{  
+{
   Size viewSize = Director::getInstance()->getVisibleSize();
   Size contentSize = getContentSize();
-  
+
   if (!viewSize.equals(contentSize))
   {
     // before we visit we are going to set our size to the visible size.
     setContentSize(Director::getInstance()->getVisibleSize());
-   
+
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
     Size visibleSize = Director::getInstance()->getVisibleSize();
     m_speedToolbar->setPosition(Vec2(origin.x + visibleSize.width,
                                      origin.y));
     m_menuButton->setPosition(Vec2(kButtonSize/2.f, visibleSize.height - kButtonSize/2.f));
     if (m_currenMenu) m_currenMenu->Resize(visibleSize);
-    
+
     m_viewport->Resize(visibleSize);
-    
+
     float bgAspect = 1.0;
     {
       bgAspect = AspectToFill(m_bg->getContentSize(), visibleSize);
     }
     m_bg->setScale(bgAspect);
-    
+
     CreateRenderTextures(visibleSize);
   }
-  
+
   Layer::visit(renderer, parentTransform, parentFlags);
-  
+
   m_mainTexture->beginWithClear(0, 0, 0, 0);
   m_bg->visit(renderer, parentTransform, parentFlags);
   m_viewport->GetMainNode()->setVisible(true);
   m_viewport->GetLightNode()->setVisible(false);
   m_viewport->GetRootNode()->visit(renderer, parentTransform, parentFlags);
   m_mainTexture->end();
-  
+
   m_lightTexture->beginWithClear(0, 0, 0, 0);
   m_viewport->GetMainNode()->setVisible(false);
   m_viewport->GetLightNode()->setVisible(true);
   m_viewport->GetRootNode()->visit(renderer, parentTransform, parentFlags);
   m_lightTexture->end();
-  
+
   m_rendTexSprite->visit(renderer, parentTransform, parentFlags);
-  
+
   m_speedToolbar->visit(renderer, parentTransform, parentFlags);
   m_menuButton->visit(renderer, parentTransform, parentFlags);
   if (m_currenMenu) m_menuNode->visit(renderer, parentTransform, parentFlags);
@@ -363,13 +363,11 @@ void MainScene::visit(cocos2d::Renderer *renderer, const cocos2d::Mat4 &parentTr
 void MainScene::timerForUpdate(float dt)
 {
   if (m_pause || m_speed == eSpeedPause) return;
-  
+
   if(!m_viewport->IsAvailable()) return;
-  
+
   if (m_stopManager)
   {
-//    delete m_viewport;
-//    CreateMap();
     m_stopManager = false;
     return;
   }
@@ -379,7 +377,7 @@ void MainScene::timerForUpdate(float dt)
     float updateTime = m_speed == eSpeedNormal ? m_updateTime : m_updateTime * 0.2;
     float updateTimeEstimated = updateTime;
     m_viewport->UpdateAsync(updateTimeEstimated);
-    
+
     if (updateTimeEstimated > updateTime)
     {
       updateTimeEstimated = 0.f;
@@ -392,7 +390,7 @@ void MainScene::timerForUpdate(float dt)
     m_viewport->UpdateAsync(updateTimeEstimated);
     schedule(schedule_selector(MainScene::timerForUpdate), 0, kRepeatForever, 0);
   }
-  
+
   m_prevSpeed = m_speed;
 }
 
@@ -404,14 +402,14 @@ void MainScene::timerForViewportUpdate(float dt)
 void MainScene::timerForMove(float dt)
 {
   if (m_currenMenu) return;
-  
+
   Vec2 moveDirection = m_moveDirection;
-  
+
   float scaleRatio = (m_mapScale - kMinMapScale)/(kMaxMapScale - kMinMapScale);
   float moveStepCorrected = scaleRatio * (kMoveStep*5.0f - kMoveStep) + kMoveStep;
-  
+
   moveDirection *= moveStepCorrected;
-  
+
   Move(moveDirection, dt);
 }
 
@@ -443,7 +441,7 @@ void MainScene::CreateSpeedToolBar()
 {
   m_speedToolbar = Node::create();
   addChild(m_speedToolbar, 999);
-  
+
   auto speed1Button = ui::Button::create("speed1.png", "speed1_hl.png");
   speed1Button->addTouchEventListener([this](Ref*,ui::Widget::TouchEventType controlEvent)
                                         {
@@ -454,7 +452,7 @@ void MainScene::CreateSpeedToolBar()
   speed1Button->setPosition(Vec2(-kButtonSize/2.f - kButtonSize*2, +kButtonSize/2.f));
   speed1Button->setScale(kButtonScale);
   m_speed1Button = speed1Button;
-  
+
   auto speed2Button = ui::Button::create("speed2.png", "speed2_hl.png");
   speed2Button->addTouchEventListener([this](Ref*,ui::Widget::TouchEventType controlEvent)
                                       {
@@ -465,7 +463,7 @@ void MainScene::CreateSpeedToolBar()
   speed2Button->setPosition(Vec2(-kButtonSize/2.f - kButtonSize*1, +kButtonSize/2.f));
   speed2Button->setScale(kButtonScale);
   m_speed2Button = speed2Button;
-  
+
   auto speedWarpButton = ui::Button::create("speed10.png", "speed10_hl.png");
   speedWarpButton->addTouchEventListener([this](Ref*,ui::Widget::TouchEventType controlEvent)
                                       {
@@ -476,20 +474,20 @@ void MainScene::CreateSpeedToolBar()
   speedWarpButton->setPosition(Vec2(-kButtonSize/2.f - kButtonSize*0, +kButtonSize/2.f));
   speedWarpButton->setScale(kButtonScale);
   m_speed10Button = speedWarpButton;
-  
+
   {
     auto button = ui::Button::create("pauseBtn.png.png", "pauseBtn.png");
     button->addTouchEventListener([this](Ref*,ui::Widget::TouchEventType controlEvent)
                                   {
                                     if (controlEvent == ui::Widget::TouchEventType::ENDED)
-                                      this->SetSpeed(eSpeedMax);
+                                      this->SetSpeed(eSpeedPause);
                                   });
     m_speedToolbar->addChild(button);
     button->setPosition(Vec2(-kButtonSize/2.f - kButtonSize*3, +kButtonSize/2.f));
     button->setScale(kButtonScale);
     m_pauseButton = button;
   }
-  
+
 //  SetSpeed(eSpeedPause);
   SetSpeed(eSpeedNormal);
 }
@@ -504,9 +502,9 @@ void MainScene::SetSpeed(Speed speed)
     m_speed10Button->loadTextureNormal("speed10.png");
   if (m_speed == eSpeedPause)
     m_pauseButton->loadTextureNormal("pauseBtn.png");
-  
+
   m_speed = speed;
-  
+
   if (m_speed == eSpeedNormal)
     m_speed1Button->loadTextureNormal("speed1_sel.png");
   if (m_speed == eSpeedDouble)
@@ -534,15 +532,15 @@ void MainScene::CreateRenderTextures(const cocos2d::Size& visibleSize)
     m_rendTexSprite->removeFromParentAndCleanup(true);
     m_rendTexSprite = nullptr;
   }
-  
+
   // shaider programm
   auto p = GLProgram::createWithFilenames("generic.vsh", "example_MultiTexture.fsh");
-  
+
   m_mainTexture = RenderTexture::create(visibleSize.width, visibleSize.height);
   m_mainTexture->retain();
   m_lightTexture = RenderTexture::create(visibleSize.width, visibleSize.height);
   m_lightTexture->retain();
-  
+
   m_rendTexSprite = Sprite::create();
   m_rendTexSprite->setTexture(m_mainTexture->getSprite()->getTexture());
   m_rendTexSprite->setTextureRect(Rect(0, 0,
@@ -552,7 +550,7 @@ void MainScene::CreateRenderTextures(const cocos2d::Size& visibleSize)
   m_rendTexSprite->setAnchorPoint(Point::ZERO);
   m_rendTexSprite->setFlippedY(true);
   addChild(m_rendTexSprite);
-  
+
   m_rendTexSprite->setGLProgram(p);
   m_rendTexSprite->getGLProgramState()->setUniformFloat("u_interpolate", 0.5);
   m_rendTexSprite->getGLProgramState()->setUniformTexture("u_texture1",

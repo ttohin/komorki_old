@@ -18,7 +18,7 @@
 
 //#define LOG_UPDATES
 
-#define DEBUG_PARTIAL_MAP
+//#define DEBUG_PARTIAL_MAP
 //#define DEBUG_VIEWPORT
 
 #ifdef DEBUG_PARTIAL_MAP

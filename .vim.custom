@@ -1,0 +1,5 @@
+let g:denite_custom_ignores =
+      \ [
+      \ 'proj.ios_mac/Build/',
+      \ ]
+call system("tmux rename-window komorki")

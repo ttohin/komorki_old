@@ -36,5 +36,15 @@ namespace komorki
       int b = cRandABInt(bottomValue, topValue);
       return cocos2d::Color3B(r, g, b);
     }
+    
+    cocos2d::Vec2 FromPixels(komorki::Vec2ConstRef vec)
+    {
+      return cocos2d::Vec2(vec.x, vec.y);
+    }
+    
+    komorki::Vec2 ToPixels(const cocos2d::Vec2& vec)
+    {
+      return komorki::Vec2(vec.x, vec.y);
+    }
   }
 }

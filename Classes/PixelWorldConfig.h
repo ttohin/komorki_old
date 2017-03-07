@@ -13,11 +13,11 @@ namespace komorki
 {
   struct PixelWorldConfig
   {
-    PixelPos width = 150;
-    PixelPos height = 100;
+    PixelPos width = 300;
+    PixelPos height = 200;
     float percentOfCellsOnStartup = 0.4;
     bool generateTerrain = true;
-    bool generateLight = false;
+    bool generateLight = true;
   };
 }
 

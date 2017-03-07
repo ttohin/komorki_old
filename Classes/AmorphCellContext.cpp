@@ -427,6 +427,8 @@ namespace komorki
         auto s = m_owner->m_background->CreateSprite();
         s->setTextureRect(m_textureRect);
         s->setPosition(source->getPosition());
+        s->setOpacity(170);
+        s->setScale(source->getScale());
         
         auto fade = cocos2d::FadeTo::create(5, 0);
         auto bgLayer = m_owner->m_background;

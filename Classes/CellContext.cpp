@@ -190,6 +190,7 @@ namespace komorki
       
       s->setTextureRect(m_textureRect);
       s->setPosition(m_sprite->getPosition());
+      s->setOpacity(170);
 
       auto fade = cocos2d::FadeTo::create(5, 0);
       auto bgLayer = m_owner->m_background;

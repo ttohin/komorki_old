@@ -295,10 +295,10 @@ namespace komorki
           int groupIndex = cRandABInt(0, groups.size());
           auto groupId = groups[groupIndex];
           
-          static int count = 1;
+          static int count = 100;
                   if (count == 0)
                   {
-                    continue;
+                    /* continue; */
                   }
           
           if (CreateRandomCell(pd, m_groups[groupId]))
