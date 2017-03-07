@@ -194,78 +194,13 @@ namespace komorki
       Director::getInstance()->replaceScene(mapScene);
     }
     
-    std::cout << "group " << groupId << " textureRext " <<
-    textureRect.origin.x << ", " << textureRect.origin.y << " " <<
-    textureRect.size.width << ", " << textureRect.size.height <<
-    std::endl << originalBuffer->Description() << std::endl;
-  }
-  
-  return cellCanvas;
-}
-
-bool TestSampleShapesScene::init()
-{
-  if ( !Layer::init() )
-  {
-    return false;
-  }
-  
-  auto sharedFileUtils = FileUtils::getInstance();
-  
-  const std::string mapDirName = "Komorki/tmp";
-  const std::string mapDir = sharedFileUtils->getWritablePath() + mapDirName;
-  bool ok = sharedFileUtils->createDirectory(mapDir);
-  assert(ok && sharedFileUtils->isDirectoryExist(mapDir));
-  
-//  Size visibleSize = Director::getInstance()->getVisibleSize();
-  Vec2 origin = Director::getInstance()->getVisibleOrigin();
-  
-  auto cellCanvas = CreateCanvasWithGenomsGenerator();
-  
-  addChild(cellCanvas);
-  
-  auto renderer = _director->getRenderer();
-  auto& parentTransform = _director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
-  
-  auto rt = RenderTexture::create(komorki::graphic::kCellShapeSegments * komorki::graphic::kCellsTextureSizeInPixels.x * CellCanvasSprite::kSpriteSize,
-                                  komorki::graphic::kCellShapeSegments * komorki::graphic::kCellsTextureSizeInPixels.y * CellCanvasSprite::kSpriteSize);
-  
-  rt->begin();
-  cellCanvas->visit(renderer, parentTransform, true);
-  rt->end();
-  
-  std::string mapName = mapDirName + "/cells";
-  mapName += ".png";
-  
-  rt->saveToFile(mapName, true, [&](RenderTexture*, const std::string& image)
-                 {
-                    schedule(schedule_selector(TestSampleShapesScene::CreateViewport), 0, 1, 0);
-                 });
-  
-  Director::getInstance()->getTextureCache()->addImage("tile_32x32.png");
-  Director::getInstance()->getTextureCache()->addImage("ground.png");
-  Director::getInstance()->getTextureCache()->addImage("debugFrames.png");
-  
-  return true;
-}
-
-void TestSampleShapesScene::timerForUpdate(float dt)
-{
-}
-
-void TestSampleShapesScene::CreateViewport(float dt)
-{
-  auto mapScene = LoadingScene::createScene();
-  Director::getInstance()->replaceScene(mapScene);
-}
-
-cocos2d::LabelProtocol* TestSampleShapesScene::CreateLabel(const char* text, const cocos2d::Vec2& offset)
-{
+    cocos2d::LabelProtocol* TestSampleShapesScene::CreateLabel(const char* text, const cocos2d::Vec2& offset)
+    {
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
-  auto result = LabelAtlas::create(text, "font.png", 18, 24, 32);
-  result->setPosition(offset);
-  addChild(result);
-  return result;
+      auto result = LabelAtlas::create(text, "font.png", 18, 24, 32);
+      result->setPosition(offset);
+      addChild(result);
+      return result;
 #else
       auto result = Label::createWithSystemFont(text, "Menlo", 24, Size::ZERO, TextHAlignment::RIGHT);
       //  auto result = Label::createWithCharMap("font.png", 18, 24, 32);
@@ -277,3 +212,4 @@ cocos2d::LabelProtocol* TestSampleShapesScene::CreateLabel(const char* text, con
     }
   }
 }
+

@@ -37,7 +37,7 @@ bool LoadingScene::init()
   Size visibleSize = Director::getInstance()->getVisibleSize();
   auto origin = Director::getInstance()->getVisibleOrigin();
   
-  m_info = CreateLabel("Loading", Vec2(visibleSize.width / 2, visibleSize.height / 2));
+  m_info = CreateLabel("Loading", cocos2d::Vec2(visibleSize.width / 2, visibleSize.height / 2));
   
   Director::getInstance()->getTextureCache()->addImage("ground.png");
 
