@@ -51,7 +51,7 @@ namespace komorki
       m_terrainBgSprite->removeFromParentAndCleanup(true);
     }
     
-    bool PartialMap::InitF(int a,
+    bool PartialMap::Init(int a,
                           int b,
                           int width,
                           int height,
@@ -101,33 +101,9 @@ namespace komorki
       return true;
     }
     
-    void PartialMap::EnableSmallAnimations(bool enable)
+    void PartialMap::EnableFancyAnimations(bool enable)
     {
-      if (m_enableSmallAnimations == enable) {
-        return;
-      }
-      
-      m_enableSmallAnimations = enable;
-      
-      for (int i = m_a1; i < m_a2; ++i)
-      {
-        for (int j = m_b1; j < m_b2; ++j)
-        {
-          auto pd = m_provider->GetDescriptor(i, j);
-          if (pd->m_type == GreatPixel::CreatureType)
-          {
-            if (pd->m_cellDescriptor->parent == pd)
-            {
-              // We are creating map current cell is incomming
-              if (pd->m_cellDescriptor->userData != nullptr)
-              {
-                auto context = static_cast<ObjectContext*>(pd->m_cellDescriptor->userData);
-                context->EnableSmallAnimations(m_enableSmallAnimations);
-              }
-            }
-          }
-        }
-      }
+      m_enableFancyAnimations = enable;
     }
     
     void PartialMap::EnableAnimations(bool enable)

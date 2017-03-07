@@ -33,9 +33,6 @@ namespace komorki
       {
         Rect rect;
         cocos2d::Vec2 graphicPos;
-        float scale;
-        bool animated;
-        bool enableSmallAnimations;
       };
       
       using CreateMapArgs = std::list<CreateMapArg>;
@@ -45,14 +42,15 @@ namespace komorki
                   const RemoveMapArgs& mapsToRemove,
                   const WorldUpdateResult& worldUpdate,
                   float animationDuration);
-      PartialMapPtr CreateMap(const CreateMapArg& args);
+      
       const Maps& GetMaps() const;
+      void EnableAnimation(bool enableAnimations, bool enableFancyAnimations);
       
     private:
       using GraphicContextList = std::list<ObjectContext*>;
       
       PartialMapPtr GetMap(Vec2ConstRef pos);
-      
+      PartialMapPtr CreateMap(const CreateMapArg& args);
       ObjectContext* CreateObjectContext(CellDescriptor* cell,
                                          const PartialMapPtr& map);
       void RemoveMap(const PartialMapPtr& map);
@@ -69,6 +67,10 @@ namespace komorki
                   const Vec2& pos,
                   const Vec2& offset,
                   float animationDuration);
+      ObjectContext* BornNewAmorphCell(CellDescriptor* cell,
+                                       Vec2ConstRef source,
+                                       const PartialMapPtr& map,
+                                       float animationDuration);
       
       Maps m_map;
 
@@ -78,7 +80,9 @@ namespace komorki
       cocos2d::Node* m_mainNode;
       cocos2d::Node* m_lightNode;
       std::shared_ptr<IPixelWorld> m_provider;
-      Rect m_pos; // visible area
+      Rect m_visibleArea; // visible area
+      bool m_enableAnimations = false;
+      bool m_enableFancyAnimaitons = false;
     };
   }
 }

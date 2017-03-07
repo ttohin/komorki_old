@@ -44,7 +44,7 @@ namespace komorki
       PartialMap();
       virtual ~PartialMap();
       
-      bool InitF(int a,
+      bool Init(int a,
                 int b,
                 int width,
                 int height,
@@ -53,7 +53,7 @@ namespace komorki
                 cocos2d::Node* lightNode,
                 const cocos2d::Vec2& offset);
 
-      void EnableSmallAnimations(bool enable);
+      void EnableFancyAnimations(bool enable);
       void EnableAnimations(bool enable);
       
       void Transfrorm(const cocos2d::Vec2& pos, float scale);
@@ -69,7 +69,10 @@ namespace komorki
       int m_b2;
       SpriteBatch* m_cellMap;
       SpriteBatch* m_background;
-      bool m_enableAnimations = true;
+      
+      // just holders for ObjectContexts
+      bool m_enableAnimations = false;
+      bool m_enableFancyAnimations = false;
       
     private:
 
@@ -77,7 +80,6 @@ namespace komorki
       cocos2d::Sprite* m_terrainSprite;
       cocos2d::Sprite* m_terrainBgSprite;
       IPixelWorld* m_provider;
-      bool m_enableSmallAnimations = false;
     };
   }
 }

@@ -44,7 +44,7 @@ namespace komorki
       virtual void Destory(PartialMapPtr _owner) = 0;
       virtual void ForceDestory(PartialMapPtr _owner);
       virtual void Attack(const Vec2& pos, const Vec2& offset, float animationTime) {}
-      virtual void EnableSmallAnimations(bool enable) {}
+      virtual void ToggleAnimation() = 0;
       virtual void CellDead() = 0;
       
       PartialMapPtr m_owner;

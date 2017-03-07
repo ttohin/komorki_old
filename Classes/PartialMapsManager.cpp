@@ -102,20 +102,34 @@ namespace komorki
           // create context if it's needed
           if (context == nullptr)
           {
-            context = CreateObjectContext(cell,
-                                          destinationMap);
+//            if (cell->GetShapeType() == eShapeTypeAmorph)
+//            {
+//              context = BornNewAmorphCell(cell, initialPos, destinationMap, animationDuration);
+//            }
+//            else
+//            {
+              context = CreateObjectContext(cell,
+                                            destinationMap);
+              Move(cell,
+                   initialPos,
+                   destinationPos,
+                   u.morph.value,
+                   destinationMap,
+                   0,
+                   animationDuration);
+//            }
           }
-          
-          LOG_W("Upate cell add %p %s step %d cell %p", cell, context ? context->Description().c_str() : "null", stepId, cell);
-          
-          Move(cell,
-               initialPos,
-               destinationPos,
-               u.morph.value,
-               destinationMap,
-               0,
-               animationDuration);
-          
+          else
+          {
+            Move(cell,
+                 initialPos,
+                 destinationPos,
+                 u.morph.value,
+                 destinationMap,
+                 0,
+                 animationDuration);
+          }
+
           continue;
         }
         
@@ -190,48 +204,15 @@ namespace komorki
         
       }
       
-//      auto instanceCounter = PartialMap::instanceCounter;
-//      
-//      Vec2 size = m_provider->GetSize();
-//      for (int i = 0; i < size.x; ++i)
-//      {
-//        for (int j = 0; j < size.y; ++j)
-//        {
-//          auto pd = m_provider->GetDescriptor(i, j);
-//          
-//          if (instanceCounter != m_map.size())
-//          {
-//            if (pd->m_cellDescriptor && pd->m_cellDescriptor->userData != nullptr)
-//            {
-//              ObjectContext* context = static_cast<ObjectContext*>(pd->m_cellDescriptor->userData);
-//              Vec2 pos = Vec2(context->m_owner->m_a1, context->m_owner->m_b1);
-//              auto map = GetMap(pos);
-//              assert(map == context->m_owner);
-//            }
-//          }
-//          
-//          
-//          if (pd->m_cellDescriptor && pd->m_cellDescriptor->parent == pd)
-//          {
-//            Vec2 point(i, j);
-//            if (point.In(m_pos))
-//            {
-//              assert(pd->m_cellDescriptor->userData);
-//            }
-//            else
-//            {
-//              assert(!pd->m_cellDescriptor->userData);
-//            }
-//          }
-//        }
-//      }
+      auto instanceCounter = PartialMap::instanceCounter;
+      assert(instanceCounter == m_map.size());
     }
     
     //********************************************************************************************
     PartialMapPtr PartialMapsManager::CreateMap(const CreateMapArg& args)
     {
       auto map = std::make_shared<graphic::PartialMap>();
-      map->InitF(args.rect.origin.x,
+      map->Init(args.rect.origin.x,
                 args.rect.origin.y,
                 args.rect.size.x,
                 args.rect.size.y,
@@ -241,10 +222,9 @@ namespace komorki
                 cocos2d::Vec2::ZERO);
 
       map->Transfrorm(args.graphicPos,
-                      args.scale);
-      
-      map->EnableSmallAnimations(args.animated);
-      map->EnableAnimations(args.enableSmallAnimations);
+                      1.0);
+      map->EnableAnimations(m_enableAnimations);
+      map->EnableFancyAnimations(m_enableFancyAnimaitons);
       
       auto it = m_map.insert(std::make_pair(GetMapOriginFromPos(args.rect.origin), map));
       assert(it.second);
@@ -282,6 +262,87 @@ namespace komorki
     }
     
     //********************************************************************************************
+    void PartialMapsManager::EnableAnimation(bool enableAnimations, bool enableFancyAnimations)
+    {
+      if (m_enableAnimations == enableAnimations &&
+          m_enableFancyAnimaitons == enableFancyAnimations)
+        return;
+      
+      m_enableAnimations = enableAnimations;
+      m_enableFancyAnimaitons = enableFancyAnimations;
+      
+      for (auto& m : m_map)
+      {
+        m.second->EnableAnimations(m_enableAnimations);
+        m.second->EnableFancyAnimations(m_enableFancyAnimaitons);
+      }
+      
+      for (int i = m_visibleArea.origin.x; i < m_visibleArea.origin.x + m_visibleArea.size.x; ++i)
+      {
+        for (int j = m_visibleArea.origin.y; j < m_visibleArea.origin.y + m_visibleArea.size.y; ++j)
+        {
+          auto pd = m_provider->GetDescriptor(i, j);
+          if (pd->m_cellDescriptor && pd->m_cellDescriptor->parent == pd && pd->m_cellDescriptor->userData != nullptr)
+          {
+            ObjectContext* context = static_cast<ObjectContext*>(pd->m_cellDescriptor->userData);
+            context->ToggleAnimation();
+          }
+        }
+      }
+    }
+    
+    //********************************************************************************************
+    ObjectContext* PartialMapsManager::BornNewAmorphCell(CellDescriptor* cell,
+                                                         Vec2ConstRef source,
+                                                          const PartialMapPtr& map,
+                                                         float animationDuration)
+    {
+      if (cell->userData != nullptr)
+      {
+        ObjectContext* context = static_cast<ObjectContext*>(cell->userData);
+        context->BecomeOwner(map);
+        return context;
+      }
+      
+      auto groupId = cell->m_genom.m_groupId;
+      auto textureRect = SharedUIData::getInstance()->m_textureMap[groupId];
+      
+      assert (cell->GetShapeType() == eShapeTypeAmorph);
+      
+      auto c = new AmorphCellContext(map, textureRect, cell);
+      auto aabb = cell->GetShape()->GetAABB();
+      assert(aabb.size.x == 1);
+      assert(aabb.size.y == 1);
+      assert(aabb.origin != source);
+      aabb.origin = source; // modify no play animation with source as aabb.origin
+      
+      int numberOfPixels = 0;
+      cell->Shape([&](GreatPixel* pd, bool& stop)
+                  {
+                    numberOfPixels += 1;
+                    assert(numberOfPixels == 1);
+                    c->AddSprite(aabb, source);
+                  });
+      assert(cell->userData == nullptr);
+      cell->userData = c;
+      c->ToggleAnimation();
+      
+      aabb = cell->GetShape()->GetAABB(); // get original aabb.
+      
+      komorki::Morphing morph;
+      Morph m;
+      m.dir = Morph::Outside;
+      m.pos = cell->parent->GetPos();
+      m.delta = source - m.pos;
+      morph.vec.push_back(m);
+      
+      static_cast<AmorphCellContext*>(c)->MoveAmorphCells(source,morph, aabb, animationDuration*0.9);
+      
+      return c;
+
+    }
+    
+    //********************************************************************************************
     ObjectContext* PartialMapsManager::CreateObjectContext(CellDescriptor* cell,
                                                            const PartialMapPtr& map)
     {
@@ -306,6 +367,7 @@ namespace komorki
                     });
         assert(cell->userData == nullptr);
         cell->userData = c;
+        c->ToggleAnimation();
         return c;
       }
       else if (cell->GetShapeType() == eShapeTypeRect
@@ -319,6 +381,7 @@ namespace komorki
                                  cell);
         assert(cell->userData == nullptr);
         cell->userData = c;
+        c->ToggleAnimation();
         return c;
       }
       else

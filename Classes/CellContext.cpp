@@ -158,16 +158,11 @@ namespace komorki
       }
     }
     
-    void CellContext::EnableSmallAnimations(bool enable)
+    void CellContext::ToggleAnimation()
     {
-      if (enable == false)
+      if (!m_owner->m_enableFancyAnimations)
       {
         m_sprite->stopAllActionsByTag(kSmallAnimationsTag);
-        return;
-      }
-      
-      if (m_owner->m_enableAnimations == false)
-      {
         return;
       }
       
@@ -190,7 +185,8 @@ namespace komorki
       
       s->setTextureRect(m_textureRect);
       s->setPosition(m_sprite->getPosition());
-      s->setOpacity(170);
+      s->setOpacity(130);
+      s->setScale(m_sprite->getScale());
 
       auto fade = cocos2d::FadeTo::create(5, 0);
       auto bgLayer = m_owner->m_background;

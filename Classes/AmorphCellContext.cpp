@@ -18,32 +18,37 @@ namespace komorki
 {
   namespace graphic
   {
-    AmorphCellContext::PolymorphShapeContext::Ptr AmorphCellContext::GetSprite(int x, int y)
+    AmorphCellContext::PolymorphShapeContext::Ptr AmorphCellContext::GetSprite(Vec2ConstRef pos)
     {
-      std::string key = GetKey(x, y);
-      auto s = m_spriteMap[key];
-      return s;
+      auto it = m_spriteMap.find(pos);
+      if (it != m_spriteMap.end())
+      {
+        return it->second;
+      }
+      else
+      {
+        return nullptr;
+      }
     }
     
-    AmorphCellContext::PolymorphShapeContext::Ptr AmorphCellContext::PopSprite(int x, int y)
+    AmorphCellContext::PolymorphShapeContext::Ptr AmorphCellContext::PopSprite(Vec2ConstRef pos)
     {
-      std::string key = GetKey(x, y);
-      auto s = m_spriteMap[key];
-      m_spriteMap.erase(key);
-      return s;
+      auto it = m_spriteMap.find(pos);
+      if (it != m_spriteMap.end())
+      {
+        auto result = it->second;
+        m_spriteMap.erase(pos);
+        return result;
+      }
+      else
+      {
+        return nullptr;
+      }
     }
     
-    void AmorphCellContext::SetSprite(PolymorphShapeContext::Ptr s, int x, int y)
+    void AmorphCellContext::SetSprite(PolymorphShapeContext::Ptr s, Vec2ConstRef pos)
     {
-      m_spriteMap[GetKey(x, y)] = s;
-    }
-    
-    std::string AmorphCellContext::GetKey(int x, int y) const
-    {
-      //    const unsigned kMaxPolymorphSize = 256;
-      //    unsigned long long key = (x + kMaxPolymorphSize) + (y + kMaxPolymorphSize) * kMaxPolymorphSize;
-      //    return key;
-      return std::to_string(x) + "_" + std::to_string(y);
+      m_spriteMap.insert(std::make_pair(pos, s));
     }
     
     AmorphCellContext::AmorphCellContext(PartialMapPtr _owner, const cocos2d::Rect& textureRect, CellDescriptor* cell)
@@ -51,14 +56,7 @@ namespace komorki
     {
       m_cell = cell;
       m_textureRect = textureRect;
-      
-      m_centerSprite = CreateSprite();
-      m_centerSprite->setTextureRect(m_textureRect);
-      m_centerSprite->setColor(cocos2d::Color3B(200, 200, 200));
-      m_centerSprite->setOpacity(kCenterAmorpghCellOpacity);
-      m_centerSprite->setScale(kCenterCellScale);
-      m_centerSprite->setAnchorPoint({0.5, 0.5});
-      m_centerSprite->setLocalZOrder(10);
+
       
       LOG_W("%s, %s", __FUNCTION__, Description().c_str());
     }
@@ -86,6 +84,10 @@ namespace komorki
                                                                                    Vec2ConstRef originalPos)
     {
       auto s = CreateSprite();
+      
+      s->setVisible(true);
+      s->setOpacity(kMaxAmorpghCellOpacity);
+      s->setLocalZOrder(0);
       s->setTextureRect(m_textureRect);
       
       float scale;
@@ -110,13 +112,38 @@ namespace komorki
     void AmorphCellContext::AddSprite(const Rect& aabb, Vec2ConstRef pos)
     {
       auto context = CreateContext(aabb, pos);
-      SetSprite(context, pos.x, pos.y);
+      SetSprite(context, pos);
       
       m_aabb = aabb;
       
+      if (m_spriteMap.size() == 1)
       {
-        cocos2d::Vec2 centerPos = GetCenterPos();
-        m_centerSprite->setPosition(centerPos);
+        auto centerSprite = CreateSprite();
+        centerSprite->setTextureRect(m_textureRect);
+        centerSprite->setColor(cocos2d::Color3B(200, 200, 200));
+        centerSprite->setOpacity(kCenterAmorpghCellOpacity);
+        centerSprite->setScale(kCenterCellScale);
+        centerSprite->setAnchorPoint({0.5, 0.5});
+        centerSprite->setLocalZOrder(10);
+        context->centerSprite = centerSprite;
+      }
+      
+      for (auto& s : m_spriteMap)
+      {
+        float scale;
+        cocos2d::Vec2 offset;
+        CalcScale(aabb, s.second->originalPos, offset, scale);
+        
+        cocos2d::Vec2 rectOffset = spriteVector({1, 1}) * 0.5;
+        auto targetPos = offset + rectOffset + spriteVector(GetPosInOwnerBase(s.second->targetPos));
+        s.second->sprite->setPosition(targetPos);
+        s.second->sprite->setScale(scale);
+        s.second->offset = offset;
+        
+        if (s.second->centerSprite)
+        {
+          s.second->centerSprite->setPosition(targetPos);
+        }
       }
     }
     
@@ -144,16 +171,21 @@ namespace komorki
         
         if (m.dir == Morph::Inside)
         {
-          polymoprhContext = PopSprite(pos.x,
-                                       pos.y);
+          polymoprhContext = PopSprite(pos);
+          if (polymoprhContext && polymoprhContext->centerSprite)
+          {
+            auto targetCenter = GetSprite(pos + offset);
+            assert(!targetCenter->centerSprite);
+            targetCenter->centerSprite = polymoprhContext->centerSprite;
+            targetCenter->useCenterSprite = false;
+          }
         }
         else
         {
           offset = -m.delta;
           pos = m.pos + m.delta;
           
-          polymoprhContext = GetSprite(m.pos.x,
-                                       m.pos.y);
+          polymoprhContext = GetSprite(m.pos);
         }
         
         cocos2d::Vec2 rectOffset = spriteVector({1, 1}) * 0.5;
@@ -163,7 +195,7 @@ namespace komorki
           polymoprhContext = CreateContext(aabb, pos);
           isNewSprite = true;
           
-          SetSprite(polymoprhContext, m.pos.x, m.pos.y);
+          SetSprite(polymoprhContext, m.pos);
         }
         
         polymoprhContext->targetPos = pos + offset;
@@ -201,16 +233,11 @@ namespace komorki
       }
       
       m_aabb = aabb;
-      
-      {
-        cocos2d::Vec2 centerPos = GetCenterPos();
-        auto moveTo = cocos2d::MoveTo::create(animationDuration,
-                                              centerPos);
-        m_centerSprite->runAction(moveTo);
-      }
     }
     
-    void AmorphCellContext::AnimatePart(PolymorphShapeContext::Ptr& context, const Rect& aabb, float animationDuration)
+    void AmorphCellContext::AnimatePart(PolymorphShapeContext::Ptr& context,
+                                        const Rect& aabb,
+                                        float animationDuration)
     {
       cocos2d::Vec2 rectOffset = spriteVector({1, 1}) * 0.5;
       
@@ -218,16 +245,35 @@ namespace komorki
       cocos2d::Vec2 offset;
       CalcScale(aabb, context->targetPos, offset, scale);
       
+      cocos2d::Sprite* centralSprite = nullptr;
+      if (context->centerSprite && context->fade)
+      {
+        assert(context->useCenterSprite);
+        centralSprite = context->centerSprite;
+        context->centerSprite = nullptr;
+        context->useCenterSprite = true;
+      }
+      if (context->centerSprite && !context->fade)
+      {
+        if (context->useCenterSprite)
+          centralSprite = context->centerSprite;
+        
+        context->useCenterSprite = true;
+      }
+      
+      auto sourcePos = context->offset + rectOffset + spriteVector(GetPosInOwnerBase(context->originalPos));
+      auto targetPos = offset + rectOffset + spriteVector(GetPosInOwnerBase(context->targetPos));
+      
       if (m_owner->m_enableAnimations)
       {
         context->sprite->stopAllActionsByTag(0);
-        context->sprite->setPosition(context->offset + rectOffset + spriteVector(GetPosInOwnerBase(context->originalPos)));
+        context->sprite->setPosition(sourcePos);
         auto moveTo = cocos2d::MoveTo::create(animationDuration,
-                                              offset + rectOffset + spriteVector(GetPosInOwnerBase(context->targetPos)));
+                                              targetPos);
         auto scaleTo = cocos2d::ScaleTo::create(animationDuration, scale);
         auto moveSpawn = cocos2d::Spawn::createWithTwoActions(moveTo, scaleTo);
         moveSpawn->setTag(0);
-        
+
         if (context->fade)
         {
           if (context->direction == Morph::Inside)
@@ -235,7 +281,7 @@ namespace komorki
             auto removeSelf = cocos2d::FadeOut::create(animationDuration);
             auto removeSeq = cocos2d::Spawn::createWithTwoActions(moveSpawn, removeSelf);
             context->sprite->runAction(removeSeq);
-            moveSpawn->setTag(0);
+            removeSeq->setTag(0);
           }
           else
           {
@@ -244,7 +290,7 @@ namespace komorki
             auto fadeAction = cocos2d::FadeTo::create(animationDuration, kMaxAmorpghCellOpacity);
             auto fadeSeq = cocos2d::Spawn::createWithTwoActions(moveSpawn, fadeAction);
             context->sprite->runAction(fadeSeq);
-            moveSpawn->setTag(0);
+            fadeSeq->setTag(0);
           }
         }
         else
@@ -255,7 +301,17 @@ namespace komorki
       }
       else // if (m_owner->m_enableAnimations)
       {
-        context->sprite->setPosition(offset + rectOffset + spriteVector(GetPosInOwnerBase(context->targetPos)));
+        context->sprite->setPosition(targetPos);
+      }
+      
+      if (centralSprite)
+      {
+        centralSprite->stopAllActionsByTag(0);
+        centralSprite->setPosition(sourcePos);
+        auto moveTo = cocos2d::MoveTo::create(animationDuration * 0.8,
+                                              targetPos);
+        moveTo->setTag(0);
+        centralSprite->runAction(moveTo);
       }
       
       context->offset = offset;
@@ -266,9 +322,6 @@ namespace komorki
       if( ! m_spritesPull.empty() )
       {
         auto s = m_spritesPull.front();
-        s->sprite->setVisible(true);
-        s->sprite->setOpacity(kMaxAmorpghCellOpacity);
-        s->sprite->setLocalZOrder(0);
         m_spritesPull.pop_front();
         
         for (auto& sm : m_spriteMap)
@@ -288,17 +341,6 @@ namespace komorki
     
     void AmorphCellContext::RemoveSprite(cocos2d::Sprite* sprite)
     {
-      //    if (m_spritesPull.size() < 10)
-      //    {
-      //      sprite->stopAllActions();
-      //      sprite->setVisible(false);
-      //      m_spritesPull.push_back(sprite);
-      //    }
-      //    else
-      //    {
-      //      assert(0);
-      //      sprite->removeFromParentAndCleanup(true);
-      //    }
     }
     
     cocos2d::Vec2 AmorphCellContext::GetCenterPos() const
@@ -315,7 +357,8 @@ namespace komorki
       
       for (auto& s : m_spritesPull)
       {
-        auto source = s;
+        auto& source = s;
+        assert(!s->centerSprite);
         source->sprite->retain();
         source->sprite->stopAllActions();
         source->sprite->removeFromParentAndCleanup(true);
@@ -325,7 +368,7 @@ namespace komorki
       
       for (auto &s : m_spriteMap)
       {
-        auto source = s.second->sprite;
+        auto& source = s.second->sprite;
         source->retain();
         source->stopAllActions();
         source->removeFromParentAndCleanup(true);
@@ -334,14 +377,16 @@ namespace komorki
         
         cocos2d::Vec2 rectOffset = spriteVector({1, 1}) * 0.5;
         source->setPosition(rectOffset + spriteVector(GetPosInOwnerBase(s.second->originalPos), m_offset));
+        
+        if (s.second->centerSprite)
+        {
+          s.second->centerSprite->retain();
+          s.second->centerSprite->stopAllActions();
+          s.second->centerSprite->removeFromParentAndCleanup(true);
+          _owner->m_cellMap->addChild(s.second->centerSprite);
+          s.second->centerSprite->release();
+        }
       }
-      
-      m_centerSprite->retain();
-      m_centerSprite->stopAllActions();
-      m_centerSprite->removeFromParentAndCleanup(true);
-      _owner->m_cellMap->addChild(m_centerSprite);
-      m_centerSprite->release();
-      m_centerSprite->setPosition(GetCenterPos());
       
       m_owner = _owner;
     }
@@ -353,7 +398,7 @@ namespace komorki
       for (auto& s : m_spritesPull)
       {
         assert(s->sprite);
-        
+        assert(!s->centerSprite);
         m_owner->m_cellMap->RemoveSprite(s->sprite);
       }
       
@@ -361,9 +406,9 @@ namespace komorki
       {
         assert(s.second->sprite);
         m_owner->m_cellMap->RemoveSprite(s.second->sprite);
+        if (s.second->centerSprite)
+          m_owner->m_cellMap->RemoveSprite(s.second->centerSprite);
       }
-      
-      m_owner->m_cellMap->RemoveSprite(m_centerSprite);
       
       delete this;
     }
@@ -399,35 +444,43 @@ namespace komorki
       cocos2d::Vec2 offset = m_offset;
       cocos2d::Vec2 rectOffset = spriteVector({1, 1}) * 0.5;
       
-      for (auto& s : m_spriteMap)
+      for (auto& it : m_spriteMap)
       {
-        cocos2d::Vec2 originalPos = s.second->offset + rectOffset + spriteVector(GetPosInOwnerBase(s.second->targetPos));
-        PlayAttackAnimation(s.second->sprite,
+        cocos2d::Vec2 originalPos = it.second->offset + rectOffset + spriteVector(GetPosInOwnerBase(it.second->targetPos));
+        PlayAttackAnimation(it.second->sprite,
                             originalPos,
                             attackOffset,
                             animationDuration,
                             kSpriteScale,
                             kSpriteScale * 1.2);
+        
+        if (it.second->centerSprite)
+        {
+          PlayAttackAnimation(it.second->centerSprite,
+                              originalPos,
+                              attackOffset,
+                              animationDuration,
+                              kCenterCellScale,
+                              kCenterCellScale * 1.2);
+        }
       }
-      
-      PlayAttackAnimation(m_centerSprite,
-                          GetCenterPos(),
-                          attackOffset,
-                          animationDuration,
-                          kCenterCellScale,
-                          kCenterCellScale * 1.2);
+    }
+    
+
+    void AmorphCellContext::ToggleAnimation()
+    {
     }
     
     void AmorphCellContext::CellDead()
     {
-      for (auto &spriteContext : m_spriteMap)
+      for (auto &it : m_spriteMap)
       {
-        auto source = spriteContext.second->sprite;
+        auto source = it.second->sprite;
         
         auto s = m_owner->m_background->CreateSprite();
         s->setTextureRect(m_textureRect);
         s->setPosition(source->getPosition());
-        s->setOpacity(170);
+        s->setOpacity(130);
         s->setScale(source->getScale());
         
         auto fade = cocos2d::FadeTo::create(5, 0);
@@ -437,7 +490,8 @@ namespace komorki
                                              bgLayer->RemoveSprite(s);
                                            });
         
-        s->runAction(cocos2d::Sequence::createWithTwoActions(fade, removeSelf));
+        auto removeSeq = cocos2d::Sequence::createWithTwoActions(fade, removeSelf);
+        s->runAction(removeSeq);
       }
     }
   }

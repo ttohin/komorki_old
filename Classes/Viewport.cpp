@@ -154,11 +154,6 @@ namespace komorki
       m_superView->addChild(m_mainView);
       m_performMove = false;
 
-
-      m_enableSmallAnimations = true;
-      m_enableAnimations = true;
-
-
       m_provider = provider;
 
       m_manager = std::make_shared<AsyncPixelWorld>(m_provider.get());
@@ -336,7 +331,7 @@ namespace komorki
 
       PerformMove(newMaps, mapsToRemove);
 
-      m_mapManager.m_pos = tt_loadedPixelRect;
+      m_mapManager.m_visibleArea = tt_loadedPixelRect;
       WorldUpdateResult worldUpdateResult;
       m_mapManager.Update(newMaps, mapsToRemove, worldUpdateResult, 0);
 
@@ -457,48 +452,44 @@ namespace komorki
       }
 #endif
 
-      if (m_performMove)
-      {
-//        Rect upcommingRect = GetCurrentVisibleRect();
-//        float upcommingRectSquare = upcommingRect.size.x * upcommingRect.size.y;
-//        if (upcommingRectSquare > 10 * 50 * 50)
-//        {
-//          m_enableSmallAnimations = false;
-//        }
-//        else
-//        {
-//          m_enableSmallAnimations = true;
-//        }
-//
-//        if (upcommingRectSquare > 20 * 50 * 50)
-//        {
-//          m_enableAnimations = false;
-//        }
-//        else
-//        {
-//          m_enableAnimations = true;
-//        }
-      }
-
       PartialMapsManager::RemoveMapArgs mapsToRemove;
       PartialMapsManager::CreateMapArgs newMaps;
 
+      bool enableAnimations = m_mapManager.m_enableAnimations;
+      bool enableFancyAnimaitons = m_mapManager.m_enableFancyAnimaitons;
+      float greatPixelSize = m_superView->getScale() * kSpritePosition;
+      if (greatPixelSize >= 7.f)
+      {
+        enableAnimations = true;
+        enableFancyAnimaitons = true;
+      }
+      else if (greatPixelSize >= 3.f)
+      {
+        enableAnimations = true;
+        enableFancyAnimaitons = false;
+      }
+      else
+      {
+        enableAnimations = false;
+        enableFancyAnimaitons = false;
+      }
+      
       if (m_performMove)
       {
         PerformMove(newMaps, mapsToRemove);
       }
 
-      m_mapManager.m_pos = tt_loadedPixelRect;
+      m_mapManager.EnableAnimation(enableAnimations, enableFancyAnimaitons);
+      m_mapManager.m_visibleArea = tt_loadedPixelRect;
       m_mapManager.Update(newMaps, mapsToRemove, worldUpdateResult, updateTime);
-      
+
       if (m_performMove)
       {
         auto currentMaps = m_mapManager.GetMaps();
         for (const auto& m : currentMaps)
         {
           Vec2 pos = m.first - tt_loadedPixelRect.origin;
-          m.second->Transfrorm(cocos2d::Vec2(pos.x, pos.y) * kSpritePosition,
-                               1.f);
+          m.second->Transfrorm(cocos2d::Vec2(pos.x, pos.y) * kSpritePosition, 1.f);
         }
         m_performMove = false;
       }
@@ -568,13 +559,13 @@ namespace komorki
       assert(reusedRect.size.y % kSegmentSize == 0);
       assert(reusedRect.origin.x % kSegmentSize == 0);
       assert(reusedRect.origin.y % kSegmentSize == 0);
-      
+
       auto diffOfLoadedPixels = extendedRect.origin - tt_loadedPixelRect.origin;
       cocos2d::Vec2 currentSuperViewPos = m_superView->getPosition();
-      
+
       cocos2d::Vec2 newSupperViewPos = currentSuperViewPos + FromPixels(diffOfLoadedPixels) * kSpritePosition * m_superView->getScale();
       m_superView->setPosition(newSupperViewPos);
-      
+
       tt_loadedPixelRect = extendedRect;
       tt_scale = m_superView->getScale();
 
@@ -611,7 +602,7 @@ namespace komorki
 
       return true;
     }
-    
+
     bool Viewport::SplitRectOnChunks(const Rect& rect, const Rect& existingRect, std::vector<Rect>& result) const
     {
       return komorki::SplitRectOnChunks(rect, existingRect, kSegmentSize, result);
@@ -623,13 +614,9 @@ namespace komorki
       for (auto rect : rects)
       {
         PartialMapsManager::CreateMapArg createMapArg;
-        createMapArg.animated = m_enableAnimations;
-        createMapArg.enableSmallAnimations = m_enableSmallAnimations;
         createMapArg.rect = rect;
         createMapArg.graphicPos = cocos2d::Vec2(rect.origin.x * kSpritePosition,
                                                 rect.origin.y * kSpritePosition);
-        createMapArg.scale = 1.0;
-
         newMapsArgs.push_back(createMapArg);
       }
 

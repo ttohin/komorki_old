@@ -75,15 +75,13 @@ namespace komorki
       cocos2d::Node* m_lightNode;
 
       bool m_performMove;
-      bool m_enableSmallAnimations;
-      bool m_enableAnimations;
 
       std::shared_ptr<IPixelWorld> m_provider;
       std::shared_ptr<AsyncPixelWorld> m_manager;
       unsigned char m_lastUpdateId;
       StatisticCounter<double> m_updateTime;
       StatisticCounter<double> m_mapsUpdateTime;
-      StatisticCounter<int> m_numberOfUpdates;
+      StatisticCounter<size_t> m_numberOfUpdates;
       PartialMapsManager m_mapManager;
 
       // offset from bottom left corner of world to SuperView corener

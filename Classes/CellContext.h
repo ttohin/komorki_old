@@ -30,7 +30,7 @@ namespace komorki
       virtual void BecomeOwner(PartialMapPtr _owner) override;
       virtual void Destory(PartialMapPtr _owner) override;
       virtual void Attack(const Vec2& pos, const Vec2& offset, float animationTime) override;
-      virtual void EnableSmallAnimations(bool enable) override;
+      virtual void ToggleAnimation() override;
       virtual void CellDead() override;
       
       cocos2d::Sprite* m_sprite = nullptr;
