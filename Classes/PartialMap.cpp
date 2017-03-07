@@ -25,13 +25,6 @@
 #include "Logging.h"
 #include "SpriteBatch.h"
 
-#define DEBUG_PARTIAL_MAP
-#ifdef DEBUG_PARTIAL_MAP
-#define LOG_W(...) KOMORKI_LOG(__VA_ARGS__)
-#else
-#define LOG_W(...) {}
-#endif
-
 namespace komorki
 {
   namespace graphic
