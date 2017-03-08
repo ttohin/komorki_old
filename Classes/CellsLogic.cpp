@@ -639,6 +639,9 @@ void ProcessCell(CellDescriptor* d,
   {
     h *= light;
   }
+  
+  h += d->m_genom.m_passiveHealthIncome;
+  
   t.m_health = h;
   
   d->nextTurnTransaction.push_back(t);

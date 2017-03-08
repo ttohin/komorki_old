@@ -612,8 +612,6 @@
 			children = (
 				8FBF24E71DB8CFBE00AE7991 /* CellCanvasSprite.cpp */,
 				8FBF24E81DB8CFBE00AE7991 /* CellCanvasSprite.h */,
-				8FBF24FC1DB8CFBE00AE7991 /* TestSampleShapesScene.cpp */,
-				8FBF24FD1DB8CFBE00AE7991 /* TestSampleShapesScene.h */,
 				8FBF251A1DB935E100AE7991 /* ShapeAnalizer.cpp */,
 				8FBF251B1DB935E100AE7991 /* ShapeAnalizer.hpp */,
 			);
@@ -671,6 +669,7 @@
 				8FB7C3E21BA495AE00194722 /* LoadingScene.h */,
 				8F48DE611AB676B50075D222 /* MainScene.cpp */,
 				8F48DE621AB676B50075D222 /* MainScene.h */,
+				8FD4A4741E703C7F004EB0D3 /* Test */,
 			);
 			name = Scenes;
 			sourceTree = "<group>";
@@ -686,6 +685,15 @@
 				8FDE8CCA1B232531000EE52C /* ShaderLayer.h */,
 			);
 			name = Sprites;
+			sourceTree = "<group>";
+		};
+		8FD4A4741E703C7F004EB0D3 /* Test */ = {
+			isa = PBXGroup;
+			children = (
+				8FBF24FC1DB8CFBE00AE7991 /* TestSampleShapesScene.cpp */,
+				8FBF24FD1DB8CFBE00AE7991 /* TestSampleShapesScene.h */,
+			);
+			name = Test;
 			sourceTree = "<group>";
 		};
 		8FFE7FDD1B9F517D008D2289 /* PartialMap */ = {

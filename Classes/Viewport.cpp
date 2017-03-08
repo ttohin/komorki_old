@@ -353,9 +353,7 @@ namespace komorki
     void Viewport::UpdateAsync(float& updateTime)
     {
       if ( false == m_manager->IsAvailable() )
-      {
         return;
-      }
 
       assert(m_lastUpdateId >= m_manager->GetUpdateId());
       if ( m_lastUpdateId != m_manager->GetUpdateId() )
@@ -379,6 +377,21 @@ namespace komorki
     bool Viewport::IsAvailable()
     {
       return m_manager->IsAvailable();
+    }
+    
+    bool Viewport::Destroy()
+    {
+      if ( false == m_manager->IsAvailable() )
+        return false;
+      
+      assert(m_lastUpdateId >= m_manager->GetUpdateId());
+      
+      float mapsUpdateTime = 0.0f;
+      Update(0.0, mapsUpdateTime);
+      
+      m_lastUpdateId++;
+      
+      return true;
     }
 
     cocos2d::Node* Viewport::GetRootNode() const

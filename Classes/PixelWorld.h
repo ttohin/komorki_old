@@ -40,7 +40,7 @@ namespace komorki
     virtual TerrainAnalizer::Result GetTerrain() const;
     virtual komorki::Vec2 GetSize() const;
     virtual void Update(bool passUpdateResult, WorldUpdateResult& result);
-    virtual ~PixelWorld () {};
+    virtual ~PixelWorld ();
     CellDescriptor* ProcessMutation(CellDescriptor* source);
     void KillAllCells();
     void KillCellAtPostiion(const Vec2& pos);

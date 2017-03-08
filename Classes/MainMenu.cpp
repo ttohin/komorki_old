@@ -73,12 +73,12 @@ void MainMenu::ShowInView(cocos2d::Node* root)
 //  icon->runAction(RepeatForever::create(Sequence::create(RotateTo::create(0.3, -5), RotateTo::create(0.3, 3), nullptr)));
   if (doublSize) icon->setScale(2);
   
-  auto optionsButton = buttons->getChildByName<ui::Button*>("Options");
-  optionsButton->setAnchorPoint({0.5, 0});
-  optionsButton->setEnabled(false);
-  optionsButton->loadTextureNormal("buttonDis.png");
+  auto restartButton = buttons->getChildByName<ui::Button*>("Options");
+  restartButton->setTitleText("Restart");
+  restartButton->setAnchorPoint({0.5, 0});
 
-  optionsButton->addTouchEventListener([this](Ref*,ui::Widget::TouchEventType type)
+
+  restartButton->addTouchEventListener([this](Ref*,ui::Widget::TouchEventType type)
                                        {
                                          if (type == ui::Widget::TouchEventType::ENDED)
                                          {
@@ -116,12 +116,12 @@ void MainMenu::ShowInView(cocos2d::Node* root)
 #else
   exitButton->setTitleText(exitButton->getTitleText() + " [Q]");
   backButton->setTitleText(backButton->getTitleText() + " [ESC]");
-  optionsButton->setTitleText(optionsButton->getTitleText() + " [O]");
+  restartButton->setTitleText(restartButton->getTitleText() + " [O]");
 #endif
   
-  if (doublSize) optionsButton->setContentSize(optionsButton->getContentSize() * 2);
-  if (doublSize) optionsButton->setTitleFontSize(kDefaultButtonFontSize * 2);
-  if (doublSize) optionsButton->setPosition(optionsButton->getPosition() * 2);                               
+  if (doublSize) restartButton->setContentSize(restartButton->getContentSize() * 2);
+  if (doublSize) restartButton->setTitleFontSize(kDefaultButtonFontSize * 2);
+  if (doublSize) restartButton->setPosition(restartButton->getPosition() * 2);                               
   if (doublSize) exitButton->setContentSize(exitButton->getContentSize() * 2);
   if (doublSize) exitButton->setTitleFontSize(kDefaultButtonFontSize * 2);
   if (doublSize) exitButton->setPosition(exitButton->getPosition() * 2);

@@ -19,13 +19,17 @@ namespace komorki
 {
 namespace graphic
 {
+  uint ObjectContext::instanceCounter = 0;
+  
   ObjectContext::ObjectContext(PartialMapPtr _owner)
   {
+    instanceCounter += 1;
     m_owner = _owner;
   }
   
   ObjectContext::~ObjectContext()
   {
+    instanceCounter -= 1;
     LOG_W("%s, %s", __FUNCTION__, Description().c_str());
   }
   

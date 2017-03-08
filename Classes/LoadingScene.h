@@ -19,7 +19,7 @@ namespace komorki
     {
     public:
       virtual bool init();
-      virtual ~LoadingScene(){}
+      virtual ~LoadingScene();
       static cocos2d::Scene* createScene()
       {
         auto scene = cocos2d::Scene::create();

@@ -19,6 +19,8 @@ namespace komorki
     {
     public:
       
+      static uint instanceCounter;
+      
       SpriteBatch();
       virtual ~SpriteBatch();
       

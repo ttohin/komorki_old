@@ -10,7 +10,7 @@
 #define __komorki__MainMenu__
 
 #include "cocos2d.h"
-#include "cocos2d/cocos/ui/CocosGUI.h"
+#include "cocos/ui/CocosGUI.h"
 #include "PixelWorld.h"
 #include "IFullScreenMenu.h"
 

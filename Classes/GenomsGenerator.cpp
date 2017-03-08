@@ -52,9 +52,9 @@ namespace komorki
     g.m_lifeTime = cRandABInt(100, 1000);
     g.m_damage = cRandABInt(1, 50);
     g.m_lightFood = cRandABInt(1, 15);
-    g.m_passiveHealthIncome = cRandABInt(0, 10);
+    g.m_passiveHealthIncome = cRandABInt(-20, 0);
     g.m_healthPerAttach = cRandABInt(10, 100);
-    g.m_mutationRate = cRandAB(0, 0.05);
+    g.m_mutationRate = cRandAB(0.01, 0.05);
     
     if (g.m_shapeType == ShapeType::eShapeTypeAmorph)
     {

@@ -66,7 +66,6 @@ private:
   cocos2d::RenderTexture* m_lightTexture;
   cocos2d::Sprite* m_rendTexSprite;
   cocos2d::Sprite* m_debugView;
-  std::shared_ptr<komorki::Config> m_config;
   
   float m_mapScale;
   cocos2d::Vec2 m_mapPos;
@@ -89,6 +88,7 @@ private:
   void ShowMainMenu();
   void SetCurrentMenu(const std::shared_ptr<IFullScreenMenu> menu);
   void Exit();
+  void RestartMap();
   void ShowMainScreen();
   
   void CreateSpeedToolBar();

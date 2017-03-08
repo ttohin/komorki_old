@@ -13,12 +13,16 @@ namespace komorki
 {
   namespace graphic
   {
+    uint SpriteBatch::instanceCounter = 0;
+    
     SpriteBatch::SpriteBatch()
     {
+      instanceCounter += 1;
     }
     
     SpriteBatch::~SpriteBatch()
     {
+      instanceCounter -= 1;
     }
     
     Sprite* SpriteBatch::CreateSprite()

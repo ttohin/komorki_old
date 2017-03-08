@@ -90,7 +90,7 @@ namespace komorki
     
     unsigned int numberOfShapes = 5;
     unsigned int shapeIndex = cRandABInt(0, numberOfShapes);
-//    shapeIndex = 4;
+//    shapeIndex = 0;
     if (0 == shapeIndex)
     {
       shape = std::make_shared<SinglePixel>(pd);

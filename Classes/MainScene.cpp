@@ -3,6 +3,7 @@
 #include "cocostudio/DictionaryHelper.h"
 #include "cocos2d/cocos/ui/CocosGUI.h"
 #include "DiamondSquareGenerator.h"
+#include "LoadingScene.h"
 
 static const float kUpdateTime = 0.5;
 
@@ -30,6 +31,7 @@ void MainScene::CreateMap(const komorki::graphic::Viewport::Ptr& viewport)
 {
   m_viewport = viewport;
   addChild(m_viewport->GetRootNode());
+  m_viewport->GetRootNode()->release();
 
   m_mapScale = 0.1;
   m_mapPos = cocos2d::Vec2::ZERO;
@@ -146,7 +148,7 @@ bool MainScene::init(const komorki::graphic::Viewport::Ptr& viewport)
     float cursorX = mouseEvent->getCursorX();
     float cursorY = mouseEvent->getCursorY();
 
-    m_viewport->Zoom({cursorX, cursorY}, scrollY);
+    if (m_viewport) m_viewport->Zoom({cursorX, cursorY}, scrollY);
   };
 
   mouseListener->onMouseMove = [this](Event* event) {
@@ -270,7 +272,7 @@ void MainScene::ShowMainMenu()
   if (!m_mainMenu)
   {
     m_mainMenu = std::make_shared<MainMenu>();
-    m_mainMenu->Init(std::bind(&MainScene::ShowMainScreen, this),
+    m_mainMenu->Init(std::bind(&MainScene::RestartMap, this),
                      std::bind(&MainScene::Exit, this),
                      std::bind(&MainScene::ShowMainScreen, this));
   }
@@ -295,6 +297,15 @@ void MainScene::SetCurrentMenu(const std::shared_ptr<IFullScreenMenu> menu)
 
   m_currenMenu->ShowInView(m_menuNode);
   m_pause = true;
+}
+
+void MainScene::RestartMap()
+{
+  m_stopManager = true;
+  m_pause = false;
+  m_currenMenu->Hide();
+  m_currenMenu = nullptr;
+  m_mainMenu = nullptr;
 }
 
 void MainScene::Exit()
@@ -327,7 +338,7 @@ void MainScene::visit(cocos2d::Renderer *renderer, const cocos2d::Mat4 &parentTr
     m_menuButton->setPosition(Vec2(kButtonSize/2.f, visibleSize.height - kButtonSize/2.f));
     if (m_currenMenu) m_currenMenu->Resize(visibleSize);
 
-    m_viewport->Resize(visibleSize);
+    if (m_viewport) m_viewport->Resize(visibleSize);
 
     float bgAspect = 1.0;
     {
@@ -342,15 +353,15 @@ void MainScene::visit(cocos2d::Renderer *renderer, const cocos2d::Mat4 &parentTr
 
   m_mainTexture->beginWithClear(0, 0, 0, 0);
   m_bg->visit(renderer, parentTransform, parentFlags);
-  m_viewport->GetMainNode()->setVisible(true);
-  m_viewport->GetLightNode()->setVisible(false);
-  m_viewport->GetRootNode()->visit(renderer, parentTransform, parentFlags);
+  if (m_viewport) m_viewport->GetMainNode()->setVisible(true);
+  if (m_viewport) m_viewport->GetLightNode()->setVisible(false);
+  if (m_viewport) m_viewport->GetRootNode()->visit(renderer, parentTransform, parentFlags);
   m_mainTexture->end();
 
   m_lightTexture->beginWithClear(0, 0, 0, 0);
-  m_viewport->GetMainNode()->setVisible(false);
-  m_viewport->GetLightNode()->setVisible(true);
-  m_viewport->GetRootNode()->visit(renderer, parentTransform, parentFlags);
+  if (m_viewport) m_viewport->GetMainNode()->setVisible(false);
+  if (m_viewport) m_viewport->GetLightNode()->setVisible(true);
+  if (m_viewport) m_viewport->GetRootNode()->visit(renderer, parentTransform, parentFlags);
   m_lightTexture->end();
 
   m_rendTexSprite->visit(renderer, parentTransform, parentFlags);
@@ -364,11 +375,18 @@ void MainScene::timerForUpdate(float dt)
 {
   if (m_pause || m_speed == eSpeedPause) return;
 
-  if(!m_viewport->IsAvailable()) return;
+  if(m_viewport && !m_viewport->IsAvailable()) return;
 
   if (m_stopManager)
   {
-    m_stopManager = false;
+    if (m_viewport->Destroy())
+    {
+      m_viewport = nullptr;
+      m_stopManager = false;
+      
+      auto loadingScene = komorki::ui::LoadingScene::createScene();
+      Director::getInstance()->replaceScene(loadingScene);
+    }
     return;
   }
 
@@ -376,7 +394,7 @@ void MainScene::timerForUpdate(float dt)
   {
     float updateTime = m_speed == eSpeedNormal ? m_updateTime : m_updateTime * 0.2;
     float updateTimeEstimated = updateTime;
-    m_viewport->UpdateAsync(updateTimeEstimated);
+    if (m_viewport) m_viewport->UpdateAsync(updateTimeEstimated);
 
     if (updateTimeEstimated > updateTime)
     {
@@ -387,7 +405,7 @@ void MainScene::timerForUpdate(float dt)
   else if (m_speed == eSpeedMax)
   {
     float updateTimeEstimated = m_updateTime;
-    m_viewport->UpdateAsync(updateTimeEstimated);
+    if (m_viewport) m_viewport->UpdateAsync(updateTimeEstimated);
     schedule(schedule_selector(MainScene::timerForUpdate), 0, kRepeatForever, 0);
   }
 
@@ -396,7 +414,7 @@ void MainScene::timerForUpdate(float dt)
 
 void MainScene::timerForViewportUpdate(float dt)
 {
-  m_viewport->Calculate();
+  if (m_viewport) m_viewport->Calculate();
 }
 
 void MainScene::timerForMove(float dt)
@@ -419,7 +437,7 @@ void MainScene::Zoom(float direction)
   float cursorX = visibleSize.width/2;
   float cursorY = visibleSize.height/2;
 
-  m_viewport->Zoom({cursorX, cursorY}, direction);
+  if (m_viewport) m_viewport->Zoom({cursorX, cursorY}, direction);
 }
 
 void MainScene::ZoomIn()
@@ -434,7 +452,7 @@ void MainScene::ZoomOut()
 
 void MainScene::Move(const Vec2& direction, float animationDuration)
 {
-  m_viewport->Move(direction);
+  if (m_viewport) m_viewport->Move(direction);
 }
 
 void MainScene::CreateSpeedToolBar()

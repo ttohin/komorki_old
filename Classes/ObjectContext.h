@@ -29,6 +29,9 @@ namespace komorki
     class ObjectContext
     {
     public:
+      
+      static uint instanceCounter;
+      
       using PartialMapPtr = std::shared_ptr<PartialMap>;
       
       ObjectContext(PartialMapPtr _owner);

@@ -45,6 +45,7 @@ namespace komorki
       
       const Maps& GetMaps() const;
       void EnableAnimation(bool enableAnimations, bool enableFancyAnimations);
+      virtual ~PartialMapsManager();
       
     private:
       using GraphicContextList = std::list<ObjectContext*>;

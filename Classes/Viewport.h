@@ -46,6 +46,7 @@ namespace komorki
       void Update(float updateTime, float& outUpdateTime);
       void UpdateAsync(float& updateTime);
       bool IsAvailable();
+      bool Destroy();
       cocos2d::Node* GetRootNode() const;
       cocos2d::Node* GetMainNode() const;
       cocos2d::Node* GetLightNode() const;

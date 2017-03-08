@@ -44,7 +44,9 @@ namespace komorki
       
       LOG_W("%s, %s instanceCounter %d", __FUNCTION__, Description().c_str(), instanceCounter);
       
+      m_cellMap->removeAllChildren();
       m_cellMap->removeFromParentAndCleanup(true);
+      m_background->removeAllChildren();
       m_background->removeFromParentAndCleanup(true);
       m_lightOverlay->removeFromParentAndCleanup(true);
       m_terrainSprite->removeFromParentAndCleanup(true);

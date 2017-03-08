@@ -223,60 +223,6 @@ namespace komorki
     PopulateCells();
   }
   
-  Genom GenerateGenom(uint64_t groupId, PixelWorld::PixelMap& map)
-  {
-    Genom g;
-    g.m_groupId = groupId;
-    
-    for (int j = 0; j < kMaxNumberOfGroups; j++)
-    {
-      if (g.m_groupId == (1 << j)) {
-        continue;
-      }
-      g.m_foodGroupId |= cRandAorB(0, 1) ? 1 << j : 0;
-    }
-    
-    for (int j = 0; j < kMaxNumberOfGroups; j++)
-    {
-      if (g.m_groupId == (1 << j)) {
-        continue;
-      }
-      g.m_dangerGroupId = cRandAorB(0, 1, 0.9) ? 1 << j : 0;
-    }
-    
-    for (int j = 0; j < kMaxNumberOfGroups; j++)
-    {
-      if (g.m_groupId == (1 << j)) {
-        continue;
-      }
-      g.m_friendGroupId |= cRandAorB(0, 1) ? 1 << j : 0;
-    }
-    
-    g.m_health = cRandABInt(100, 1000);
-    g.m_armor = cRandABInt(1, 100);
-    g.m_sleepTime = cRandABInt(0, 10);
-    g.m_lifeTime = cRandABInt(100, 1000);
-    g.m_damage = cRandABInt(1, 50);
-    g.m_lightFood = cRandABInt(1, 15);
-    g.m_passiveHealthIncome = cRandABInt(0, 10);
-    g.m_healthPerAttach = cRandABInt(10, 100);
-    GenerateShape(map[20][20].get(), g.m_shape, g.m_shapeType);
-    
-    return g;
-  }
-  
-  std::vector<Genom> GenerateGenoms(PixelWorld::PixelMap& map)
-  {
-    std::vector<Genom> result;
-    for (int i = 0; i < kInitialNumberOfGroups; ++i)
-    {
-      Genom g = GenerateGenom(1 << i, map);
-      result.push_back(g);
-    }
-    
-    return result;
-  }
-  
   void PixelWorld::PopulateCells()
   {
     std::vector<GroupMap::key_type> groups;
@@ -667,6 +613,10 @@ namespace komorki
     }
     
     ++m_updateId;
+  }
+  
+  PixelWorld::~PixelWorld ()
+  {
   }
 
   void PixelWorld::KillAllCells()

@@ -77,6 +77,8 @@ namespace komorki
     
     CellCanvasSprite* CreateCanvasWithGenomsGenerator()
     {
+      komorki::graphic::SharedUIData::getInstance()->m_genomsGenerator = std::make_shared<komorki::GenomsGenerator>();
+      
       komorki::ShapesGenerator gen;
       auto cellCanvas = new CellCanvasSprite();
       cellCanvas->init();

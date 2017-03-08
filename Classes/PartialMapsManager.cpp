@@ -14,6 +14,8 @@
 #include "SharedUIData.h"
 #include "UIConfig.h"
 #include "Logging.h"
+#include "SharedUIData.h"
+#include "SpriteBatch.h"
 
 namespace komorki
 {
@@ -289,6 +291,54 @@ namespace komorki
           }
         }
       }
+    }
+    
+    PartialMapsManager::~PartialMapsManager()
+    {
+      auto contextInstanceCount = ObjectContext::instanceCounter;
+      
+      auto deletedContext = 0;
+      
+      auto size = m_provider->GetSize();
+      for (int i = 0; i < size.x; ++i)
+      {
+        for (int j = 0; j < size.y; ++j)
+        {
+          auto pd = m_provider->GetDescriptor(i, j);
+          assert(pd);
+          if (pd->m_cellDescriptor)
+          {
+            ObjectContext* context = static_cast<ObjectContext*>(pd->m_cellDescriptor->userData);
+            if (context)
+            {
+              context->Destory(nullptr);
+              pd->m_cellDescriptor->userData = nullptr;
+              deletedContext += 1;
+            }
+          }
+        }
+      }
+      
+      auto contextInstanceCountAfterRemoval = ObjectContext::instanceCounter;
+      assert(contextInstanceCountAfterRemoval == 0);
+      assert(deletedContext == contextInstanceCount);
+      
+      m_map.clear();
+      
+      auto partialMapsCount = PartialMap::instanceCounter;
+      assert(partialMapsCount == 0);
+      
+      auto mainNodeChildrenCount = m_mainNode->getChildren().size();
+      assert(mainNodeChildrenCount == 0);
+      
+      auto lightNodeChildrenCount = m_lightNode->getChildren().size();
+      assert(lightNodeChildrenCount == 0);
+      
+      SharedUIData::getInstance()->m_textureMap.clear();
+      SharedUIData::getInstance()->m_genomsGenerator = nullptr;
+      
+      auto sprites = SpriteBatch::instanceCounter;
+      assert(sprites == 0);
     }
     
     //********************************************************************************************
