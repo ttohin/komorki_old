@@ -20,7 +20,7 @@ public:
   
   void WorkerThread();
   bool IsAvailable();
-  unsigned char GetUpdateId();
+  unsigned int GetUpdateId();
   std::string GetCurrentJobString();
   
   komorki::graphic::Viewport::Ptr GetViewport();
@@ -35,7 +35,7 @@ private:
   bool m_inProccess;
   double m_lastUpdateDuration;
   unsigned int m_nuberOfUpdates;
-  unsigned char m_updateId;
+  unsigned int m_updateId;
   std::mutex m_lock;
   std::condition_variable m_semaphore;
   std::thread m_thread;

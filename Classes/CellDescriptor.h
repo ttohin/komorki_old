@@ -41,7 +41,7 @@ namespace komorki
     virtual ShapeType GetShapeType() const;
     virtual void CleanSpace();
     
-    virtual ~CellDescriptor () {};
+    virtual ~CellDescriptor () { assert(userData == nullptr); };
     
     int m_id;
     int m_health;

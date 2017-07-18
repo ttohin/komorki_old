@@ -79,16 +79,17 @@ namespace komorki
 
       std::shared_ptr<IPixelWorld> m_provider;
       std::shared_ptr<AsyncPixelWorld> m_manager;
-      unsigned char m_lastUpdateId;
+      unsigned int m_lastUpdateId;
       StatisticCounter<double> m_updateTime;
       StatisticCounter<double> m_mapsUpdateTime;
       StatisticCounter<size_t> m_numberOfUpdates;
-      PartialMapsManager m_mapManager;
+      std::shared_ptr<PartialMapsManager> m_mapManager;
 
       // offset from bottom left corner of world to SuperView corener
       float tt_scale;
       Rect tt_loadedPixelRect;
       cocos2d::Size tt_viewSize;
+      WorldUpdateList m_updateListToRemove;
     };
   }
 }

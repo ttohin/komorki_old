@@ -123,7 +123,7 @@ namespace komorki
       m_semaphore.notify_one();
     }
     
-    unsigned char GetUpdateId()
+    unsigned int GetUpdateId()
     {
       return m_updateId;
     }
@@ -135,7 +135,7 @@ namespace komorki
     bool m_inProccess;
     double m_lastUpdateDuration;
     unsigned int m_nuberOfUpdates;
-    unsigned char m_updateId;
+    unsigned int m_updateId;
     std::mutex m_lock;
     std::condition_variable m_semaphore;
     WorldUpdateResult m_updateResult;
