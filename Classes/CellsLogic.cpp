@@ -433,6 +433,7 @@ bool StepTo(CellDescriptor* cd,
               Optional<Movement>& m,
               Optional<Morphing>& morph)
 {
+  m.value.duration = cd->m_genom.m_sleepTime;
   if (cd->GetShapeType() == ShapeType::eShapeTypeSinglePixel)
   {
     return SimplePixelStepTo(cd, targetPd, m);
