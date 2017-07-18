@@ -197,5 +197,14 @@ namespace komorki
       
       s->runAction(cocos2d::Sequence::createWithTwoActions(fade, removeSelf));
     }
+    
+    void CellContext::PlayBorningAnimation(float animationDuration)
+    {
+      m_sprite->stopAllActionsByTag(kSmallAnimationsTag);
+      m_sprite->setScale(kSpriteScale * 0.1);
+      auto scaleTo = cocos2d::ScaleTo::create(animationDuration, kSpriteScale * 0.9);
+      m_sprite->runAction(scaleTo);
+      
+    }
   }
 }

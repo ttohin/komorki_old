@@ -104,25 +104,12 @@ namespace komorki
           // create context if it's needed
           if (context == nullptr)
           {
-//            if (cell->GetShapeType() == eShapeTypeAmorph)
-//            {
-//              context = BornNewAmorphCell(cell, initialPos, destinationMap, animationDuration);
-//            }
-//            else
-//            {
               context = CreateObjectContext(cell,
                                             destinationMap);
-              Move(cell,
-                   initialPos,
-                   destinationPos,
-                   u.morph.value,
-                   destinationMap,
-                   0,
-                   animationDuration);
-//            }
           }
-          else
-          {
+          
+          context->PlayBorningAnimation(animationDuration);
+          
             Move(cell,
                  initialPos,
                  destinationPos,
@@ -130,7 +117,6 @@ namespace komorki
                  destinationMap,
                  0,
                  animationDuration);
-          }
 
           continue;
         }

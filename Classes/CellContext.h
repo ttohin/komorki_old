@@ -32,6 +32,7 @@ namespace komorki
       virtual void Attack(const Vec2& pos, const Vec2& offset, float animationTime) override;
       virtual void ToggleAnimation() override;
       virtual void CellDead() override;
+      virtual void PlayBorningAnimation(float animationDuration) override;
       
       cocos2d::Sprite* m_sprite = nullptr;
       cocos2d::Sprite* m_glow = nullptr;

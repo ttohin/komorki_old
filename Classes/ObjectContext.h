@@ -49,6 +49,7 @@ namespace komorki
       virtual void Attack(const Vec2& pos, const Vec2& offset, float animationTime) {}
       virtual void ToggleAnimation() = 0;
       virtual void CellDead() = 0;
+      virtual void PlayBorningAnimation(float animationDuration) {};
       
       PartialMapPtr m_owner;
       CellDescriptor* m_cell;
