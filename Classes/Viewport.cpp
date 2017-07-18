@@ -159,9 +159,10 @@ namespace komorki
       m_manager = std::make_shared<AsyncPixelWorld>(m_provider.get());
       m_lastUpdateId = 0;
 
-      m_mapManager.m_mainNode = m_mainView;
-      m_mapManager.m_lightNode = m_lightNode;
-      m_mapManager.m_provider = m_provider;
+      m_mapManager = std::make_shared<PartialMapsManager>();
+      m_mapManager->m_mainNode = m_mainView;
+      m_mapManager->m_lightNode = m_lightNode;
+      m_mapManager->m_provider = m_provider;
       m_mainView->setName("SuperView");
 
       CreateMap();
@@ -171,6 +172,12 @@ namespace komorki
 
     Viewport::~Viewport()
     {
+      while (m_manager->IsAvailable() == false)
+      {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      }
+      
+      Destroy();
       m_manager->Stop();
     }
 
@@ -331,11 +338,11 @@ namespace komorki
 
       PerformMove(newMaps, mapsToRemove);
 
-      m_mapManager.m_visibleArea = tt_loadedPixelRect;
+      m_mapManager->m_visibleArea = tt_loadedPixelRect;
       WorldUpdateResult worldUpdateResult;
-      m_mapManager.Update(newMaps, mapsToRemove, worldUpdateResult, 0);
+      m_mapManager->Update(newMaps, mapsToRemove, worldUpdateResult, 0);
 
-      auto currentMaps = m_mapManager.GetMaps();
+      auto currentMaps = m_mapManager->GetMaps();
       for (const auto& m : currentMaps)
       {
         Vec2 pos = m.first - tt_loadedPixelRect.origin;
@@ -468,8 +475,8 @@ namespace komorki
       PartialMapsManager::RemoveMapArgs mapsToRemove;
       PartialMapsManager::CreateMapArgs newMaps;
 
-      bool enableAnimations = m_mapManager.m_enableAnimations;
-      bool enableFancyAnimaitons = m_mapManager.m_enableFancyAnimaitons;
+      bool enableAnimations = m_mapManager->m_enableAnimations;
+      bool enableFancyAnimaitons = m_mapManager->m_enableFancyAnimaitons;
       float greatPixelSize = m_superView->getScale() * kSpritePosition;
       if (greatPixelSize >= 7.f)
       {
@@ -492,13 +499,13 @@ namespace komorki
         PerformMove(newMaps, mapsToRemove);
       }
 
-      m_mapManager.EnableAnimation(enableAnimations, enableFancyAnimaitons);
-      m_mapManager.m_visibleArea = tt_loadedPixelRect;
-      m_mapManager.Update(newMaps, mapsToRemove, worldUpdateResult, updateTime);
+      m_mapManager->EnableAnimation(enableAnimations, enableFancyAnimaitons);
+      m_mapManager->m_visibleArea = tt_loadedPixelRect;
+      m_mapManager->Update(newMaps, mapsToRemove, worldUpdateResult, updateTime);
 
       if (m_performMove)
       {
-        auto currentMaps = m_mapManager.GetMaps();
+        auto currentMaps = m_mapManager->GetMaps();
         for (const auto& m : currentMaps)
         {
           Vec2 pos = m.first - tt_loadedPixelRect.origin;
@@ -582,7 +589,7 @@ namespace komorki
       tt_loadedPixelRect = extendedRect;
       tt_scale = m_superView->getScale();
 
-      auto currentMaps = m_mapManager.GetMaps();
+      auto currentMaps = m_mapManager->GetMaps();
       bool res = RemoveMapsOutsideOfRect(extendedRect, currentMaps, mapsToRemove);
 
       std::vector<Rect> mapRects;
